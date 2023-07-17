@@ -1385,6 +1385,21 @@ pub fn get_environment_string(env: &QuestEnv) -> Result<String, QuestError> {
 
 /// Copy the state-vector (or density matrix) into GPU memory.
 ///
+/// In GPU mode, this copies the state-vector (or density matrix) from RAM
+/// to VRAM / GPU-memory, which is the version operated upon by other calls to
+/// the API.
+///
+/// In CPU mode, this function has no effect.
+///
+/// In conjunction with [`copy_state_from_gpu()`][api-copy-state-from-gpu]
+/// (which should be called first), this allows a user to directly modify the
+/// state-vector in a hardware agnostic way. Note though that users should
+/// instead use [`set_amps()`][api-set-amps] if possible.
+///
+/// # Parameters
+///
+/// - `qureg`: the qureg to copy
+///
 /// # Examples
 ///
 /// ```rust
@@ -1395,9 +1410,11 @@ pub fn get_environment_string(env: &QuestEnv) -> Result<String, QuestError> {
 /// copy_state_to_gpu(qureg);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API][quest-api] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [api-copy-state-from-gpu]: crate::copy_state_from_gpu()
+/// [api-set-amps]: crate::set_amps()
+/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
 pub fn copy_state_to_gpu(qureg: &mut Qureg) {
     catch_quest_exception(|| unsafe {
         ffi::copyStateToGPU(qureg.reg);
@@ -1406,6 +1423,20 @@ pub fn copy_state_to_gpu(qureg: &mut Qureg) {
 }
 
 /// Copy the state-vector (or density matrix) from GPU memory.
+///
+/// In GPU mode, this copies the state-vector (or density matrix) from GPU
+/// memory  to RAM , where it can be accessed/modified  by the user.
+///
+/// In CPU mode, this function has no effect.
+///
+/// In conjunction with [`copy_state_to_gpu()`][api-copy-state-to-gpu] , this
+/// allows a user to directly modify the state-vector in a hardware agnostic
+/// way. Note though that users should instead use [`set_amps()`][api-set-amps]
+/// if possible.
+///
+/// # Parameters
+///
+/// - `qureg`: the qureg to copy
 ///
 /// # Examples
 ///
@@ -1417,9 +1448,11 @@ pub fn copy_state_to_gpu(qureg: &mut Qureg) {
 /// copy_state_from_gpu(qureg);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API][quest-api] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [api-copy-state-to-gpu]: crate::copy_state_to_gpu()
+/// [api-set-amps]: crate::set_amps()
+/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
 pub fn copy_state_from_gpu(qureg: &mut Qureg) {
     catch_quest_exception(|| unsafe { ffi::copyStateFromGPU(qureg.reg) })
         .expect("copy_state_from_gpu should always succeed");
@@ -1427,9 +1460,42 @@ pub fn copy_state_from_gpu(qureg: &mut Qureg) {
 
 /// Copy a part the state-vector (or density matrix) into GPU memory.
 ///
-/// See [QuEST API][1] for more information.
+/// In GPU mode, this copies a substate of the state-vector (or density matrix)
+/// from RAM to VRAM / GPU-memory.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// In CPU mode, this function has no effect.
+///
+/// In conjunction with
+/// [`copy_substate_from_gpu()`][api-copy-substate-from-gpu], this allows a user
+/// to directly modify a subset of the amplitudes the state-vector in a hardware
+/// agnostic way, without having to load the entire state via
+/// [`copy_state_to_gpu()`][api-copy-state-to-gpu].
+///
+/// Note though that users should instead use [`set_amps()`][api-set-amps] if
+/// possible.
+///
+/// # Parameters
+///
+/// - `qureg`: the qureg to copy
+/// - `start_ind` the index of the first amplitude to copy
+/// - `num_amps` the number of contiguous amplitudes to copy (starting with
+///   `start_ind`)
+///
+/// # Errors
+///
+/// - [`InvalidQuESTInputError`][quest-error-except],
+///   - if `start_ind` is an invalid amplitude index
+///   - if `num_amps` is greater than the remaining amplitudes in the state,
+///     from `start_ind`
+///
+///
+/// See [QuEST API][quest-api] for more information.
+///
+/// [api-copy-substate-from-gpu]: crate::copy_substate_from_gpu()
+/// [api-copy-state-to-gpu]: crate::copy_state_to_gpu()
+/// [api-set-amps]: crate::set_amps()
+/// [quest-error-except]: crate::QuestError::InvalidQuESTInputError
+/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
 pub fn copy_substate_to_gpu(
     qureg: &mut Qureg,
     start_ind: i64,
@@ -1442,9 +1508,43 @@ pub fn copy_substate_to_gpu(
 
 /// Copy a part the state-vector (or density matrix) from GPU memory.
 ///
-/// See [QuEST API][1] for more information.
+/// In GPU mode, this copies a substate of the state-vector (or density matrix)
+/// from  to VRAM / GPU-memory to RAM, which is the version operated upon by
+/// other calls to the API.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// In CPU mode, this function has no effect.
+///
+/// In conjunction with
+/// [`copy_substate_to_gpu()`][api-copy-substate-to-gpu], this allows a user
+/// to directly modify a subset of the amplitudes the state-vector in a hardware
+/// agnostic way, without having to load the entire state via
+/// [`copy_state_from_gpu()`][api-copy-state-from-gpu].
+///
+/// Note though that users should instead use [`set_amps()`][api-set-amps] if
+/// possible.
+///
+/// # Parameters
+///
+/// - `qureg`: the qureg to copy
+/// - `start_ind` the index of the first amplitude to copy
+/// - `num_amps` the number of contiguous amplitudes to copy (starting with
+///   `start_ind`)
+///
+/// # Errors
+///
+/// - [`InvalidQuESTInputError`][quest-error-except],
+///   - if `start_ind` is an invalid amplitude index
+///   - if `num_amps` is greater than the remaining amplitudes in the state,
+///     from `start_ind`
+///
+///
+/// See [QuEST API][quest-api] for more information.
+///
+/// [api-copy-substate-to-gpu]: crate::copy_substate_to_gpu()
+/// [api-copy-state-from-gpu]: crate::copy_state_from_gpu()
+/// [api-set-amps]: crate::set_amps()
+/// [quest-error-except]: crate::QuestError::InvalidQuESTInputError
+/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
 pub fn copy_substate_from_gpu(
     qureg: &mut Qureg,
     start_ind: i64,
