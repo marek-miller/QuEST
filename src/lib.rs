@@ -2190,6 +2190,16 @@ pub fn multi_controlled_unitary(
 
 /// Apply the single-qubit Pauli-X gate.
 ///
+/// # Parameters
+///
+///  - `qureg`: object representing the set of all qubits
+///  - `target_qubit`: qubit to operate on
+///
+/// # Errors
+///
+/// - [`QubitIndexError`][quest-error-index], if `qubit` is outside [0,
+///   [`qureg.num_qubits_represented()`][qureg-num-qubits]).
+///
 /// # Examples
 ///
 /// ```rust
@@ -2204,9 +2214,11 @@ pub fn multi_controlled_unitary(
 /// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API][quest-api] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [quest-error-index]: crate::QuestError::QubitIndexError
+/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
+/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
 pub fn pauli_x(
     qureg: &mut Qureg,
     target_qubit: i32,
@@ -2220,6 +2232,16 @@ pub fn pauli_x(
 }
 
 /// Apply the single-qubit Pauli-Y gate.
+///
+/// # Parameters
+///
+///  - `qureg`: object representing the set of all qubits
+///  - `target_qubit`: qubit to operate on
+///
+/// # Errors
+///
+/// - [`QubitIndexError`][quest-error-index], if `qubit` is outside [0,
+///   [`qureg.num_qubits_represented()`][qureg-num-qubits]).
 ///
 /// # Examples
 ///
@@ -2235,9 +2257,11 @@ pub fn pauli_x(
 /// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API][quest-api] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [quest-error-index]: crate::QuestError::QubitIndexError
+/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
+/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
 pub fn pauli_y(
     qureg: &mut Qureg,
     target_qubit: i32,
@@ -2251,6 +2275,16 @@ pub fn pauli_y(
 }
 
 /// Apply the single-qubit Pauli-Z gate.
+///
+/// # Parameters
+///
+///  - `qureg`: object representing the set of all qubits
+///  - `target_qubit`: qubit to operate on
+///
+/// # Errors
+///
+/// - [`QubitIndexError`][quest-error-index], if `qubit` is outside [0,
+///   [`qureg.num_qubits_represented()`][qureg-num-qubits]).
 ///
 /// # Examples
 ///
@@ -2266,9 +2300,11 @@ pub fn pauli_y(
 /// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API][quest-api] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [quest-error-index]: crate::QuestError::QubitIndexError
+/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
+/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
 pub fn pauli_z(
     qureg: &mut Qureg,
     target_qubit: i32,
