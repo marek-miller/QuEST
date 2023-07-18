@@ -1,9 +1,10 @@
 # Releases
 
-## v0.3.3 (??/??/2023)
+## v0.3.3 (18/07/2023)
 
 - Simplify handling QuEST exceptions
 - Implement `Sync` and `Send` traits for QuestEnv
+- Expand and improve documentation
 
 ## v0.3.2 (09/07/2023)
 

@@ -1385,6 +1385,21 @@ pub fn get_environment_string(env: &QuestEnv) -> Result<String, QuestError> {
 
 /// Copy the state-vector (or density matrix) into GPU memory.
 ///
+/// In GPU mode, this copies the state-vector (or density matrix) from RAM
+/// to VRAM / GPU-memory, which is the version operated upon by other calls to
+/// the API.
+///
+/// In CPU mode, this function has no effect.
+///
+/// In conjunction with [`copy_state_from_gpu()`][api-copy-state-from-gpu]
+/// (which should be called first), this allows a user to directly modify the
+/// state-vector in a hardware agnostic way. Note though that users should
+/// instead use [`set_amps()`][api-set-amps] if possible.
+///
+/// # Parameters
+///
+/// - `qureg`: the qureg to copy
+///
 /// # Examples
 ///
 /// ```rust
@@ -1395,9 +1410,11 @@ pub fn get_environment_string(env: &QuestEnv) -> Result<String, QuestError> {
 /// copy_state_to_gpu(qureg);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API][quest-api] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [api-copy-state-from-gpu]: crate::copy_state_from_gpu()
+/// [api-set-amps]: crate::set_amps()
+/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
 pub fn copy_state_to_gpu(qureg: &mut Qureg) {
     catch_quest_exception(|| unsafe {
         ffi::copyStateToGPU(qureg.reg);
@@ -1406,6 +1423,20 @@ pub fn copy_state_to_gpu(qureg: &mut Qureg) {
 }
 
 /// Copy the state-vector (or density matrix) from GPU memory.
+///
+/// In GPU mode, this copies the state-vector (or density matrix) from GPU
+/// memory  to RAM , where it can be accessed/modified  by the user.
+///
+/// In CPU mode, this function has no effect.
+///
+/// In conjunction with [`copy_state_to_gpu()`][api-copy-state-to-gpu] , this
+/// allows a user to directly modify the state-vector in a hardware agnostic
+/// way. Note though that users should instead use [`set_amps()`][api-set-amps]
+/// if possible.
+///
+/// # Parameters
+///
+/// - `qureg`: the qureg to copy
 ///
 /// # Examples
 ///
@@ -1417,9 +1448,11 @@ pub fn copy_state_to_gpu(qureg: &mut Qureg) {
 /// copy_state_from_gpu(qureg);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API][quest-api] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [api-copy-state-to-gpu]: crate::copy_state_to_gpu()
+/// [api-set-amps]: crate::set_amps()
+/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
 pub fn copy_state_from_gpu(qureg: &mut Qureg) {
     catch_quest_exception(|| unsafe { ffi::copyStateFromGPU(qureg.reg) })
         .expect("copy_state_from_gpu should always succeed");
@@ -1427,9 +1460,42 @@ pub fn copy_state_from_gpu(qureg: &mut Qureg) {
 
 /// Copy a part the state-vector (or density matrix) into GPU memory.
 ///
-/// See [QuEST API][1] for more information.
+/// In GPU mode, this copies a substate of the state-vector (or density matrix)
+/// from RAM to VRAM / GPU-memory.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// In CPU mode, this function has no effect.
+///
+/// In conjunction with
+/// [`copy_substate_from_gpu()`][api-copy-substate-from-gpu], this allows a user
+/// to directly modify a subset of the amplitudes the state-vector in a hardware
+/// agnostic way, without having to load the entire state via
+/// [`copy_state_to_gpu()`][api-copy-state-to-gpu].
+///
+/// Note though that users should instead use [`set_amps()`][api-set-amps] if
+/// possible.
+///
+/// # Parameters
+///
+/// - `qureg`: the qureg to copy
+/// - `start_ind` the index of the first amplitude to copy
+/// - `num_amps` the number of contiguous amplitudes to copy (starting with
+///   `start_ind`)
+///
+/// # Errors
+///
+/// - [`InvalidQuESTInputError`][quest-error-except],
+///   - if `start_ind` is an invalid amplitude index
+///   - if `num_amps` is greater than the remaining amplitudes in the state,
+///     from `start_ind`
+///
+///
+/// See [QuEST API][quest-api] for more information.
+///
+/// [api-copy-substate-from-gpu]: crate::copy_substate_from_gpu()
+/// [api-copy-state-to-gpu]: crate::copy_state_to_gpu()
+/// [api-set-amps]: crate::set_amps()
+/// [quest-error-except]: crate::QuestError::InvalidQuESTInputError
+/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
 pub fn copy_substate_to_gpu(
     qureg: &mut Qureg,
     start_ind: i64,
@@ -1442,9 +1508,43 @@ pub fn copy_substate_to_gpu(
 
 /// Copy a part the state-vector (or density matrix) from GPU memory.
 ///
-/// See [QuEST API][1] for more information.
+/// In GPU mode, this copies a substate of the state-vector (or density matrix)
+/// from  to VRAM / GPU-memory to RAM, which is the version operated upon by
+/// other calls to the API.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// In CPU mode, this function has no effect.
+///
+/// In conjunction with
+/// [`copy_substate_to_gpu()`][api-copy-substate-to-gpu], this allows a user
+/// to directly modify a subset of the amplitudes the state-vector in a hardware
+/// agnostic way, without having to load the entire state via
+/// [`copy_state_from_gpu()`][api-copy-state-from-gpu].
+///
+/// Note though that users should instead use [`set_amps()`][api-set-amps] if
+/// possible.
+///
+/// # Parameters
+///
+/// - `qureg`: the qureg to copy
+/// - `start_ind` the index of the first amplitude to copy
+/// - `num_amps` the number of contiguous amplitudes to copy (starting with
+///   `start_ind`)
+///
+/// # Errors
+///
+/// - [`InvalidQuESTInputError`][quest-error-except],
+///   - if `start_ind` is an invalid amplitude index
+///   - if `num_amps` is greater than the remaining amplitudes in the state,
+///     from `start_ind`
+///
+///
+/// See [QuEST API][quest-api] for more information.
+///
+/// [api-copy-substate-to-gpu]: crate::copy_substate_to_gpu()
+/// [api-copy-state-from-gpu]: crate::copy_state_from_gpu()
+/// [api-set-amps]: crate::set_amps()
+/// [quest-error-except]: crate::QuestError::InvalidQuESTInputError
+/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
 pub fn copy_substate_from_gpu(
     qureg: &mut Qureg,
     start_ind: i64,
@@ -2090,6 +2190,16 @@ pub fn multi_controlled_unitary(
 
 /// Apply the single-qubit Pauli-X gate.
 ///
+/// # Parameters
+///
+///  - `qureg`: object representing the set of all qubits
+///  - `target_qubit`: qubit to operate on
+///
+/// # Errors
+///
+/// - [`QubitIndexError`][quest-error-index], if `qubit` is outside [0,
+///   [`qureg.num_qubits_represented()`][qureg-num-qubits]).
+///
 /// # Examples
 ///
 /// ```rust
@@ -2104,9 +2214,11 @@ pub fn multi_controlled_unitary(
 /// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API][quest-api] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [quest-error-index]: crate::QuestError::QubitIndexError
+/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
+/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
 pub fn pauli_x(
     qureg: &mut Qureg,
     target_qubit: i32,
@@ -2120,6 +2232,16 @@ pub fn pauli_x(
 }
 
 /// Apply the single-qubit Pauli-Y gate.
+///
+/// # Parameters
+///
+///  - `qureg`: object representing the set of all qubits
+///  - `target_qubit`: qubit to operate on
+///
+/// # Errors
+///
+/// - [`QubitIndexError`][quest-error-index], if `qubit` is outside [0,
+///   [`qureg.num_qubits_represented()`][qureg-num-qubits]).
 ///
 /// # Examples
 ///
@@ -2135,9 +2257,11 @@ pub fn pauli_x(
 /// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API][quest-api] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [quest-error-index]: crate::QuestError::QubitIndexError
+/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
+/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
 pub fn pauli_y(
     qureg: &mut Qureg,
     target_qubit: i32,
@@ -2151,6 +2275,16 @@ pub fn pauli_y(
 }
 
 /// Apply the single-qubit Pauli-Z gate.
+///
+/// # Parameters
+///
+///  - `qureg`: object representing the set of all qubits
+///  - `target_qubit`: qubit to operate on
+///
+/// # Errors
+///
+/// - [`QubitIndexError`][quest-error-index], if `qubit` is outside [0,
+///   [`qureg.num_qubits_represented()`][qureg-num-qubits]).
 ///
 /// # Examples
 ///
@@ -2166,9 +2300,11 @@ pub fn pauli_y(
 /// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API][quest-api] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [quest-error-index]: crate::QuestError::QubitIndexError
+/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
+/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
 pub fn pauli_z(
     qureg: &mut Qureg,
     target_qubit: i32,
@@ -4928,10 +5064,101 @@ pub fn apply_multi_controlled_matrix_n(
 /// Apply a phase function.
 ///
 /// Induces a phase change upon each amplitude of `qureg`, determined by the
-/// passed exponential polynomial *phase function*.
+/// passed exponential polynomial *phase function*.  This effects a diagonal
+/// unitary of unit complex scalars, targeting the nominated `qubits`.
+///
+/// - Arguments `coeffs` and `exponents` together specify a real exponential
+///   polynomial `f(r)` with `num_terms` terms, of the form
+///  
+///   ```latex
+///   f(r) =
+///     \sum\limits_{i}^{\text{num_terms}} \text{coeffs}[i] \;
+///     r^{\, \text{exponents}[i]}\,, \f],
+///   ```
+///   where both `coeffs` and `exponents` can be negative, positive and
+///   fractional. For example,
+///  
+///   ```rust,no_run
+///   let coeffs = [1., -3.14];
+///   let exponents = [2., -5.5];
+///   ```
+///  
+///   constitutes the function: `f(r) =  1 * r^2 - 3.14 * r^(-5.5)`.  Note
+///   that you cannot use fractional exponents with `encoding` being
+///   [`BitEncoding::TWOS_COMPLEMENT`][api-bit-encoding-twos-cplm],  since the
+///   negative   indices would generate (illegal) complex phases, and  must be
+///   overriden with
+///   [`apply_phase_func_overrides()`][api-apply-phase-func-overrides].  
+///  
+///   If your function `f(r)` diverges at one or more `r` values, you
+///   must instead use `apply_phase_func_overrides()` and specify explicit phase
+///   changes for these values. Otherwise, the corresponding amplitudes of the
+///   state-vector will become indeterminate (like `NaN`). Note that use of any
+///   negative exponent will result in divergences at `r=0`.
+///
+/// - The function `f(r)` specifies the phase change to induce upon amplitude
+///   `alpha` of computational basis state with index `r`, such that
+///
+///   ```latex
+///   \alpha |r\rangle \rightarrow \, \exp(i f(r))  \alpha \,  |r\rangle.
+///   ```
+///
+///   The index `r` associated with each computational basis
+///   state is determined by the binary value of the specified `qubits`
+///   (ordered least to most significant), interpreted under the given
+///   [`BitEncoding`][api-bit-encoding] encoding.
+///
+/// - If `qureg` is a density matrix `rho`, this function modifies `qureg` to:
+///
+/// ```latex
+/// \rho \rightarrow \hat{D} \, \rho \, \hat{D}^\dagger,
+/// ```
+///
+///  where   `\hat{D}` is the diagonal unitary operator:
+///
+/// ```latex
+///  \hat{D} = \text{diag}
+///   \, \{ \; e^{i f(r_0)}, \; e^{i f(r_1)}, \;  \dots \; \}.
+/// ```
+///
+/// - The interpreted phase function can be previewed in the QASM log, as a
+///   comment.
+///
+/// - This function may become numerically imprecise for quickly growing phase
+///   functions which admit very large phases, for example of `10^10`.
+///
+/// # Parameters
+///
+/// - `qureg`: the state-vector or density matrix to be modified
+/// - `qubits`: a list of the indices of the qubits which will inform `r` for
+///   each amplitude in `qureg`
+/// - `encoding`: the [`BitEncoding`][api-bit-encoding] under which to infer the
+///   binary value `r` from the bits of `qubits` in each basis state of `qureg`
+/// - `coeffs`: the coefficients of the exponential polynomial phase function
+///   `f(r)`
+/// - `exponents`: the exponents of the exponential polynomial phase function
+///   `f(r)`
+///
+/// The length of list `coeffs` must be the same as that of `exponents`
+///
+/// # Errors
+///
+/// - [`ArrayLengthError`][quest-error-array-len], if the length of `coeffs` is
+///   different than that of `exponents`
+/// - [`InvalidQuESTInputError`][quest-error-except]
+///   - if any qubit in `qubits` has an invalid index (i.e. does not satisfy `0
+///     <= qubit < qureg.num_qubits_represented()`
+///   - if the elements of `qubits` are not unique
+///   - if `qubits.len() >= qureg.num_qubits_represented()`
+///   - if `encoding` is not compatible with `qubits.len()` (e.g.
+///     `TWOS_COMPLEMENT` with only 1 qubit)
+///   - if `exponents` contains a fractional number despite `encoding` being
+///     `TWOS_COMPLEMENT` (you must instead use `apply_phase_func_overrides()`
+///     and override all negative indices)
+///   - if `exponents` contains a negative power (you must instead use
+///     apply_phase_func_overrides()` and override the zero index)
 ///
 /// # Examples
-///
 /// ```rust
 /// # use quest_bind::*;
 /// let env = &QuestEnv::new();
@@ -4947,9 +5174,15 @@ pub fn apply_multi_controlled_matrix_n(
 /// apply_phase_func(qureg, qubits, encoding, coeffs, exponents).unwrap();
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API][quest-api] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [api-bit-encoding-twos-cplm]: crate::BitEncoding::TWOS_COMPLEMENT
+/// [api-bit-encoding]: crate::BitEncoding
+/// [api-apply-phase-func-overrides]: crate::apply_phase_func_overrides()
+/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
+/// [quest-error-array-len]: crate::QuestError::ArrayLengthError
+/// [quest-error-except]: crate::QuestError::InvalidQuESTInputError
+/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
 pub fn apply_phase_func(
     qureg: &mut Qureg,
     qubits: &[i32],
@@ -4982,6 +5215,65 @@ pub fn apply_phase_func(
 /// passed  exponential polynomial "phase function", and an explicit set of
 /// 'overriding' values at specific state indices.
 ///
+/// See [`apply_phase_func()`][api-apply-phase-func] for a full desctiption.
+///
+/// - As in `apply_phase_func()`, the arguments `coeffs` and `exponents` specify
+///   a phase function `f(r)`, where `r` is determined by `qubits` and
+///   `encoding` for each basis state of `qureg`.
+/// - Additionally, `override_inds` is a list specifying the values of `r` for
+///   which to explicitly set the induced phase change. The overriding phase
+///   changes are specified in the corresponding elements of `override_phases`.
+/// - Note that if `encoding` is `TWOS_COMPLEMENT`, and `f(r)` features a
+///   fractional exponent, then every negative phase index must be overriden.
+///   This is checked and enforced by QuEST's validation, unless there are more
+///   than 16 targeted qubits, in which case valid input is assumed (due to an
+///   otherwise prohibitive performance overhead).
+/// - Overriding phases are checked at each computational basis state of `qureg`
+///   *before* evaluating the phase function `f(r)`, and hence are useful for
+///   avoiding singularities or errors at diverging values of `r`.
+/// - The interpreted phase function and list of overrides can be previewed in
+///   the QASM log, as a comment.
+///
+/// # Parameters
+///
+/// - `qureg`:  the state-vector or density matrix to be modified
+/// - `qubits`: a list of the indices of the qubits which will inform `r` for
+///   each amplitude in `qureg`
+/// - `encoding`: [`BitEncoding`][api-bit-encoding] under which to infer the
+///   binary value `r` from the bits of `qubits` in each basis state of `qureg`
+/// - `coeffs`: the coefficients of the exponential polynomial phase function
+///   `f(r)`
+/// - `exponents`: the exponents of the exponential polynomial phase function
+///   `f(r)`
+/// - `override_inds`: a list of sub-state indices (values of `r` of which to
+///   explicit set the phase change
+/// - `override_phases`: a list of replacement phase changes, for the
+///   corresponding `r` values in `override_inds` (one to one)
+///
+/// # Errors
+///
+/// - [`ArrayLengthError`][quest-error-array-len],
+///   - if the length of `coeffs` is different than that of `exponents`
+///   - if the length of `override_inds` is different than that of
+///     `override_phases`
+/// - [`InvalidQuESTInputError`][quest-error-except],
+///   - if any qubit in `qubits` has an invalid index (i.e. does not satisfy `0
+///     <= qubit < qureg.num_qubits_represented()`
+///   - if the elements of `qubits` are not unique
+///   - if `qubits.len() >= qureg.num_qubits_represented()`
+///   - if `encoding` is not compatible with `qubits.len()` (e.g.
+///     `TWOS_COMPLEMENT` with only 1 qubit)
+///   - if `exponents` contains a fractional number despite `encoding` being
+///     `TWOS_COMPLEMENT` (you must instead use `apply_phase_func_overrides()`
+///     and override all negative indices)
+///   - if `exponents` contains a negative power and the (consequently
+///     diverging) zero index is not contained in `override_inds`
+///   - if any value in `override_inds` is not producible by `qubits` under the
+///     given `encoding` (e.g. 2 unsigned qubits cannot represent index 9)
+///   - if `encoding` is `TWOS_COMPLEMENT`, and `exponents` contains a
+///     fractional number, but `override_inds` does not contain every possible
+///     negative index (checked only up to 16 targeted qubits)
+///
 /// # Examples
 ///
 /// ```rust
@@ -5010,9 +5302,13 @@ pub fn apply_phase_func(
 /// .unwrap();
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API][quest-api] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [api-apply-phase-func]: crate::apply_phase_func()
+/// [api-bit-encoding]: crate::BitEncoding
+/// [quest-error-array-len]: crate::QuestError::ArrayLengthError
+/// [quest-error-except]: crate::QuestError::InvalidQuESTInputError
+/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::too_many_arguments)]
 pub fn apply_phase_func_overrides(
     qureg: &mut Qureg,
