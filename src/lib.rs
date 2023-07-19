@@ -2067,6 +2067,33 @@ pub fn controlled_rotate_around_axis(
 /// Apply a controlled unitary parameterized by
 /// two given complex scalars.
 ///
+///  Given valid complex numbers `alpha` and `beta`, applies the two-qubit
+/// unitary:
+///
+/// ```text
+/// [ alpha -beta.conj() ]
+/// [ beta  alpha.conj() ]
+/// ```
+/// Valid `alpha`, `beta` satisfy `|alpha|^2 + |beta|^2 = 1`.
+/// The target unitary is general up to a global phase factor.  
+///
+/// # Parameters
+///
+/// - `qureg`: object representing the set of all qubits
+/// - `control_qubit`: applies unitary if this qubit is `1`
+/// - `target_qubit`: qubit to operate on
+/// - `alpha`: complex unitary parameter (row 1, column 1)
+/// - `beta`: complex unitary parameter (row 2, column 1)
+///
+/// # Errors
+///
+/// - [`QubitIndexError`][quest-error-index], if either `target_qubit` or
+///   `control_qubit` is outside [0,
+///   [`qureg.num_qubits_represented()`][qureg-num-qubits]).
+/// - [`InvalidQuESTInputError`][quest-error-except],
+///   - if `control_qubits` and `target_qubit` are equal
+///   - if  `alpha`, `beta` don't satisfy: `|alpha|^2 + |beta|^2 = 1`.
+///
 /// # Examples
 ///
 /// ```rust
@@ -2081,9 +2108,12 @@ pub fn controlled_rotate_around_axis(
 /// controlled_compact_unitary(qureg, 0, 1, alpha, beta).unwrap();
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API][quest-api] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [quest-error-index]: crate::QuestError::QubitIndexError
+/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
+/// [quest-error-except]: crate::QuestError::InvalidQuESTInputError
+/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
 pub fn controlled_compact_unitary(
     qureg: &mut Qureg,
     control_qubit: i32,
@@ -2109,6 +2139,25 @@ pub fn controlled_compact_unitary(
 
 /// Apply a general controlled unitary.
 ///
+/// The unitary can include a global phase factor and is applied
+/// to the target qubit if the control qubit has value `1`.
+///
+/// # Parameters
+///
+/// - `qureg`: object representing the set of all qubits
+/// - `control_qubit`: applies unitary if this qubit is `1`
+/// - `target_qubit`: qubit to operate on
+/// - `u`: single-qubit unitary matrix to apply
+///
+/// # Errors
+///
+/// - [`QubitIndexError`][quest-error-index], if either `target_qubit` or
+///   `control_qubit` is outside [0,
+///   [`qureg.num_qubits_represented()`][qureg-num-qubits]).
+/// - [`InvalidQuESTInputError`][quest-error-except],
+///   - if `control_qubits` and `target_qubit` are equal
+///   - if `u` is not unitary
+///
 /// # Examples
 ///
 /// ```rust
@@ -2125,9 +2174,12 @@ pub fn controlled_compact_unitary(
 /// controlled_unitary(qureg, 0, 1, mtr).unwrap();
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API][quest-api] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [quest-error-index]: crate::QuestError::QubitIndexError
+/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
+/// [quest-error-except]: crate::QuestError::InvalidQuESTInputError
+/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
 pub fn controlled_unitary(
     qureg: &mut Qureg,
     control_qubit: i32,
@@ -2146,6 +2198,28 @@ pub fn controlled_unitary(
 
 /// Apply a general multiple-control single-target unitary.
 ///
+/// The unitary can include a global phase factor. Any number of control qubits
+/// can be specified, and if all have value `1`, the given unitary is applied to
+/// the target qubit.
+///
+/// # Parameters
+///
+/// - `qureg`: object representing the set of all qubits
+/// - `control_qubits`: applies unitary if all qubits in this slice are equal to
+///   `1`
+/// - `target_qubit`: qubit to operate on
+/// - `u`: single-qubit unitary matrix to apply
+///
+/// # Errors
+///
+/// - [`QubitIndexError`][quest-error-index], if `target_qubit` or any of
+///   `control_qubits` is outside [0,
+///   [`qureg.num_qubits_represented()`][qureg-num-qubits]).
+/// - [`InvalidQuESTInputError`][quest-error-except],
+///   - if any qubit in `control_qubits` is repeated
+///   - if `control_qubits` contains `target_qubit`
+///   - if `u` is not unitary
+///
 /// # Examples
 ///
 /// ```rust
@@ -2162,9 +2236,12 @@ pub fn controlled_unitary(
 /// multi_controlled_unitary(qureg, &[1, 2], 0, mtr).unwrap();
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API][quest-api] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [quest-error-index]: crate::QuestError::QubitIndexError
+/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
+/// [quest-error-except]: crate::QuestError::InvalidQuESTInputError
+/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
 pub fn multi_controlled_unitary(
     qureg: &mut Qureg,
     control_qubits: &[i32],
@@ -5744,7 +5821,6 @@ pub fn apply_param_named_phase_func_overrides(
 ///
 /// - `qureg`: a state-vector or density matrix to modify
 ///
-/// See [QuEST API][quest-api] for more information.
 ///
 /// # Examples
 ///
@@ -5756,6 +5832,7 @@ pub fn apply_param_named_phase_func_overrides(
 ///
 /// apply_full_qft(qureg);
 /// ```
+/// See [QuEST API][quest-api] for more information.
 ///
 /// [api-apply-named-phase-func]: crate::apply_named_phase_func()
 /// [api-apply-qft]: crate::apply_qft()
@@ -5808,7 +5885,6 @@ pub fn apply_full_qft(qureg: &mut Qureg) {
 /// - [`InvalidQuESTInputError`][quest-error-except], if `qubits` contains any
 ///   repetitions
 ///
-/// See [QuEST API][quest-api] for more information.
 ///
 /// # Examples
 ///
@@ -5820,6 +5896,8 @@ pub fn apply_full_qft(qureg: &mut Qureg) {
 ///
 /// apply_qft(qureg, &[0, 1]).unwrap();
 /// ```
+///
+/// See [QuEST API][quest-api] for more information.
 ///
 /// [api-apply-full-qft]: crate::apply_full_qft()
 /// [api-apply-named-phase-func]: crate::apply_named_phase_func()
