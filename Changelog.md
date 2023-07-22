@@ -1,5 +1,7 @@
 # Releases
 
+## v0.4.0 (??/??/????)
+
 ## v0.3.3 (18/07/2023)
 
 - Simplify handling QuEST exceptions
