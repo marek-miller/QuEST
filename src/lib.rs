@@ -825,21 +825,35 @@ pub fn get_num_amps(qureg: &Qureg) -> Result<i64, QuestError> {
 
 /// Initializes a `qureg` to have all-zero-amplitudes.
 ///
+/// This is an unphysical state, useful for iteratively building a state with
+/// functions like [`set_weighted_qureg()`][api-set-weighted-qureg], and should
+/// not be confused with [`init_zero_state()`][api-init-zero-state].
+///
+/// # Parameters
+///
+/// - `qureg`: a [`Qureg`][api-qureg] of which to clear all amplitudes
+///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
 /// let env = &QuestEnv::new();
-/// let qureg = &mut Qureg::try_new(3, env).unwrap();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
 ///
 /// init_blank_state(qureg);
 ///
 /// assert!(get_prob_amp(qureg, 0).unwrap().abs() < EPSILON);
+/// assert!(get_prob_amp(qureg, 1).unwrap().abs() < EPSILON);
+/// assert!(get_prob_amp(qureg, 2).unwrap().abs() < EPSILON);
+/// assert!(get_prob_amp(qureg, 3).unwrap().abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API][quest-api] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [api-set-weighted-qureg]: crate::set_weighted_qureg()
+/// [api-init-zero-state]: crate::init_zero_state()
+/// [api-qureg]: crate::Qureg
+/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
 pub fn init_blank_state(qureg: &mut Qureg) {
     catch_quest_exception(|| unsafe {
         ffi::initBlankState(qureg.reg);
@@ -849,21 +863,34 @@ pub fn init_blank_state(qureg: &mut Qureg) {
 
 /// Initialize `qureg` into the zero state.
 ///
+/// If `qureg` is a state-vector of `N` qubits, it is modified to state
+/// `|0>^{\otimes N}`.  If `qureg` is a density matrix of `N` qubits, it is
+/// modified to state `|0><0|^{\otimes N}`.
+///
+/// # Parameters
+///
+/// - `qureg`: a [`Qureg`][api-qureg] of which to clear all amplitudes
+///
+///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
 /// let env = &QuestEnv::new();
-/// let qureg = &mut Qureg::try_new(3, env).unwrap();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
 ///
 /// init_zero_state(qureg);
 ///
 /// assert!((get_prob_amp(qureg, 0).unwrap() - 1.).abs() < EPSILON);
+/// assert!(get_prob_amp(qureg, 1).unwrap().abs() < EPSILON);
+/// assert!(get_prob_amp(qureg, 2).unwrap().abs() < EPSILON);
+/// assert!(get_prob_amp(qureg, 3).unwrap().abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API][quest-api] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [api-qureg]: crate::Qureg
+/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
 pub fn init_zero_state(qureg: &mut Qureg) {
     catch_quest_exception(|| unsafe {
         ffi::initZeroState(qureg.reg);
@@ -873,22 +900,37 @@ pub fn init_zero_state(qureg: &mut Qureg) {
 
 /// Initialize `qureg` into the plus state.
 ///
+/// If `qureg` is a state-vector of `N` qubits, it is modified to state:
+///
+/// ```latex
+///   {| + \rangle}^{\otimes N} = \frac{1}{\sqrt{2^N}} (| 0 \rangle + | 1 \rangle)^{\otimes N}.
+/// ```
+///
+/// If `qureg` is a density matrix of `N`, it is modified to state:
+///
+/// ```latex
+///   {| + \rangle\langle+|}^{\otimes N} = \frac{1}{{2^N}} \sum_i\sum_j |i\rangle\langle j|.
+/// ```
+///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
 /// let env = &QuestEnv::new();
-/// let qureg = &mut Qureg::try_new(3, env).unwrap();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
 ///
 /// init_plus_state(qureg);
-/// let prob = get_prob_amp(qureg, 0).unwrap();
 ///
-/// assert!((prob - 0.125).abs() < EPSILON);
+/// assert!((get_prob_amp(qureg, 0).unwrap() - 0.25).abs() < EPSILON);
+/// assert!((get_prob_amp(qureg, 1).unwrap() - 0.25).abs() < EPSILON);
+/// assert!((get_prob_amp(qureg, 2).unwrap() - 0.25).abs() < EPSILON);
+/// assert!((get_prob_amp(qureg, 3).unwrap() - 0.25).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API][quest-api] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [api-qureg]: crate::Qureg
+/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
 pub fn init_plus_state(qureg: &mut Qureg) {
     catch_quest_exception(|| unsafe {
         ffi::initPlusState(qureg.reg);
