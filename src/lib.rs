@@ -1791,6 +1791,23 @@ pub fn unitary(
 /// Rotate a single qubit by a given angle around the X-axis of the
 /// Bloch-sphere.
 ///
+/// For angle `theta`, this applies
+/// ```text
+/// [    cos(theta/2)   -i sin(theta/2) ]
+/// [ -i sin(theta/2)      cos(theta/2) ]
+/// ```
+///
+/// # Parameters
+///
+/// - `qureg`: object representing the set of all qubits
+/// - `rot_qubit`: qubit to rotate
+/// - `angle`: angle by which to rotate in radians
+///
+/// # Errors
+///
+/// - [`QubitIndexError`][quest-error-index],  if `rot_qubit` is outside [0,
+///   [`qureg.num_qubits_represented()`][qureg-num-qubits]).
+///
 /// # Examples
 ///
 /// ```rust
@@ -1802,15 +1819,17 @@ pub fn unitary(
 /// rotate_x(qureg, 0, theta).unwrap();
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API][quest-api] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
+/// [quest-error-index]: crate::QuestError::QubitIndexError
+/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
 pub fn rotate_x(
     qureg: &mut Qureg,
     rot_qubit: i32,
     angle: Qreal,
 ) -> Result<(), QuestError> {
-    if rot_qubit >= qureg.num_qubits_represented() {
+    if rot_qubit >= qureg.num_qubits_represented() || rot_qubit < 0 {
         return Err(QuestError::QubitIndexError);
     }
     catch_quest_exception(|| unsafe {
@@ -1820,6 +1839,23 @@ pub fn rotate_x(
 
 /// Rotate a single qubit by a given angle around the Y-axis of the
 /// Bloch-sphere.
+///
+/// For angle `theta`, this applies
+/// ```text
+/// [  cos(theta/2)   -sin(theta/2) ]
+/// [ -sin(theta/2)    cos(theta/2) ]
+/// ```
+///
+/// # Parameters
+///
+/// - `qureg`: object representing the set of all qubits
+/// - `rot_qubit`: qubit to rotate
+/// - `angle`: angle by which to rotate in radians
+///
+/// # Errors
+///
+/// - [`QubitIndexError`][quest-error-index],  if `rot_qubit` is outside [0,
+///   [`qureg.num_qubits_represented()`][qureg-num-qubits]).
 ///
 /// # Examples
 ///
@@ -1832,15 +1868,17 @@ pub fn rotate_x(
 /// rotate_y(qureg, 0, theta).unwrap();
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API][quest-api] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
+/// [quest-error-index]: crate::QuestError::QubitIndexError
+/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
 pub fn rotate_y(
     qureg: &mut Qureg,
     rot_qubit: i32,
     angle: Qreal,
 ) -> Result<(), QuestError> {
-    if rot_qubit >= qureg.num_qubits_represented() {
+    if rot_qubit >= qureg.num_qubits_represented() || rot_qubit < 0 {
         return Err(QuestError::QubitIndexError);
     }
     catch_quest_exception(|| unsafe {
@@ -1850,6 +1888,23 @@ pub fn rotate_y(
 
 /// Rotate a single qubit by a given angle around the Z-axis of the
 /// Bloch-sphere.
+///
+/// For angle `theta`, this applies
+/// ```text
+/// [ exp(-i theta/2)         0     ]
+/// [       0          exp(theta/2) ]
+/// ```
+///
+/// # Parameters
+///
+/// - `qureg`: object representing the set of all qubits
+/// - `rot_qubit`: qubit to rotate
+/// - `angle`: angle by which to rotate in radians
+///
+/// # Errors
+///
+/// - [`QubitIndexError`][quest-error-index],  if `rot_qubit` is outside [0,
+///   [`qureg.num_qubits_represented()`][qureg-num-qubits]).
 ///
 /// # Examples
 ///
@@ -1862,15 +1917,17 @@ pub fn rotate_y(
 /// rotate_z(qureg, 0, theta).unwrap();
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API][quest-api] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
+/// [quest-error-index]: crate::QuestError::QubitIndexError
+/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
 pub fn rotate_z(
     qureg: &mut Qureg,
     rot_qubit: i32,
     angle: Qreal,
 ) -> Result<(), QuestError> {
-    if rot_qubit >= qureg.num_qubits_represented() {
+    if rot_qubit >= qureg.num_qubits_represented() || rot_qubit < 0 {
         return Err(QuestError::QubitIndexError);
     }
     catch_quest_exception(|| unsafe {

@@ -1,5 +1,9 @@
 # Releases
 
+## v0.3.4 (??/??/????)
+
+- Change returned error type in `rotate_{x,y,z}()` to `QubitIndexError`
+
 ## v0.3.3 (18/07/2023)
 
 - Simplify handling QuEST exceptions
