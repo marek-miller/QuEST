@@ -755,11 +755,49 @@ pub fn calc_expec_diagonal_op(
 }
 
 /// Print the current state vector of probability amplitudes to file.
+///
+/// ## File format:
+///
+/// ```text
+/// real, imag
+/// realComponent1, imagComponent1
+/// realComponent2, imagComponent2
+/// ...
+/// realComponentN, imagComponentN
+/// ```
+///
+///  ## File naming convention:
+///
+/// For each node that the program runs on, a file `state_rank_[node_rank].csv`
+/// is generated. If there is  more than one node, ranks after the first do not
+/// include the header:
+///
+/// ```text
+/// real, imag
+/// ```
+///
+/// so that files are easier to combine.
+///
+/// # Parameters
+///
+/// - `qureg` a state-vector or density matrix
+///
+/// See [QuEST API][quest-api] for more information.
+///
+/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
 pub fn report_state(qureg: &Qureg) {
     unsafe { ffi::reportState(qureg.reg) }
 }
 
 /// Print the current state vector of probability amplitudes.
+///
+/// Print the current state vector of probability amplitudes for a set of qubits
+/// to standard out. For debugging purposes. Each rank should print output
+/// serially.  Only print output for systems <= 5 qubits.
+///
+/// See [QuEST API][quest-api] for more information.
+///
+/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
 pub fn report_state_to_screen(
     qureg: &Qureg,
     env: &QuestEnv,
@@ -786,6 +824,10 @@ pub fn report_pauli_hamil(hamil: &PauliHamil) -> Result<(), QuestError> {
 
 /// Returns the number of qubits represented.
 ///
+/// # Parameters
+///
+/// - `qureg` a state-vector or density matrix
+///
 /// # Examples
 ///
 /// ```rust
@@ -796,15 +838,28 @@ pub fn report_pauli_hamil(hamil: &PauliHamil) -> Result<(), QuestError> {
 /// assert_eq!(get_num_qubits(qureg), 3);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API][quest-api] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
 #[must_use]
 pub fn get_num_qubits(qureg: &Qureg) -> i32 {
     unsafe { ffi::getNumQubits(qureg.reg) }
 }
 
-/// Returns the number of complex amplitudes in a state-vector.
+/// Return the number of complex amplitudes in a state-vector.
+///
+/// In distributed mode, this returns the total number of amplitudes in the
+/// full representation of `qureg`, and so may be larger than the number stored
+/// on each node.
+///
+/// # Parameters
+///
+/// - `qureg` a state-vector or density matrix
+///
+/// # Errors
+///
+/// - [`InvalidQuESTInputError`][quest-error-except], if `qureg` is a density
+///   matrix
 ///
 /// # Examples
 ///
@@ -816,9 +871,10 @@ pub fn get_num_qubits(qureg: &Qureg) -> i32 {
 /// assert_eq!(get_num_amps(qureg).unwrap(), 8);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API][quest-api] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [quest-error-except]: crate::QuestError::InvalidQuESTInputError
+/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
 pub fn get_num_amps(qureg: &Qureg) -> Result<i64, QuestError> {
     catch_quest_exception(|| unsafe { ffi::getNumAmps(qureg.reg) })
 }
