@@ -2602,6 +2602,33 @@ pub fn hadamard(
 
 /// Apply the controlled not (single control, single target) gate.
 ///
+/// The gate is also known as the c-X, c-sigma-X, c-Pauli-X and c-bit-flip gate.
+/// This applies pauliX to the target qubit if the control qubit has value 1.
+/// This effects the two-qubit unitary:
+///
+/// ```text
+///  [ 1 0 0 0 ]
+///  [ 0 1 0 0 ]
+///  [ 0 0 0 1 ]
+///  [ 0 0 1 0 ]
+/// ```
+///
+/// on the control and target qubits.
+///
+/// # Parameters
+///
+/// - `qureg`: the state-vector or density matrix to modify
+/// - `control_qubit`: "nots" the target if this qubit is 1
+/// - `target_qubit`: qubit to "not"
+///
+/// # Errors
+///
+/// - [`QubitIndexError`][quest-error-index],
+///   - if either `control_qubit` or `target_qubit` is outside [0,
+///     [`qureg.num_qubits_represented()`][qureg-num-qubits])
+/// - [`InvalidQuESTInputError`][quest-error-except],
+///   - if `control_qubit` and `target_qubit` are equal
+///
 /// # Examples
 ///
 /// ```rust
@@ -2617,9 +2644,12 @@ pub fn hadamard(
 /// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API][quest-api] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
+/// [quest-error-except]: crate::QuestError::InvalidQuESTInputError
+/// [quest-error-index]: crate::QuestError::QubitIndexError
+/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
 pub fn controlled_not(
     qureg: &mut Qureg,
     control_qubit: i32,
@@ -2636,6 +2666,36 @@ pub fn controlled_not(
 }
 
 /// Apply a NOT (or Pauli X) gate with multiple control and target qubits.
+///
+/// This applies pauliX to qubits `targs` on every basis state for which the
+/// control qubits `ctrls` are all in the `|1>` state. The ordering within  each
+/// of `ctrls` and `targs` has no effect on the operation.
+///
+/// This function is equivalent, but significantly faster (approximately
+/// `targs.len()` times) than applying controlled NOTs on each qubit in `targs`
+/// in turn.
+///
+/// In distributed mode, this operation requires at most a single round of)
+/// pair-wise communication between nodes, and hence is as efficient as
+/// [`pauli_x()`][api-pauli-x].
+///
+/// # Parameters
+///
+///  - `qureg`: a state-vector or density matrix to modify
+///  - `ctrls`: a list of the control qubit indices
+///  - `targs`: a list of the qubits to be targeted by the X gates
+///
+/// # Errors
+///
+/// - [`QubitIndexError`][quest-error-index],
+///   - if any qubit in `ctrls` and `targs` is invalid, i.e. outside [0,
+///     [`qureg.num_qubits_represented()`][qureg-num-qubits]).
+/// - [`ArrayLengthError`][quest-error-array-len],
+///   - if the length of `targs` or `ctrls` is larger than
+///     [`qureg.num_qubits_represented()`][qureg-num-qubits]
+/// - [`InvalidQuESTInputError`][quest-error-except],
+///   - if `ctrls` or `targs` contain any repetitions
+///   - if any qubit in `ctrls` is also in `targs` (and vice versa)
 ///
 /// # Examples
 ///
@@ -2655,9 +2715,14 @@ pub fn controlled_not(
 /// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API][quest-api] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [api-pauli-x]: crate::pauli_x()
+/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
+/// [quest-error-except]: crate::QuestError::InvalidQuESTInputError
+/// [quest-error-index]: crate::QuestError::QubitIndexError
+/// [quest-error-array-len]: crate::QuestError::ArrayLengthError
+/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
 pub fn multi_controlled_multi_qubit_not(
     qureg: &mut Qureg,
     ctrls: &[i32],
@@ -2687,10 +2752,35 @@ pub fn multi_controlled_multi_qubit_not(
     })
 }
 
-/// Apply a NOT (or Pauli X) gate with multiple target qubits,
+/// Apply a NOT (or Pauli X) gate with multiple target qubits.
 ///
-/// which has the same  effect as (but is much faster than) applying each
+/// This has the same  effect as (but is much faster than) applying each
 /// single-qubit NOT gate in turn.
+///
+/// The ordering within `targs` has no effect on the operation.
+///
+/// This function is equivalent, but significantly faster (approximately
+/// `targs.len()` times) than applying NOT on each qubit in `targs` in turn.
+///
+/// In distributed mode, this operation requires at most a single round of)
+/// pair-wise communication between nodes, and hence is as efficient as
+/// [`pauli_x()`][api-pauli-x].
+///
+/// # Parameters
+///
+///  - `qureg`: a state-vector or density matrix to modify
+///  - `targs`: a list of the qubits to be targeted by the X gates
+///
+/// # Errors
+///
+/// - [`QubitIndexError`][quest-error-index],
+///   - if any qubit in `targs` is invalid, i.e. outside [0,
+///     [`qureg.num_qubits_represented()`][qureg-num-qubits]).
+/// - [`ArrayLengthError`][quest-error-array-len],
+///   - if the length of `targs` is larger than
+///     [`qureg.num_qubits_represented()`][qureg-num-qubits]
+/// - [`InvalidQuESTInputError`][quest-error-except],
+///   - if `targs` contains any repetitions
 ///
 /// # Examples
 ///
@@ -2707,9 +2797,14 @@ pub fn multi_controlled_multi_qubit_not(
 /// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API][quest-api] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [api-pauli-x]: crate::pauli_x()
+/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
+/// [quest-error-except]: crate::QuestError::InvalidQuESTInputError
+/// [quest-error-index]: crate::QuestError::QubitIndexError
+/// [quest-error-array-len]: crate::QuestError::ArrayLengthError
+/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
 pub fn multi_qubit_not(
     qureg: &mut Qureg,
     targs: &[i32],
