@@ -1806,6 +1806,31 @@ pub fn calc_total_prob(qureg: &Qureg) -> Qreal {
 
 /// Apply a single-qubit unitary parameterized by two given complex scalars.
 ///
+/// Given valid complex numbers `alpha` and `beta`, applies the unitary:
+///
+/// ```text
+/// [ alpha -beta.conj() ]
+/// [ beta  alpha.conj() ]
+/// ```
+///
+/// Valid `alpha`, `beta` satisfy `|alpha|^2 + |beta|^2 = 1`.
+/// The target unitary is general up to a global phase factor.
+///
+/// # Parameters
+///
+/// - `qureg`: object representing the set of all qubits
+/// - `target_qubit`: qubit to operate on
+/// - `alpha`: complex unitary parameter (row 1, column 1)
+/// - `beta`: complex unitary parameter (row 2, column 1)
+///
+/// # Errors
+///
+/// - [`QubitIndexError`][quest-error-index],
+///   - if `target_qubit` is outside [0,
+///     [`qureg.num_qubits_represented()`][qureg-num-qubits]).
+/// - [`InvalidQuESTInputError`][quest-error-except],
+///   - if  `alpha`, `beta` don't satisfy: `|alpha|^2 + |beta|^2 = 1`.
+///
 /// # Examples
 ///
 /// ```rust
@@ -1827,9 +1852,12 @@ pub fn calc_total_prob(qureg: &Qureg) -> Qreal {
 /// assert!((fidelity - 1.).abs() < 10. * EPSILON,);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API][quest-api] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [quest-error-index]: crate::QuestError::QubitIndexError
+/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
+/// [quest-error-except]: crate::QuestError::InvalidQuESTInputError
+/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
 pub fn compact_unitary(
     qureg: &mut Qureg,
     target_qubit: i32,
@@ -1845,6 +1873,22 @@ pub fn compact_unitary(
 }
 
 /// Apply a general single-qubit unitary (including a global phase factor).
+///
+/// The passed 2x2 ComplexMatrix must be unitary, otherwise an error is thrown.
+///
+/// # Parameters
+///
+/// - `qureg`: object representing the set of all qubits
+/// - `target_qubit`: qubit to operate on
+/// - `u`: single-qubit unitary matrix to apply
+///
+/// # Errors
+///
+/// - [`QubitIndexError`][quest-error-index],
+///   - if `target_qubit` is outside [0,
+///     [`qureg.num_qubits_represented()`][qureg-num-qubits]).
+/// - [`InvalidQuESTInputError`][quest-error-except],
+///   - if `u` is not unitary
 ///
 /// # Examples
 ///
@@ -1869,9 +1913,12 @@ pub fn compact_unitary(
 /// assert!((fidelity - 1.).abs() < 10. * EPSILON,);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API][quest-api] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [quest-error-index]: crate::QuestError::QubitIndexError
+/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
+/// [quest-error-except]: crate::QuestError::InvalidQuESTInputError
+/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
 pub fn unitary(
     qureg: &mut Qureg,
     target_qubit: i32,
@@ -2229,6 +2276,7 @@ pub fn controlled_rotate_around_axis(
 /// [ alpha -beta.conj() ]
 /// [ beta  alpha.conj() ]
 /// ```
+///
 /// Valid `alpha`, `beta` satisfy `|alpha|^2 + |beta|^2 = 1`.
 /// The target unitary is general up to a global phase factor.  
 ///
