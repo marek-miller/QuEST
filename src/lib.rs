@@ -1655,6 +1655,18 @@ pub fn copy_substate_from_gpu(
 
 /// Get the complex amplitude at a given index in the state vector.
 ///
+/// # Parameters
+///
+/// - `qureg`: object representing a set of qubits
+/// - `index`: index in state vector of probability amplitudes
+///
+/// # Errors
+///
+/// - [`InvalidQuESTInputError`][quest-error-except],
+///   - if `qureg` is a density matrix
+///   - if `index` is outside [0,
+///     [`qureg.num_qubits_represented()`][qureg-num-qubits]).
+///
 /// # Examples
 ///
 /// ```rust
@@ -1667,9 +1679,11 @@ pub fn copy_substate_from_gpu(
 /// assert!((amp - 0.5).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API][quest-api] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [quest-error-except]: crate::QuestError::InvalidQuESTInputError
+/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
+/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
 pub fn get_amp(
     qureg: &Qureg,
     index: i64,
@@ -1680,6 +1694,18 @@ pub fn get_amp(
 
 /// Get the real part of the probability amplitude at an index in
 /// the state vector.
+///
+/// # Parameters
+///
+/// - `qureg`: object representing a set of qubits
+/// - `index`: index in state vector of probability amplitudes
+///
+/// # Errors
+///
+/// - [`InvalidQuESTInputError`][quest-error-except],
+///   - if `qureg` is a density matrix
+///   - if `index` is outside [0,
+///     [`qureg.num_qubits_represented()`][qureg-num-qubits]).
 ///
 /// # Examples
 ///
@@ -1693,9 +1719,11 @@ pub fn get_amp(
 /// assert!((amp - 0.5).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API][quest-api] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [quest-error-except]: crate::QuestError::InvalidQuESTInputError
+/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
+/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
 pub fn get_real_amp(
     qureg: &Qureg,
     index: i64,
@@ -1705,6 +1733,18 @@ pub fn get_real_amp(
 
 /// Get the imaginary part of the probability amplitude at an index
 /// in the state vector.
+///
+/// # Parameters
+///
+/// - `qureg`: object representing a set of qubits
+/// - `index`: index in state vector of probability amplitudes
+///
+/// # Errors
+///
+/// - [`InvalidQuESTInputError`][quest-error-except],
+///   - if `qureg` is a density matrix
+///   - if `index` is outside [0,
+///     [`qureg.num_qubits_represented()`][qureg-num-qubits]).
 ///
 /// # Examples
 ///
@@ -1718,9 +1758,11 @@ pub fn get_real_amp(
 /// assert!(amp.abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API][quest-api] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [quest-error-except]: crate::QuestError::InvalidQuESTInputError
+/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
+/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
 pub fn get_imag_amp(
     qureg: &Qureg,
     index: i64,
@@ -1729,6 +1771,18 @@ pub fn get_imag_amp(
 }
 
 /// Get the probability of a state-vector at an index in the full state vector.
+///
+/// # Parameters
+///
+/// - `qureg`: object representing a set of qubits
+/// - `index`: index in state vector of probability amplitudes
+///
+/// # Errors
+///
+/// - [`InvalidQuESTInputError`][quest-error-except],
+///   - if `qureg` is a density matrix
+///   - if `index` is outside [0,
+///     [`qureg.num_qubits_represented()`][qureg-num-qubits]).
 ///
 /// # Examples
 ///
@@ -1742,9 +1796,11 @@ pub fn get_imag_amp(
 /// assert!((amp - 0.25).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API][quest-api] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [quest-error-except]: crate::QuestError::InvalidQuESTInputError
+/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
+/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
 pub fn get_prob_amp(
     qureg: &Qureg,
     index: i64,
@@ -1753,6 +1809,19 @@ pub fn get_prob_amp(
 }
 
 /// Get an amplitude from a density matrix at a given row and column.
+///
+/// # Parameters
+///
+/// - `qureg`: object representing a set of qubits
+/// - `row`: row of the desired amplitude in the density matrix
+/// - `col`: column of the desired amplitude in the density matrix
+///
+/// # Errors
+///
+/// - [`InvalidQuESTInputError`][quest-error-except],
+///   - if `qureg` is a state vector
+///   - if `row` or `col` are outside [0,
+///     [`qureg.num_qubits_represented()`][qureg-num-qubits]).
 ///
 /// # Examples
 ///
@@ -1766,9 +1835,11 @@ pub fn get_prob_amp(
 /// assert!((amp - 0.25).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API][quest-api] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [quest-error-except]: crate::QuestError::InvalidQuESTInputError
+/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
+/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
 pub fn get_density_amp(
     qureg: &Qureg,
     row: i64,
@@ -6249,10 +6320,11 @@ pub fn apply_qft(
 ///
 /// # Errors
 ///
-/// - [`QubitIndexError`][quest-error-index], if `qubit` is outside [0,
-///   [`qureg.num_qubits_represented()`][qureg-num-qubits]).
-/// - [`InvalidQuESTInputError`][quest-error-except], if `outcome` is not in
-///   {0,1}
+/// - [`QubitIndexError`][quest-error-index],
+///   - if `qubit` is outside [0,
+///     [`qureg.num_qubits_represented()`][qureg-num-qubits]).
+/// - [`InvalidQuESTInputError`][quest-error-except],
+///   - if `outcome` is not in {0,1}
 ///
 /// # Examples
 ///
