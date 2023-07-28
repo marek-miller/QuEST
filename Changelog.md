@@ -3,6 +3,9 @@
 ## v0.3.4 (??/??/????)
 
 - Change returned error type in `rotate_{x,y,z}()` to `QubitIndexError`
+- Internall exception hadler passes error messages via lock-free channel (add
+  dependency: crossbeam, to be able to share the global channel's receiver end
+  between thread -- std channel is not Sync.)
 
 ## v0.3.3 (18/07/2023)
 

@@ -11,8 +11,8 @@
 //! The present implementation works because `QuEST`'s
 //! `invalidQuESTInputError()` is synchronous and *all* `QuEST` API calls from
 //! us that can potentially throw an exception are wrapped with
-//! `catch_quest_exception()`. This way we ensure the calls are atomic and all
-//! exceptions have been thrown already when it's time for us to scoop them.
+//! `catch_quest_exception()`. This way we ensure the calls are synchronous and
+//! all exceptions have been thrown already when it's time for us to scoop them.
 //!
 //! This is an internal module that doesn't contain any useful user interface.
 //!
@@ -23,13 +23,25 @@ use std::{
         c_char,
         CStr,
     },
-    sync::Mutex,
+    sync::{
+        Mutex,
+        OnceLock,
+    },
+};
+
+use crossbeam::channel::{
+    unbounded,
+    Receiver,
+    Sender,
 };
 
 use super::QuestError;
 
 static QUEST_EXCEPT_GUARD: Mutex<()> = Mutex::new(());
-static QUEST_EXCEPT_ERROR: Mutex<Vec<QuestError>> = Mutex::new(Vec::new());
+static QUEST_EXCEPT_ERROR: OnceLock<(
+    Sender<QuestError>,
+    Receiver<QuestError>,
+)> = OnceLock::new();
 
 /// Report error in a `QuEST` API call.
 ///
@@ -40,7 +52,8 @@ static QUEST_EXCEPT_ERROR: Mutex<Vec<QuestError>> = Mutex::new(Vec::new());
 /// # Panics
 ///
 /// This function will panic if strings returned by `QuEST` are not properly
-/// formatted (null terminated) C strings, or if our mutex is poisoned.
+/// formatted (null terminated) C strings, or if the channel used for passing
+/// error messages gets disconnected.
 #[allow(non_snake_case)]
 #[no_mangle]
 unsafe extern "C" fn invalidQuESTInputError(
@@ -50,13 +63,14 @@ unsafe extern "C" fn invalidQuESTInputError(
     let err_msg = unsafe { CStr::from_ptr(errMsg) }.to_str().unwrap();
     let err_func = unsafe { CStr::from_ptr(errFunc) }.to_str().unwrap();
 
-    QUEST_EXCEPT_ERROR.lock().unwrap().insert(
-        0,
-        QuestError::InvalidQuESTInputError {
+    QUEST_EXCEPT_ERROR
+        .get_or_init(unbounded)
+        .0
+        .send(QuestError::InvalidQuESTInputError {
             err_msg:  err_msg.to_owned(),
             err_func: err_func.to_owned(),
-        },
-    );
+        })
+        .expect("channel transmitting error messages disconnected");
 
     log::error!("QueST Error in function {err_func}: {err_msg}");
 }
@@ -65,13 +79,13 @@ unsafe extern "C" fn invalidQuESTInputError(
 ///
 /// This function achieves synchronous execution between threads
 /// by locking the global `QUEST_EXCEPTION_GUARD` each time,
-/// then executing the closure supplied, and finally checking the global
-/// storage `QUEST_EXCEPTION_ERROR` for any error messages reported downstream.
+/// then executing the closure supplied, and checking the global
+/// lock-free storage `QUEST_EXCEPTION_ERROR` for any error messages reported.
 ///
 /// This way, interacting with `QuEST` API should stay thread-safe at all times,
 /// at the expense of being able to call only one function at the time.
 /// This is not an undesired property and shouldn't matter much for the overall
-/// performance of the simulation, since each functions retains access to all
+/// performance of the simulation, since each function retains access to all
 /// the parallelism available in the system.
 pub fn catch_quest_exception<T, F>(f: F) -> Result<T, QuestError>
 where
@@ -80,17 +94,15 @@ where
     // Lock QuEST to our call
     let guard = QUEST_EXCEPT_GUARD.lock().unwrap();
 
-    // The lock here is not bound to any variable; it will be released as
-    // soon as the buffer is cleared.
-    QUEST_EXCEPT_ERROR.lock().unwrap().clear();
-
     // Call QuEST API
     let res = f();
 
     // At this point all exceptions have been thrown.
-    // Take the last exception from the buffer (first reported).
-    // For now, we log the rest as error messages via invalidQuESTInputError()
-    let err = QUEST_EXCEPT_ERROR.lock().unwrap().pop();
+    // Get the first exception thrown.  Drain the nonblocking iterator to leave
+    // it empty for the next call.
+    let mut err_iter = QUEST_EXCEPT_ERROR.get_or_init(unbounded).1.try_iter();
+    let err = err_iter.next();
+    let _ = err_iter.last();
 
     // Drop the guard as soon as we don't need it anymore:
     drop(guard);
