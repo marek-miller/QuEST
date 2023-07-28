@@ -1002,6 +1002,36 @@ pub fn init_plus_state(qureg: &mut Qureg) {
 
 /// Initialize `qureg` into a classical state.
 ///
+/// This state is also known as a "computational basis state" with index
+/// `state_ind`.
+///
+/// If `qureg` is a state-vector, it will become: `|state_ind>`. If `qureg`is a
+/// density matrix, it will become:
+///
+/// ```text
+///   |state_ind> <state_ind|
+/// ````
+///
+/// Classical states are indexed from zero, so that `state_ind=0` produces
+/// `|0..00>`,  and  `state_ind=1` produces `|00..01>`, and `state_ind=2^N - 1`
+/// produces `|11..11>`. Subsequent calls to
+/// [`get_prob_amp()`][api-get-prob-amp] will yield `0` for all indices except
+/// `state_ind`,  and the phase of `state_ind`'s amplitude will be `1` (real).
+///
+/// This function can be used to initialise `qureg` into a specific binary
+/// state  (e.g. `11001`) using a binary literal.
+///
+/// # Parameters
+///
+///  - `qureg`: the register to modify
+///  - `state_ind` the index of the basis state to modify `qureg` into
+///
+/// # Errors
+///
+/// - [`InvalidQuESTInputError`][quest-error-except],
+///   - if `state_ind` is outside [0,
+///     [`qureg.num_qubits_represented()`][qureg-num-qubits]).
+///
 /// # Examples
 ///
 /// ```rust
@@ -1015,9 +1045,13 @@ pub fn init_plus_state(qureg: &mut Qureg) {
 /// assert!(prob.abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// See [QuEST API][quest-api] for more information.
+///
+/// [api-get-prob-amp]: crate::get_prob_amp()
+/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
+/// [quest-error-except]: crate::QuestError::InvalidQuESTInputError
+/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
 pub fn init_classical_state(
     qureg: &mut Qureg,
     state_ind: i64,
