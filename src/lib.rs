@@ -786,7 +786,8 @@ pub fn calc_expec_diagonal_op(
 ///
 /// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
 pub fn report_state(qureg: &Qureg) {
-    unsafe { ffi::reportState(qureg.reg) }
+    catch_quest_exception(|| unsafe { ffi::reportState(qureg.reg) })
+        .expect("report_state should never fail");
 }
 
 /// Print the current state vector of probability amplitudes.
@@ -803,16 +804,20 @@ pub fn report_state_to_screen(
     env: &QuestEnv,
     report_rank: i32,
 ) {
-    unsafe { ffi::reportStateToScreen(qureg.reg, env.0, report_rank) }
+    catch_quest_exception(|| unsafe {
+        ffi::reportStateToScreen(qureg.reg, env.0, report_rank)
+    })
+    .expect("report_state_to screen should never fail");
 }
 
 /// Report information about a set of qubits.
 ///
 /// This function reports: number of qubits, number of probability amplitudes.
 pub fn report_qureg_params(qureg: &Qureg) {
-    unsafe {
+    catch_quest_exception(|| unsafe {
         ffi::reportQuregParams(qureg.reg);
-    }
+    })
+    .expect("report_qureg_params should never fail");
 }
 
 /// Print the Hamiltonian `hamil` to screen.
@@ -843,7 +848,8 @@ pub fn report_pauli_hamil(hamil: &PauliHamil) -> Result<(), QuestError> {
 /// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
 #[must_use]
 pub fn get_num_qubits(qureg: &Qureg) -> i32 {
-    unsafe { ffi::getNumQubits(qureg.reg) }
+    catch_quest_exception(|| unsafe { ffi::getNumQubits(qureg.reg) })
+        .expect("get_num_qubits should never fail")
 }
 
 /// Return the number of complex amplitudes in a state-vector.
