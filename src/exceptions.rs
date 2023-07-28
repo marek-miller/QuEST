@@ -11,8 +11,8 @@
 //! The present implementation works because `QuEST`'s
 //! `invalidQuESTInputError()` is synchronous and *all* `QuEST` API calls from
 //! us that can potentially throw an exception are wrapped with
-//! `catch_quest_exception()`. This way we ensure the calls are atomic and all
-//! exceptions have been thrown already when it's time for us to scoop them.
+//! `catch_quest_exception()`. This way we ensure the calls are synchronous and
+//! all exceptions have been thrown already when it's time for us to scoop them.
 //!
 //! This is an internal module that doesn't contain any useful user interface.
 //!
@@ -70,7 +70,7 @@ unsafe extern "C" fn invalidQuESTInputError(
             err_msg:  err_msg.to_owned(),
             err_func: err_func.to_owned(),
         })
-        .expect("channel transmitting error messages got disconnected");
+        .expect("channel transmitting error messages disconnected");
 
     log::error!("QueST Error in function {err_func}: {err_msg}");
 }
@@ -79,7 +79,7 @@ unsafe extern "C" fn invalidQuESTInputError(
 ///
 /// This function achieves synchronous execution between threads
 /// by locking the global `QUEST_EXCEPTION_GUARD` each time,
-/// then executing the closure supplied, and finally checking the global
+/// then executing the closure supplied, and checking the global
 /// lock-free storage `QUEST_EXCEPTION_ERROR` for any error messages reported.
 ///
 /// This way, interacting with `QuEST` API should stay thread-safe at all times,
@@ -98,6 +98,8 @@ where
     let res = f();
 
     // At this point all exceptions have been thrown.
+    // Get the first exception thrown.  Drain the nonblocking iterator to leave
+    // it empty for the next call.
     let mut err_iter = QUEST_EXCEPT_ERROR.get_or_init(unbounded).1.try_iter();
     let err = err_iter.next();
     let _ = err_iter.last();
