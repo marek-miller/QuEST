@@ -1525,41 +1525,6 @@ pub fn sync_quest_success(success_code: i32) -> i32 {
         .expect("sync_quest_success should always succeed")
 }
 
-/// Get a string containing information about the runtime environment,
-///
-/// # Examples
-///
-/// ```rust
-/// # use quest_bind::*;
-/// let env = &QuestEnv::new();
-/// let env_str = get_environment_string(env).unwrap();
-///
-/// assert!(env_str.contains("OpenMP="));
-/// assert!(env_str.contains("threads="));
-/// assert!(env_str.contains("MPI="));
-/// assert!(env_str.contains("ranks="));
-/// assert!(env_str.contains("CUDA="));
-/// ```
-///
-/// See [QuEST API][quest-api] for more information.
-///
-/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
-pub fn get_environment_string(env: &QuestEnv) -> Result<String, QuestError> {
-    let mut cstr =
-        CString::new("CUDA=x OpenMP=x MPI=x threads=xxxxxxx ranks=xxxxxxx")
-            .map_err(QuestError::NulError)?;
-    catch_quest_exception(|| {
-        unsafe {
-            let cstr_ptr = cstr.into_raw();
-            ffi::getEnvironmentString(env.0, cstr_ptr);
-            cstr = CString::from_raw(cstr_ptr);
-        }
-
-        cstr.into_string().map_err(QuestError::IntoStringError)
-    })
-    .expect("get_environment_string should always succeed")
-}
-
 /// Copy the state-vector (or density matrix) into GPU memory.
 ///
 /// In GPU mode, this copies the state-vector (or density matrix) from RAM

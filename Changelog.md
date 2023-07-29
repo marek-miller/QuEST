@@ -4,8 +4,10 @@
 
 - API breaking changes:
 
-  - move free function: report_quest_env() onto QuestEnv type as
+  - move free function: `report_quest_env()` onto QuestEnv type as
     `QuestEnv::report_quest_env()`
+  - move free function: `get_environment_string`() onto QuestEnv type as
+    `QuestEnv::get_environment_string()`
 
 ## v0.3.4 (29/07/2023)
 

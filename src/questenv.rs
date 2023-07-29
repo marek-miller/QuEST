@@ -1,6 +1,9 @@
+use std::ffi::CString;
+
 use crate::{
     exceptions::catch_quest_exception,
     ffi,
+    QuestError,
 };
 
 /// Information about the QuEST environment.
@@ -55,6 +58,41 @@ impl QuestEnv {
             ffi::reportQuESTEnv(self.0);
         })
         .expect("report_quest_env should always succeed");
+    }
+
+    /// Get a string containing information about the runtime environment,
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use quest_bind::*;
+    /// let env = &QuestEnv::new();
+    /// let env_str = env.get_environment_string().unwrap();
+    ///
+    /// assert!(env_str.contains("OpenMP="));
+    /// assert!(env_str.contains("threads="));
+    /// assert!(env_str.contains("MPI="));
+    /// assert!(env_str.contains("ranks="));
+    /// assert!(env_str.contains("CUDA="));
+    /// ```
+    ///
+    /// See [QuEST API][quest-api] for more information.
+    ///
+    /// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
+    pub fn get_environment_string(&self) -> Result<String, QuestError> {
+        let mut cstr =
+            CString::new("CUDA=x OpenMP=x MPI=x threads=xxxxxxx ranks=xxxxxxx")
+                .map_err(QuestError::NulError)?;
+        catch_quest_exception(|| {
+            unsafe {
+                let cstr_ptr = cstr.into_raw();
+                ffi::getEnvironmentString(self.0, cstr_ptr);
+                cstr = CString::from_raw(cstr_ptr);
+            }
+
+            cstr.into_string().map_err(QuestError::IntoStringError)
+        })
+        .expect("get_environment_string should always succeed")
     }
 }
 
