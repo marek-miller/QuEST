@@ -1404,6 +1404,25 @@ pub fn multi_controlled_phase_flip(
 
 /// Apply the single-qubit S gate.
 ///
+/// This is a rotation of `PI/2` around the Z-axis on the Bloch sphere, or the
+/// unitary:
+///
+/// ```text
+///   [ 1  0 ]
+///   [ 0  i ]
+/// ```
+///
+/// # Parameters
+///
+/// - `qureg`: object representing the set of all qubits
+/// - `target_qubit`: qubit to operate upon
+///
+/// # Errors
+///
+/// - [`InvalidQuESTInputError`][quest-error-except],
+///   - if `target_qubit` is outside [0,
+///     [`qureg.num_qubits_represented()`][qureg-num-qubits]).
+///
 /// # Examples
 ///
 /// ```rust
@@ -1419,9 +1438,11 @@ pub fn multi_controlled_phase_flip(
 /// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API][quest-api] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
+/// [quest-error-except]: crate::QuestError::InvalidQuESTInputError
+/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
 pub fn s_gate(
     qureg: &mut Qureg,
     target_qubit: i32,
@@ -1432,6 +1453,26 @@ pub fn s_gate(
 }
 
 /// Apply the single-qubit T gate.
+///
+/// This is a rotation of `PI/4` around the Z-axis on the Bloch sphere, or the
+/// unitary:
+///
+/// ```text
+///   [ 1       0       ]
+///   [ 0  e^(i PI / 4) ]
+/// ```
+///
+/// # Parameters
+///
+/// - `qureg`: object representing the set of all qubits
+/// - `target_qubit`: qubit to operate upon
+///
+/// # Errors
+///
+/// - [`InvalidQuESTInputError`][quest-error-except],
+///   - if `target_qubit` is outside [0,
+///     [`qureg.num_qubits_represented()`][qureg-num-qubits]).
+///
 ///
 /// # Examples
 ///
@@ -1448,9 +1489,11 @@ pub fn s_gate(
 /// assert!((amp - SQRT_2 / 2.).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API][quest-api] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
+/// [quest-error-except]: crate::QuestError::InvalidQuESTInputError
+/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
 pub fn t_gate(
     qureg: &mut Qureg,
     target_qubit: i32,
