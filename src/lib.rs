@@ -1508,25 +1508,21 @@ pub fn t_gate(
 /// If any one process has a zero `success_code`, all processes will return a
 /// zero success code.
 ///
-/// See [QuEST API][1] for more information.
+/// # Parameters
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// - `success_code`: `1` if process task succeeded, `0` if process task failed
+///
+/// # Returns
+///
+/// `1` if all processes succeeded, `0` if any one process failed
+///
+/// See [QuEST API][quest-api] for more information.
+///
+/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
 #[must_use]
 pub fn sync_quest_success(success_code: i32) -> i32 {
     catch_quest_exception(|| unsafe { ffi::syncQuESTSuccess(success_code) })
         .expect("sync_quest_success should always succeed")
-}
-
-/// Report information about the `QuEST` environment
-///
-/// See [QuEST API][1] for more information.
-///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
-pub fn report_quest_env(env: &QuestEnv) {
-    catch_quest_exception(|| unsafe {
-        ffi::reportQuESTEnv(env.0);
-    })
-    .expect("report_quest_env should always succeed");
 }
 
 /// Get a string containing information about the runtime environment,
@@ -1545,9 +1541,9 @@ pub fn report_quest_env(env: &QuestEnv) {
 /// assert!(env_str.contains("CUDA="));
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API][quest-api] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
 pub fn get_environment_string(env: &QuestEnv) -> Result<String, QuestError> {
     let mut cstr =
         CString::new("CUDA=x OpenMP=x MPI=x threads=xxxxxxx ranks=xxxxxxx")

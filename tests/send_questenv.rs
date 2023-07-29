@@ -5,7 +5,6 @@ use quest_bind::{
     get_real_amp,
     init_zero_state,
     pauli_x,
-    report_quest_env,
     seed_quest,
     seed_quest_default,
     QuestEnv,
@@ -19,7 +18,7 @@ fn questenv_is_send_01() {
     let env = QuestEnv::new();
 
     thread::scope(|s| {
-        s.spawn(move || report_quest_env(&env));
+        s.spawn(move || env.report_quest_env());
     });
 }
 
@@ -27,12 +26,12 @@ fn questenv_is_send_01() {
 fn questenv_is_send_02() {
     let env = QuestEnv::new();
     let handle = thread::spawn(move || {
-        report_quest_env(&env);
+        env.report_quest_env();
         env
     });
 
     let env = handle.join().unwrap();
-    report_quest_env(&env);
+    env.report_quest_env();
 }
 
 #[test]

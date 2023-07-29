@@ -18,7 +18,7 @@ impl QuestEnv {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// report_quest_env(&env);
+    /// env.report_quest_env();
     /// ```
     #[must_use]
     pub fn new() -> Self {
@@ -41,6 +41,20 @@ impl QuestEnv {
         unsafe {
             ffi::syncQuESTEnv(self.0);
         }
+    }
+
+    /// Report information about the `QuEST` environment.
+    ///
+    /// The information if printed to standard output.
+    ///
+    /// See [QuEST API][quest-api] for more information.
+    ///
+    /// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
+    pub fn report_quest_env(&self) {
+        catch_quest_exception(|| unsafe {
+            ffi::reportQuESTEnv(self.0);
+        })
+        .expect("report_quest_env should always succeed");
     }
 }
 

@@ -5,7 +5,6 @@ use quest_bind::{
     get_real_amp,
     init_zero_state,
     pauli_x,
-    report_quest_env,
     seed_quest,
     seed_quest_default,
     QuestEnv,
@@ -19,7 +18,7 @@ fn questenv_is_sync() {
     let env = QuestEnv::new();
 
     thread::scope(|s| {
-        s.spawn(|| report_quest_env(&env));
+        s.spawn(|| env.report_quest_env());
     });
 }
 
