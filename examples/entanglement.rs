@@ -1,11 +1,21 @@
-//! This is a basic example showing how to initialize QuEST environment
+//! This is a basic example showing how to initialize `QuEST` environment
 //! and perform a operations on a quantum register consisting of 2 qubits.
 //!
 //! We entangle the qubits by preparing a Bell state `|00> + |11>`.
 //! Next, we measure both qubits in the computational basis.  Because qubits are
 //! entangled, after the measurement they are both in the same, equally probable
 //! state `0` or `1`.
-use quest_bind::*;
+use quest_bind::{
+    controlled_not,
+    hadamard,
+    init_zero_state,
+    measure,
+    report_qureg_params,
+    report_state_to_screen,
+    QuestEnv,
+    QuestError,
+    Qureg,
+};
 
 fn main() -> Result<(), QuestError> {
     // Initialize QuEST environment and report to screen
@@ -27,8 +37,8 @@ fn main() -> Result<(), QuestError> {
     // Measure both qubits
     let outcome0 = measure(qureg, 0)?;
     let outcome1 = measure(qureg, 1)?;
-    println!("Qubit \"0\" measured in state: |{}>", outcome0);
-    println!("Qubit \"1\" measured in state: |{}>", outcome1);
+    println!("Qubit \"0\" measured in state: |{outcome0}>");
+    println!("Qubit \"1\" measured in state: |{outcome1}>");
 
     // Because the state was entangled, the outcomes
     // should always be the same

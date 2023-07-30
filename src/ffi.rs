@@ -16,7 +16,7 @@ use std::ffi::{
 };
 
 use crate::{
-    precision::qreal,
+    numbers::qreal,
     SendPtr,
 };
 

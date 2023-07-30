@@ -6,7 +6,7 @@ use crate::{
     QuestError,
 };
 
-/// Information about the QuEST environment.
+/// Information about the `QuEST` environment.
 ///
 /// In practice, this holds info about MPI ranks and helps to hide MPI
 /// initialization code.

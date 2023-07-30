@@ -5,19 +5,35 @@
 
 use std::ffi::CString;
 
-mod exceptions;
 use exceptions::catch_quest_exception;
 
+mod errors;
+mod exceptions;
 mod ffi;
+mod matrices;
+mod numbers;
+mod operators;
+mod questenv;
+mod qureg;
+#[cfg(test)]
+mod tests;
+
+pub use errors::QuestError;
 pub use ffi::{
     bitEncoding as BitEncoding,
     pauliOpType as PauliOpType,
     phaseFunc as PhaseFunc,
     phaseGateType as PhaseGateType,
 };
-
-mod precision;
-pub use precision::{
+pub use matrices::{
+    init_complex_matrix_n,
+    ComplexMatrix2,
+    ComplexMatrix4,
+    ComplexMatrixN,
+    Vector,
+};
+pub use numbers::{
+    Qcomplex,
     Qreal,
     EPSILON,
     LN_10,
@@ -26,736 +42,19 @@ pub use precision::{
     SQRT_2,
     TAU,
 };
-
-mod qureg;
-pub use qureg::Qureg;
-
-mod questenv;
+pub use operators::{
+    apply_diagonal_op,
+    calc_expec_diagonal_op,
+    init_diagonal_op,
+    init_diagonal_op_from_pauli_hamil,
+    init_pauli_hamil,
+    set_diagonal_op_elems,
+    sync_diagonal_op,
+    DiagonalOp,
+    PauliHamil,
+};
 pub use questenv::QuestEnv;
-
-#[derive(Debug, PartialEq, Clone)]
-pub enum QuestError {
-    /// An exception thrown by the C library.  From QuEST documentation:
-    ///
-    /// > An internal function is called when invalid arguments are passed to a
-    /// > QuEST API call, which the user can optionally override by
-    /// > redefining. This function is a weak symbol, so that users can
-    /// > choose how input errors are handled, by redefining it in their own
-    /// > code. Users must ensure that the triggered API call
-    /// > does not continue (e.g. the user exits or throws an exception), else
-    /// > QuEST will continue with the valid input and likely trigger a
-    /// > seg-fault. This function is triggered before any internal
-    /// > state-change, hence it is safe to interrupt with exceptions.
-    ///
-    /// See also [`invalidQuESTInputError()`][1].
-    ///
-    /// [1]: https://quest-kit.github.io/QuEST/group__debug.html#ga51a64b05d31ef9bcf6a63ce26c0092db
-    InvalidQuESTInputError {
-        err_msg:  String,
-        err_func: String,
-    },
-    NulError(std::ffi::NulError),
-    IntoStringError(std::ffi::IntoStringError),
-    ArrayLengthError,
-    QubitIndexError,
-    NotDensityMatrix,
-    NegativeProbability,
-}
-
-pub type Qcomplex = num::Complex<Qreal>;
-
-impl From<Qcomplex> for ffi::Complex {
-    fn from(value: Qcomplex) -> Self {
-        ffi::Complex {
-            real: value.re,
-            imag: value.im,
-        }
-    }
-}
-
-impl From<ffi::Complex> for Qcomplex {
-    fn from(value: ffi::Complex) -> Self {
-        Self::new(value.real, value.imag)
-    }
-}
-
-#[derive(Debug, Clone, Copy)]
-pub struct ComplexMatrix2(ffi::ComplexMatrix2);
-
-impl ComplexMatrix2 {
-    #[must_use]
-    pub fn new(
-        real: [[Qreal; 2]; 2],
-        imag: [[Qreal; 2]; 2],
-    ) -> Self {
-        Self(ffi::ComplexMatrix2 {
-            real,
-            imag,
-        })
-    }
-}
-
-#[derive(Debug)]
-pub struct ComplexMatrix4(ffi::ComplexMatrix4);
-
-impl ComplexMatrix4 {
-    #[must_use]
-    pub fn new(
-        real: [[Qreal; 4]; 4],
-        imag: [[Qreal; 4]; 4],
-    ) -> Self {
-        Self(ffi::ComplexMatrix4 {
-            real,
-            imag,
-        })
-    }
-}
-
-#[derive(Debug)]
-pub struct ComplexMatrixN(ffi::ComplexMatrixN);
-
-impl ComplexMatrixN {
-    /// Allocate dynamic memory for a square complex matrix of any size.
-    ///
-    /// # Examples
-    ///
-    /// ```rust
-    /// # use quest_bind::*;
-    /// let mtr = ComplexMatrixN::try_new(3).unwrap();
-    /// ```
-    ///
-    /// See [QuEST API] for more information.
-    ///
-    /// # Errors
-    ///
-    /// Returns [`QuestError::InvalidQuESTInputError`](crate::QuestError::InvalidQuESTInputError)
-    /// on failure.  This is an exception thrown by `QuEST`.
-    ///
-    /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
-    pub fn try_new(num_qubits: i32) -> Result<Self, QuestError> {
-        catch_quest_exception(|| {
-            Self(unsafe { ffi::createComplexMatrixN(num_qubits) })
-        })
-    }
-
-    /// Get the real part of the `i`th row of the matrix as shared slice.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use quest_bind::*;
-    /// let num_qubits = 2;
-    /// let mtr = &mut ComplexMatrixN::try_new(num_qubits).unwrap();
-    /// init_complex_matrix_n(
-    ///     mtr,
-    ///     &[
-    ///         &[111., 112., 113., 114.],
-    ///         &[115., 116., 117., 118.],
-    ///         &[119., 120., 121., 122.],
-    ///         &[123., 124., 125., 126.],
-    ///     ],
-    ///     &[
-    ///         &[211., 212., 213., 214.],
-    ///         &[215., 216., 217., 218.],
-    ///         &[219., 220., 221., 222.],
-    ///         &[223., 224., 225., 226.],
-    ///     ],
-    /// )
-    /// .unwrap();
-    ///
-    /// let i = 3;
-    /// assert!(i < 1 << num_qubits);
-    ///
-    /// let row = mtr.row_real_as_slice(i);
-    /// assert_eq!(row, &[123., 124., 125., 126.]);
-    /// ```
-    /// # Panics
-    ///
-    /// This function will panic if `i>= 2.pow(1<< num_qubits),
-    /// where `num_qubits` is the number of qubits the matrix was initialized
-    /// with.
-    #[must_use]
-    pub fn row_real_as_slice(
-        &self,
-        i: usize,
-    ) -> &[Qreal] {
-        assert!(i < 1 << self.0.numQubits);
-
-        unsafe {
-            std::slice::from_raw_parts(
-                *(self.0.real).add(i),
-                (1 << self.0.numQubits) as usize,
-            )
-        }
-    }
-
-    /// Get the real part of the `i`th row of the matrix as mutable slice.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use quest_bind::*;
-    /// let num_qubits = 2;
-    /// let mtr = &mut ComplexMatrixN::try_new(num_qubits).unwrap();
-    /// init_complex_matrix_n(
-    ///     mtr,
-    ///     &[
-    ///         &[111., 112., 113., 114.],
-    ///         &[115., 116., 117., 118.],
-    ///         &[119., 120., 121., 122.],
-    ///         &[123., 124., 125., 126.],
-    ///     ],
-    ///     &[
-    ///         &[211., 212., 213., 214.],
-    ///         &[215., 216., 217., 218.],
-    ///         &[219., 220., 221., 222.],
-    ///         &[223., 224., 225., 226.],
-    ///     ],
-    /// )
-    /// .unwrap();
-    ///
-    /// let i = 3;
-    /// assert!(i < 1 << num_qubits);
-    ///
-    /// let row = mtr.row_real_as_mut_slice(i);
-    /// assert_eq!(row, &[123., 124., 125., 126.]);
-    /// ```
-    /// # Panics
-    ///
-    /// This function will panic if `i>= 2.pow(1<< num_qubits),
-    /// where `num_qubits` is the number of qubits the matrix was initialized
-    /// with.
-    pub fn row_real_as_mut_slice(
-        &mut self,
-        i: usize,
-    ) -> &mut [Qreal] {
-        unsafe {
-            std::slice::from_raw_parts_mut(
-                *(self.0.real).add(i),
-                (1 << self.0.numQubits) as usize,
-            )
-        }
-    }
-
-    /// Get the imaginary part of the `i`th row of the matrix as shared slice.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use quest_bind::*;
-    /// let num_qubits = 2;
-    /// let mtr = &mut ComplexMatrixN::try_new(num_qubits).unwrap();
-    /// init_complex_matrix_n(
-    ///     mtr,
-    ///     &[
-    ///         &[111., 112., 113., 114.],
-    ///         &[115., 116., 117., 118.],
-    ///         &[119., 120., 121., 122.],
-    ///         &[123., 124., 125., 126.],
-    ///     ],
-    ///     &[
-    ///         &[211., 212., 213., 214.],
-    ///         &[215., 216., 217., 218.],
-    ///         &[219., 220., 221., 222.],
-    ///         &[223., 224., 225., 226.],
-    ///     ],
-    /// )
-    /// .unwrap();
-    ///
-    /// let i = 3;
-    /// assert!(i < 1 << num_qubits);
-    ///
-    /// let row = mtr.row_imag_as_slice(i);
-    /// assert_eq!(row, &[223., 224., 225., 226.]);
-    /// ```
-    /// # Panics
-    ///
-    /// This function will panic if `i>= 2.pow(1<< num_qubits),
-    /// where `num_qubits` is the number of qubits the matrix was initialized
-    /// with.
-    #[must_use]
-    pub fn row_imag_as_slice(
-        &self,
-        i: usize,
-    ) -> &[Qreal] {
-        unsafe {
-            std::slice::from_raw_parts(
-                *(self.0.imag).add(i),
-                (1 << self.0.numQubits) as usize,
-            )
-        }
-    }
-
-    /// Get the imaginary part of the `i`th row of the matrix as mutable slice.
-    ///
-    /// # Examples
-    ///
-    /// ```
-    /// # use quest_bind::*;
-    /// let num_qubits = 2;
-    /// let mtr = &mut ComplexMatrixN::try_new(num_qubits).unwrap();
-    /// init_complex_matrix_n(
-    ///     mtr,
-    ///     &[
-    ///         &[111., 112., 113., 114.],
-    ///         &[115., 116., 117., 118.],
-    ///         &[119., 120., 121., 122.],
-    ///         &[123., 124., 125., 126.],
-    ///     ],
-    ///     &[
-    ///         &[211., 212., 213., 214.],
-    ///         &[215., 216., 217., 218.],
-    ///         &[219., 220., 221., 222.],
-    ///         &[223., 224., 225., 226.],
-    ///     ],
-    /// )
-    /// .unwrap();
-    ///
-    /// let i = 3;
-    /// assert!(i < 1 << num_qubits);
-    ///
-    /// let row = mtr.row_imag_as_mut_slice(i);
-    /// assert_eq!(row, &[223., 224., 225., 226.]);
-    /// ```
-    /// # Panics
-    ///
-    /// This function will panic if `i>= 2.pow(1<< num_qubits),
-    /// where `num_qubits` is the number of qubits the matrix was initialized
-    /// with.
-    pub fn row_imag_as_mut_slice(
-        &mut self,
-        i: usize,
-    ) -> &mut [Qreal] {
-        unsafe {
-            std::slice::from_raw_parts_mut(
-                *(self.0.imag).add(i),
-                (1 << self.0.numQubits) as usize,
-            )
-        }
-    }
-}
-
-impl Drop for ComplexMatrixN {
-    fn drop(&mut self) {
-        catch_quest_exception(|| unsafe { ffi::destroyComplexMatrixN(self.0) })
-            .unwrap();
-    }
-}
-
-#[derive(Debug)]
-pub struct Vector(ffi::Vector);
-
-impl Vector {
-    #[must_use]
-    pub fn new(
-        x: Qreal,
-        y: Qreal,
-        z: Qreal,
-    ) -> Self {
-        Self(ffi::Vector {
-            x,
-            y,
-            z,
-        })
-    }
-}
-
-#[derive(Debug)]
-pub struct PauliHamil(ffi::PauliHamil);
-
-impl PauliHamil {
-    /// Dynamically allocates a Hamiltonian
-    ///
-    /// The Hamiltonian is expressed as a real-weighted sum of products of
-    /// Pauli operators.
-    ///
-    /// # Examples
-    ///
-    /// ```rust
-    /// # use quest_bind::*;
-    /// let hamil = PauliHamil::try_new(2, 3).unwrap();
-    /// ```
-    ///
-    /// See [QuEST API] for more information.
-    ///
-    /// # Errors
-    ///
-    /// Returns [`QuestError::InvalidQuESTInputError`](crate::QuestError::InvalidQuESTInputError) on
-    /// failure. This is an exception thrown by `QuEST`.
-    ///
-    /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
-    pub fn try_new(
-        num_qubits: i32,
-        num_sum_terms: i32,
-    ) -> Result<Self, QuestError> {
-        catch_quest_exception(|| {
-            Self(unsafe { ffi::createPauliHamil(num_qubits, num_sum_terms) })
-        })
-    }
-
-    /// Creates a [`PauliHamil`] instance
-    /// populated with the data in filename `fn_`.
-    ///
-    /// # Bugs
-    ///
-    /// This function calls its C equivalent which unfortunately behaves
-    /// erratically when the file specified is incorrectly formatted or
-    /// inaccessible, often leading to seg-faults.  Use at your own risk.
-    pub fn try_new_from_file(fn_: &str) -> Result<Self, QuestError> {
-        let filename = CString::new(fn_).map_err(QuestError::NulError)?;
-        catch_quest_exception(|| {
-            Self(unsafe { ffi::createPauliHamilFromFile((*filename).as_ptr()) })
-        })
-    }
-}
-
-impl Drop for PauliHamil {
-    fn drop(&mut self) {
-        catch_quest_exception(|| unsafe { ffi::destroyPauliHamil(self.0) })
-            .expect("dropping PauliHamil should always succeed");
-    }
-}
-
-#[derive(Debug)]
-pub struct DiagonalOp<'a> {
-    env: &'a QuestEnv,
-    op:  ffi::DiagonalOp,
-}
-
-impl<'a> DiagonalOp<'a> {
-    pub fn try_new(
-        num_qubits: i32,
-        env: &'a QuestEnv,
-    ) -> Result<Self, QuestError> {
-        Ok(Self {
-            env,
-            op: catch_quest_exception(|| unsafe {
-                ffi::createDiagonalOp(num_qubits, env.0)
-            })?,
-        })
-    }
-
-    pub fn try_new_from_file(
-        fn_: &str,
-        env: &'a QuestEnv,
-    ) -> Result<Self, QuestError> {
-        let filename = CString::new(fn_).map_err(QuestError::NulError)?;
-
-        Ok(Self {
-            env,
-            op: catch_quest_exception(|| unsafe {
-                ffi::createDiagonalOpFromPauliHamilFile(
-                    (*filename).as_ptr(),
-                    env.0,
-                )
-            })?,
-        })
-    }
-}
-
-impl<'a> Drop for DiagonalOp<'a> {
-    fn drop(&mut self) {
-        catch_quest_exception(|| unsafe {
-            ffi::destroyDiagonalOp(self.op, self.env.0);
-        })
-        .expect("dropping DiagonalOp should always succeed");
-    }
-}
-
-/// Initialises a `ComplexMatrixN` instance to have the passed
-/// `real` and `imag` values.
-///
-/// This function reimplements the functionality of `QuEST`'s
-/// `initComplexMatrix()`, instead of calling that function directly.  This way,
-/// we avoid transmuting the slice of slices passed as argument into a C array
-/// and simply copy the matrix elements onto the `QuEST` matrix type.
-///
-/// # Examples
-///
-/// ```rust
-/// # use quest_bind::*;
-/// let mtr = &mut ComplexMatrixN::try_new(1).unwrap();
-/// init_complex_matrix_n(
-///     mtr,
-///     &[&[1., 2.], &[3., 4.]],
-///     &[&[5., 6.], &[7., 8.]],
-/// )
-/// .unwrap();
-/// ```
-///
-/// See [QuEST API] for more information.
-///
-/// # Errors
-///
-/// Returns [`Error::ArrayLengthError`](crate::QuestError::ArrayLengthError), if
-/// either `real` or `imag` is not a square array of dimension equal to the
-/// number of qubits in `m`.  Otherwise, returns
-/// [`QuestError::InvalidQuESTInputError`](crate::QuestError::InvalidQuESTInputError) on
-/// failure. This is an exception thrown by `QuEST`.
-///
-/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
-#[allow(clippy::cast_sign_loss)]
-pub fn init_complex_matrix_n(
-    m: &mut ComplexMatrixN,
-    real: &[&[Qreal]],
-    imag: &[&[Qreal]],
-) -> Result<(), QuestError> {
-    let num_elems = 1 << m.0.numQubits;
-
-    if real.len() < num_elems || imag.len() < num_elems {
-        return Err(QuestError::ArrayLengthError);
-    }
-    for i in 0..num_elems {
-        if real[i].len() < num_elems || imag[i].len() < num_elems {
-            return Err(QuestError::ArrayLengthError);
-        }
-    }
-
-    for i in 0..num_elems {
-        for j in 0..num_elems {
-            unsafe {
-                *(*m.0.real.add(i)).add(j) = real[i][j];
-                *(*m.0.imag.add(i)).add(j) = imag[i][j];
-            }
-        }
-    }
-    Ok(())
-}
-
-/// Initialize [`PauliHamil`](crate::PauliHamil) instance with the given term
-/// coefficients
-///
-/// # Examples
-///
-/// ```rust
-/// # use quest_bind::*;
-/// use quest_bind::PauliOpType::*;
-///
-/// let hamil = &mut PauliHamil::try_new(2, 2).unwrap();
-///
-/// init_pauli_hamil(
-///     hamil,
-///     &[0.5, -0.5],
-///     &[PAULI_X, PAULI_Y, PAULI_I, PAULI_I, PAULI_Z, PAULI_X],
-/// )
-/// .unwrap();
-/// ```
-///
-/// See [QuEST API] for more information.
-///
-/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
-pub fn init_pauli_hamil(
-    hamil: &mut PauliHamil,
-    coeffs: &[Qreal],
-    codes: &[PauliOpType],
-) -> Result<(), QuestError> {
-    catch_quest_exception(|| unsafe {
-        ffi::initPauliHamil(hamil.0, coeffs.as_ptr(), codes.as_ptr());
-    })
-}
-
-/// Update the GPU memory with the current values in `op`.
-///
-/// # Examples
-///
-/// ```rust
-/// # use quest_bind::*;
-/// let env = &QuestEnv::new();
-/// let op = &mut DiagonalOp::try_new(1, env).unwrap();
-///
-/// sync_diagonal_op(op).unwrap();
-/// ```
-/// See [QuEST API] for more information.
-///
-/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
-pub fn sync_diagonal_op(op: &mut DiagonalOp<'_>) -> Result<(), QuestError> {
-    catch_quest_exception(|| unsafe {
-        ffi::syncDiagonalOp(op.op);
-    })
-}
-
-/// Overwrites the entire `DiagonalOp` with the given elements.
-///
-/// # Examples
-///
-/// ```rust
-/// # use quest_bind::*;
-/// let env = &QuestEnv::new();
-/// let mut op = &mut DiagonalOp::try_new(2, env).unwrap();
-///
-/// let real = &[1., 2., 3., 4.];
-/// let imag = &[5., 6., 7., 8.];
-/// init_diagonal_op(op, real, imag);
-/// ```
-/// See [QuEST API] for more information.
-///
-/// # Panics
-///
-/// This function will panic, if either `real` or `imag`
-/// have length smaller than `2.pow(num_qubits)`.
-///
-/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
-#[allow(clippy::cast_sign_loss)]
-pub fn init_diagonal_op(
-    op: &mut DiagonalOp<'_>,
-    real: &[Qreal],
-    imag: &[Qreal],
-) -> Result<(), QuestError> {
-    let len_required = 2usize.pow(op.op.numQubits as u32);
-    assert!(real.len() >= len_required);
-    assert!(imag.len() >= len_required);
-    catch_quest_exception(|| unsafe {
-        ffi::initDiagonalOp(op.op, real.as_ptr(), imag.as_ptr());
-    })
-}
-
-/// Populates the diagonal operator \p op to be equivalent to the given Pauli
-/// Hamiltonian
-///
-/// Assuming `hamil` contains only `PAULI_I` or `PAULI_Z` operators.
-///
-/// # Examples
-///
-/// ```rust
-/// # use quest_bind::*;
-/// use quest_bind::PauliOpType::*;
-///
-/// let hamil = &mut PauliHamil::try_new(2, 2).unwrap();
-/// init_pauli_hamil(
-///     hamil,
-///     &[0.5, -0.5],
-///     &[PAULI_I, PAULI_Z, PAULI_Z, PAULI_Z],
-/// )
-/// .unwrap();
-///
-/// let env = &QuestEnv::new();
-/// let mut op = &mut DiagonalOp::try_new(2, env).unwrap();
-///
-/// init_diagonal_op_from_pauli_hamil(op, hamil).unwrap();
-/// ```
-///
-/// See [QuEST API] for more information.
-///
-/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
-pub fn init_diagonal_op_from_pauli_hamil(
-    op: &mut DiagonalOp<'_>,
-    hamil: &PauliHamil,
-) -> Result<(), QuestError> {
-    catch_quest_exception(|| unsafe {
-        ffi::initDiagonalOpFromPauliHamil(op.op, hamil.0);
-    })
-}
-
-/// Modifies a subset of elements of `DiagonalOp`.
-///
-/// Starting at index `start_ind`, and ending at index
-/// `start_ind +  num_elems`.
-///
-/// # Examples
-///
-/// ```rust
-/// # use quest_bind::*;
-/// let env = &QuestEnv::new();
-/// let op = &mut DiagonalOp::try_new(3, env).unwrap();
-///
-/// let num_elems = 4;
-/// let re = &[1., 2., 3., 4.];
-/// let im = &[1., 2., 3., 4.];
-/// set_diagonal_op_elems(op, 0, re, im, num_elems).unwrap();
-/// ```
-///
-/// # Panics
-///
-/// This function will panic if either
-/// `real.len() >= num_elems as usize`, or
-/// `imag.len() >= num_elems as usize`.
-///
-/// See [QuEST API] for more information.
-///
-/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
-#[allow(clippy::cast_sign_loss)]
-#[allow(clippy::cast_possible_truncation)]
-pub fn set_diagonal_op_elems(
-    op: &mut DiagonalOp<'_>,
-    start_ind: i64,
-    real: &[Qreal],
-    imag: &[Qreal],
-    num_elems: i64,
-) -> Result<(), QuestError> {
-    assert!(real.len() >= num_elems as usize);
-    assert!(imag.len() >= num_elems as usize);
-
-    catch_quest_exception(|| unsafe {
-        ffi::setDiagonalOpElems(
-            op.op,
-            start_ind,
-            real.as_ptr(),
-            imag.as_ptr(),
-            num_elems,
-        );
-    })
-}
-
-/// Apply a diagonal operator to the entire `qureg`.
-///
-/// # Examples
-///
-/// ```rust
-/// # use quest_bind::*;
-/// let env = &QuestEnv::new();
-/// let qureg = &mut Qureg::try_new(2, env).unwrap();
-/// let op = &mut DiagonalOp::try_new(2, env).unwrap();
-///
-/// init_diagonal_op(op, &[1., 2., 3., 4.], &[5., 6., 7., 8.]).unwrap();
-/// apply_diagonal_op(qureg, &op).unwrap();
-/// ```
-///
-/// See [QuEST API] for more information.
-///
-/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
-pub fn apply_diagonal_op(
-    qureg: &mut Qureg<'_>,
-    op: &DiagonalOp<'_>,
-) -> Result<(), QuestError> {
-    catch_quest_exception(|| unsafe {
-        ffi::applyDiagonalOp(qureg.reg, op.op);
-    })
-}
-
-/// Computes the expected value of the diagonal operator `op`.
-///
-/// Since `op` is not necessarily Hermitian, the expected value may be a complex
-/// number.
-///
-/// # Examples
-///
-/// ```rust
-/// # use quest_bind::*;
-/// let env = &QuestEnv::new();
-/// let qureg = &mut Qureg::try_new(2, env).unwrap();
-/// let op = &mut DiagonalOp::try_new(2, env).unwrap();
-///
-/// init_zero_state(qureg);
-/// init_diagonal_op(op, &[1., 2., 3., 4.], &[5., 6., 7., 8.]).unwrap();
-///
-/// let expec_val = calc_expec_diagonal_op(qureg, op).unwrap();
-///
-/// assert!((expec_val.re - 1.).abs() < EPSILON);
-/// assert!((expec_val.im - 5.).abs() < EPSILON);
-/// ```
-///
-/// See [QuEST API] for more information.
-///
-/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
-pub fn calc_expec_diagonal_op(
-    qureg: &Qureg<'_>,
-    op: &DiagonalOp<'_>,
-) -> Result<Qcomplex, QuestError> {
-    catch_quest_exception(|| unsafe {
-        ffi::calcExpecDiagonalOp(qureg.reg, op.op)
-    })
-    .map(Into::into)
-}
+pub use qureg::Qureg;
 
 /// Print the current state vector of probability amplitudes to file.
 ///
@@ -1982,7 +1281,8 @@ pub fn compact_unitary(
 
 /// Apply a general single-qubit unitary (including a global phase factor).
 ///
-/// The passed 2x2 ComplexMatrix must be unitary, otherwise an error is thrown.
+/// The passed 2x2 `ComplexMatrix` must be unitary, otherwise an error is
+/// thrown.
 ///
 /// # Parameters
 ///
@@ -5139,7 +4439,7 @@ pub fn calc_hilbert_schmidt_distance(
 /// Works for both state-vectors and density matrices. Note that afterward, \p
 /// out may not longer be normalised and ergo no longer a valid  state-vector or
 /// density matrix. Users must therefore be careful passing \p out to other
-/// QuEST functions which assume normalisation in order to function correctly.
+/// `QuEST` functions which assume normalisation in order to function correctly.
 ///
 /// # Examples
 ///
@@ -5703,9 +5003,9 @@ pub fn apply_phase_func(
 ///   changes are specified in the corresponding elements of `override_phases`.
 /// - Note that if `encoding` is `TWOS_COMPLEMENT`, and `f(r)` features a
 ///   fractional exponent, then every negative phase index must be overriden.
-///   This is checked and enforced by QuEST's validation, unless there are more
-///   than 16 targeted qubits, in which case valid input is assumed (due to an
-///   otherwise prohibitive performance overhead).
+///   This is checked and enforced by `QuEST`'s validation, unless there are
+///   more than 16 targeted qubits, in which case valid input is assumed (due to
+///   an otherwise prohibitive performance overhead).
 /// - Overriding phases are checked at each computational basis state of `qureg`
 ///   *before* evaluating the phase function `f(r)`, and hence are useful for
 ///   avoiding singularities or errors at diverging values of `r`.
@@ -6207,7 +5507,7 @@ pub fn apply_param_named_phase_func_overrides(
 ///   unnormalised.
 ///
 /// This function merges contiguous controlled-phase gates into single
-/// invocations of [apply_named_phase_func()][api-apply-named-phase-func], and
+/// invocations of [`apply_named_phase_func`()][api-apply-named-phase-func], and
 /// hence is significantly faster than performing
 /// the QFT circuit directly.
 ///
@@ -6390,14 +5690,11 @@ pub fn apply_projector(
     })
 }
 
-#[cfg(test)]
-mod tests;
-
 /// The impl of `SendPtr` was taken from [`rayon`] crate.
 /// Rayon is distributed under MIT License.
 ///
 /// We need to transmit raw pointers across threads. It is possible to do this
-/// without any unsafe code by converting pointers to usize or to AtomicPtr<T>
+/// without any unsafe code by converting pointers to usize or to `AtomicPtr`<T>
 /// then back to a raw pointer for use. We prefer this approach because code
 /// that uses this type is more explicit.
 ///
@@ -6418,6 +5715,8 @@ unsafe impl<T: Send> Sync for SendPtr<T> {}
 
 impl<T> SendPtr<T> {
     // Helper to avoid disjoint captures of `send_ptr.0`
+    #[allow(dead_code)]
+    #[must_use]
     pub fn get(self) -> *mut T {
         self.0
     }
