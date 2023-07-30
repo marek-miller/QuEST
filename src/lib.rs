@@ -1,4 +1,7 @@
-#![allow(clippy::missing_errors_doc)]
+// #![deny(missing_debug_implementations)]
+// #![deny(missing_docs)]
+// #![deny(unreachable_pub)]
+#![warn(rust_2018_idioms)]
 
 use std::ffi::CString;
 
@@ -565,7 +568,7 @@ pub fn init_pauli_hamil(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
-pub fn sync_diagonal_op(op: &mut DiagonalOp) -> Result<(), QuestError> {
+pub fn sync_diagonal_op(op: &mut DiagonalOp<'_>) -> Result<(), QuestError> {
     catch_quest_exception(|| unsafe {
         ffi::syncDiagonalOp(op.op);
     })
@@ -594,7 +597,7 @@ pub fn sync_diagonal_op(op: &mut DiagonalOp) -> Result<(), QuestError> {
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::cast_sign_loss)]
 pub fn init_diagonal_op(
-    op: &mut DiagonalOp,
+    op: &mut DiagonalOp<'_>,
     real: &[Qreal],
     imag: &[Qreal],
 ) -> Result<(), QuestError> {
@@ -635,7 +638,7 @@ pub fn init_diagonal_op(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn init_diagonal_op_from_pauli_hamil(
-    op: &mut DiagonalOp,
+    op: &mut DiagonalOp<'_>,
     hamil: &PauliHamil,
 ) -> Result<(), QuestError> {
     catch_quest_exception(|| unsafe {
@@ -673,7 +676,7 @@ pub fn init_diagonal_op_from_pauli_hamil(
 #[allow(clippy::cast_sign_loss)]
 #[allow(clippy::cast_possible_truncation)]
 pub fn set_diagonal_op_elems(
-    op: &mut DiagonalOp,
+    op: &mut DiagonalOp<'_>,
     start_ind: i64,
     real: &[Qreal],
     imag: &[Qreal],
@@ -711,8 +714,8 @@ pub fn set_diagonal_op_elems(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn apply_diagonal_op(
-    qureg: &mut Qureg,
-    op: &DiagonalOp,
+    qureg: &mut Qureg<'_>,
+    op: &DiagonalOp<'_>,
 ) -> Result<(), QuestError> {
     catch_quest_exception(|| unsafe {
         ffi::applyDiagonalOp(qureg.reg, op.op);
@@ -745,8 +748,8 @@ pub fn apply_diagonal_op(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn calc_expec_diagonal_op(
-    qureg: &Qureg,
-    op: &DiagonalOp,
+    qureg: &Qureg<'_>,
+    op: &DiagonalOp<'_>,
 ) -> Result<Qcomplex, QuestError> {
     catch_quest_exception(|| unsafe {
         ffi::calcExpecDiagonalOp(qureg.reg, op.op)
@@ -785,7 +788,7 @@ pub fn calc_expec_diagonal_op(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
-pub fn report_state(qureg: &Qureg) {
+pub fn report_state(qureg: &Qureg<'_>) {
     catch_quest_exception(|| unsafe { ffi::reportState(qureg.reg) })
         .expect("report_state should never fail");
 }
@@ -800,7 +803,7 @@ pub fn report_state(qureg: &Qureg) {
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn report_state_to_screen(
-    qureg: &Qureg,
+    qureg: &Qureg<'_>,
     env: &QuestEnv,
     report_rank: i32,
 ) {
@@ -813,7 +816,7 @@ pub fn report_state_to_screen(
 /// Report information about a set of qubits.
 ///
 /// This function reports: number of qubits, number of probability amplitudes.
-pub fn report_qureg_params(qureg: &Qureg) {
+pub fn report_qureg_params(qureg: &Qureg<'_>) {
     catch_quest_exception(|| unsafe {
         ffi::reportQuregParams(qureg.reg);
     })
@@ -847,7 +850,7 @@ pub fn report_pauli_hamil(hamil: &PauliHamil) -> Result<(), QuestError> {
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[must_use]
-pub fn get_num_qubits(qureg: &Qureg) -> i32 {
+pub fn get_num_qubits(qureg: &Qureg<'_>) -> i32 {
     catch_quest_exception(|| unsafe { ffi::getNumQubits(qureg.reg) })
         .expect("get_num_qubits should never fail")
 }
@@ -880,7 +883,7 @@ pub fn get_num_qubits(qureg: &Qureg) -> i32 {
 ///
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
-pub fn get_num_amps(qureg: &Qureg) -> Result<i64, QuestError> {
+pub fn get_num_amps(qureg: &Qureg<'_>) -> Result<i64, QuestError> {
     catch_quest_exception(|| unsafe { ffi::getNumAmps(qureg.reg) })
 }
 
@@ -915,7 +918,7 @@ pub fn get_num_amps(qureg: &Qureg) -> Result<i64, QuestError> {
 /// [api-init-zero-state]: crate::init_zero_state()
 /// [api-qureg]: crate::Qureg
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
-pub fn init_blank_state(qureg: &mut Qureg) {
+pub fn init_blank_state(qureg: &mut Qureg<'_>) {
     catch_quest_exception(|| unsafe {
         ffi::initBlankState(qureg.reg);
     })
@@ -952,7 +955,7 @@ pub fn init_blank_state(qureg: &mut Qureg) {
 ///
 /// [api-qureg]: crate::Qureg
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
-pub fn init_zero_state(qureg: &mut Qureg) {
+pub fn init_zero_state(qureg: &mut Qureg<'_>) {
     catch_quest_exception(|| unsafe {
         ffi::initZeroState(qureg.reg);
     })
@@ -992,7 +995,7 @@ pub fn init_zero_state(qureg: &mut Qureg) {
 ///
 /// [api-qureg]: crate::Qureg
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
-pub fn init_plus_state(qureg: &mut Qureg) {
+pub fn init_plus_state(qureg: &mut Qureg<'_>) {
     catch_quest_exception(|| unsafe {
         ffi::initPlusState(qureg.reg);
     })
@@ -1051,7 +1054,7 @@ pub fn init_plus_state(qureg: &mut Qureg) {
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn init_classical_state(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     state_ind: i64,
 ) -> Result<(), QuestError> {
     catch_quest_exception(|| unsafe {
@@ -1079,8 +1082,8 @@ pub fn init_classical_state(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn init_pure_state(
-    qureg: &mut Qureg,
-    pure_: &Qureg,
+    qureg: &mut Qureg<'_>,
+    pure_: &Qureg<'_>,
 ) -> Result<(), QuestError> {
     catch_quest_exception(|| unsafe {
         ffi::initPureState(qureg.reg, pure_.reg);
@@ -1092,7 +1095,7 @@ pub fn init_pure_state(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
-pub fn init_debug_state(qureg: &mut Qureg) {
+pub fn init_debug_state(qureg: &mut Qureg<'_>) {
     catch_quest_exception(|| unsafe {
         ffi::initDebugState(qureg.reg);
     })
@@ -1118,7 +1121,7 @@ pub fn init_debug_state(qureg: &mut Qureg) {
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn init_state_from_amps(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     reals: &[Qreal],
     imags: &[Qreal],
 ) -> Result<(), QuestError> {
@@ -1160,7 +1163,7 @@ pub fn init_state_from_amps(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn set_amps(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     start_ind: i64,
     reals: &[Qreal],
     imags: &[Qreal],
@@ -1200,7 +1203,7 @@ pub fn set_amps(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn set_density_amps(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     start_row: i64,
     start_col: i64,
     reals: &[Qreal],
@@ -1236,8 +1239,8 @@ pub fn set_density_amps(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn clone_qureg(
-    target_qureg: &mut Qureg,
-    copy_qureg: &Qureg,
+    target_qureg: &mut Qureg<'_>,
+    copy_qureg: &Qureg<'_>,
 ) -> Result<(), QuestError> {
     catch_quest_exception(|| unsafe {
         ffi::cloneQureg(target_qureg.reg, copy_qureg.reg);
@@ -1263,7 +1266,7 @@ pub fn clone_qureg(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn phase_shift(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     target_quibit: i32,
     angle: Qreal,
 ) -> Result<(), QuestError> {
@@ -1291,7 +1294,7 @@ pub fn phase_shift(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn controlled_phase_shift(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     id_qubit1: i32,
     id_qubit2: i32,
     angle: Qreal,
@@ -1319,7 +1322,7 @@ pub fn controlled_phase_shift(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn multi_controlled_phase_shift(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     control_qubits: &[i32],
     angle: Qreal,
 ) -> Result<(), QuestError> {
@@ -1361,7 +1364,7 @@ pub fn multi_controlled_phase_shift(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn controlled_phase_flip(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     id_qubit1: i32,
     id_qubit2: i32,
 ) -> Result<(), QuestError> {
@@ -1388,7 +1391,7 @@ pub fn controlled_phase_flip(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn multi_controlled_phase_flip(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     control_qubits: &[i32],
 ) -> Result<(), QuestError> {
     catch_quest_exception(|| unsafe {
@@ -1441,7 +1444,7 @@ pub fn multi_controlled_phase_flip(
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn s_gate(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     target_qubit: i32,
 ) -> Result<(), QuestError> {
     catch_quest_exception(|| unsafe {
@@ -1491,7 +1494,7 @@ pub fn s_gate(
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn t_gate(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     target_qubit: i32,
 ) -> Result<(), QuestError> {
     catch_quest_exception(|| unsafe {
@@ -1553,7 +1556,7 @@ pub fn sync_quest_success(success_code: i32) -> i32 {
 /// [api-copy-state-from-gpu]: crate::copy_state_from_gpu()
 /// [api-set-amps]: crate::set_amps()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
-pub fn copy_state_to_gpu(qureg: &mut Qureg) {
+pub fn copy_state_to_gpu(qureg: &mut Qureg<'_>) {
     catch_quest_exception(|| unsafe {
         ffi::copyStateToGPU(qureg.reg);
     })
@@ -1591,7 +1594,7 @@ pub fn copy_state_to_gpu(qureg: &mut Qureg) {
 /// [api-copy-state-to-gpu]: crate::copy_state_to_gpu()
 /// [api-set-amps]: crate::set_amps()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
-pub fn copy_state_from_gpu(qureg: &mut Qureg) {
+pub fn copy_state_from_gpu(qureg: &mut Qureg<'_>) {
     catch_quest_exception(|| unsafe { ffi::copyStateFromGPU(qureg.reg) })
         .expect("copy_state_from_gpu should always succeed");
 }
@@ -1635,7 +1638,7 @@ pub fn copy_state_from_gpu(qureg: &mut Qureg) {
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn copy_substate_to_gpu(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     start_ind: i64,
     num_amps: i64,
 ) -> Result<(), QuestError> {
@@ -1684,7 +1687,7 @@ pub fn copy_substate_to_gpu(
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn copy_substate_from_gpu(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     start_ind: i64,
     num_amps: i64,
 ) -> Result<(), QuestError> {
@@ -1724,7 +1727,7 @@ pub fn copy_substate_from_gpu(
 /// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn get_amp(
-    qureg: &Qureg,
+    qureg: &Qureg<'_>,
     index: i64,
 ) -> Result<Qcomplex, QuestError> {
     catch_quest_exception(|| unsafe { ffi::getAmp(qureg.reg, index) })
@@ -1763,7 +1766,7 @@ pub fn get_amp(
 /// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn get_real_amp(
-    qureg: &Qureg,
+    qureg: &Qureg<'_>,
     index: i64,
 ) -> Result<Qreal, QuestError> {
     catch_quest_exception(|| unsafe { ffi::getRealAmp(qureg.reg, index) })
@@ -1801,7 +1804,7 @@ pub fn get_real_amp(
 /// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn get_imag_amp(
-    qureg: &Qureg,
+    qureg: &Qureg<'_>,
     index: i64,
 ) -> Result<Qreal, QuestError> {
     catch_quest_exception(|| unsafe { ffi::getImagAmp(qureg.reg, index) })
@@ -1838,7 +1841,7 @@ pub fn get_imag_amp(
 /// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn get_prob_amp(
-    qureg: &Qureg,
+    qureg: &Qureg<'_>,
     index: i64,
 ) -> Result<Qreal, QuestError> {
     catch_quest_exception(|| unsafe { ffi::getProbAmp(qureg.reg, index) })
@@ -1876,7 +1879,7 @@ pub fn get_prob_amp(
 /// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn get_density_amp(
-    qureg: &Qureg,
+    qureg: &Qureg<'_>,
     row: i64,
     col: i64,
 ) -> Result<Qcomplex, QuestError> {
@@ -1905,7 +1908,7 @@ pub fn get_density_amp(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[must_use]
-pub fn calc_total_prob(qureg: &Qureg) -> Qreal {
+pub fn calc_total_prob(qureg: &Qureg<'_>) -> Qreal {
     catch_quest_exception(|| unsafe { ffi::calcTotalProb(qureg.reg) })
         .expect("calc_total_prop should always succeed")
 }
@@ -1964,7 +1967,7 @@ pub fn calc_total_prob(qureg: &Qureg) -> Qreal {
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn compact_unitary(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     target_qubit: i32,
     alpha: Qcomplex,
     beta: Qcomplex,
@@ -2024,7 +2027,7 @@ pub fn compact_unitary(
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn unitary(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     target_qubit: i32,
     u: &ComplexMatrix2,
 ) -> Result<(), QuestError> {
@@ -2074,7 +2077,7 @@ pub fn unitary(
 /// [`QubitIndexError`]: crate::QuestError::QubitIndexError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn rotate_x(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     rot_qubit: i32,
     angle: Qreal,
 ) -> Result<(), QuestError> {
@@ -2123,7 +2126,7 @@ pub fn rotate_x(
 /// [`QubitIndexError`]: crate::QuestError::QubitIndexError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn rotate_y(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     rot_qubit: i32,
     angle: Qreal,
 ) -> Result<(), QuestError> {
@@ -2172,7 +2175,7 @@ pub fn rotate_y(
 /// [`QubitIndexError`]: crate::QuestError::QubitIndexError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn rotate_z(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     rot_qubit: i32,
     angle: Qreal,
 ) -> Result<(), QuestError> {
@@ -2203,7 +2206,7 @@ pub fn rotate_z(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn rotate_around_axis(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     rot_qubit: i32,
     angle: Qreal,
     axis: &Vector,
@@ -2236,7 +2239,7 @@ pub fn rotate_around_axis(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn controlled_rotate_x(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     control_qubit: i32,
     target_qubit: i32,
     angle: Qreal,
@@ -2271,7 +2274,7 @@ pub fn controlled_rotate_x(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn controlled_rotate_y(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     control_qubit: i32,
     target_qubit: i32,
     angle: Qreal,
@@ -2306,7 +2309,7 @@ pub fn controlled_rotate_y(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn controlled_rotate_z(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     control_qubit: i32,
     target_qubit: i32,
     angle: Qreal,
@@ -2348,7 +2351,7 @@ pub fn controlled_rotate_z(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn controlled_rotate_around_axis(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     control_qubit: i32,
     target_qubit: i32,
     angle: Qreal,
@@ -2421,7 +2424,7 @@ pub fn controlled_rotate_around_axis(
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn controlled_compact_unitary(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     control_qubit: i32,
     target_qubit: i32,
     alpha: Qcomplex,
@@ -2486,7 +2489,7 @@ pub fn controlled_compact_unitary(
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn controlled_unitary(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     control_qubit: i32,
     target_qubit: i32,
     u: &ComplexMatrix2,
@@ -2547,7 +2550,7 @@ pub fn controlled_unitary(
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn multi_controlled_unitary(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     control_qubits: &[i32],
     target_qubit: i32,
     u: &ComplexMatrix2,
@@ -2601,7 +2604,7 @@ pub fn multi_controlled_unitary(
 /// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn pauli_x(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     target_qubit: i32,
 ) -> Result<(), QuestError> {
     if target_qubit >= qureg.num_qubits_represented() || target_qubit < 0 {
@@ -2644,7 +2647,7 @@ pub fn pauli_x(
 /// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn pauli_y(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     target_qubit: i32,
 ) -> Result<(), QuestError> {
     if target_qubit >= qureg.num_qubits_represented() || target_qubit < 0 {
@@ -2687,7 +2690,7 @@ pub fn pauli_y(
 /// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn pauli_z(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     target_qubit: i32,
 ) -> Result<(), QuestError> {
     if target_qubit >= qureg.num_qubits_represented() || target_qubit < 0 {
@@ -2738,7 +2741,7 @@ pub fn pauli_z(
 /// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn hadamard(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     target_qubit: i32,
 ) -> Result<(), QuestError> {
     if target_qubit < 0 || target_qubit >= qureg.num_qubits_represented() {
@@ -2800,7 +2803,7 @@ pub fn hadamard(
 /// [`QubitIndexError`]: crate::QuestError::QubitIndexError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn controlled_not(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     control_qubit: i32,
     target_qubit: i32,
 ) -> Result<(), QuestError> {
@@ -2873,7 +2876,7 @@ pub fn controlled_not(
 /// [`ArrayLengthError`]: crate::QuestError::ArrayLengthError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn multi_controlled_multi_qubit_not(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     ctrls: &[i32],
     targs: &[i32],
 ) -> Result<(), QuestError> {
@@ -2955,7 +2958,7 @@ pub fn multi_controlled_multi_qubit_not(
 /// [`ArrayLengthError`]: crate::QuestError::ArrayLengthError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn multi_qubit_not(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     targs: &[i32],
 ) -> Result<(), QuestError> {
     let num_targs = targs.len() as i32;
@@ -2994,7 +2997,7 @@ pub fn multi_qubit_not(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn controlled_pauli_y(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     control_qubit: i32,
     target_qubit: i32,
 ) -> Result<(), QuestError> {
@@ -3023,7 +3026,7 @@ pub fn controlled_pauli_y(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn calc_prob_of_outcome(
-    qureg: &Qureg,
+    qureg: &Qureg<'_>,
     measure_qubit: i32,
     outcome: i32,
 ) -> Result<Qreal, QuestError> {
@@ -3059,7 +3062,7 @@ pub fn calc_prob_of_outcome(
 #[allow(clippy::cast_sign_loss)]
 pub fn calc_prob_of_all_outcomes(
     outcome_probs: &mut [Qreal],
-    qureg: &Qureg,
+    qureg: &Qureg<'_>,
     qubits: &[i32],
 ) -> Result<(), QuestError> {
     let num_qubits = qubits.len() as i32;
@@ -3100,7 +3103,7 @@ pub fn calc_prob_of_all_outcomes(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn collapse_to_outcome(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     measure_qubit: i32,
     outcome: i32,
 ) -> Result<Qreal, QuestError> {
@@ -3136,7 +3139,7 @@ pub fn collapse_to_outcome(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn measure(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     measure_qubit: i32,
 ) -> Result<i32, QuestError> {
     catch_quest_exception(|| unsafe { ffi::measure(qureg.reg, measure_qubit) })
@@ -3172,7 +3175,7 @@ pub fn measure(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn measure_with_stats(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     measure_qubit: i32,
     outcome_prob: &mut Qreal,
 ) -> Result<i32, QuestError> {
@@ -3203,8 +3206,8 @@ pub fn measure_with_stats(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn calc_inner_product(
-    bra: &Qureg,
-    ket: &Qureg,
+    bra: &Qureg<'_>,
+    ket: &Qureg<'_>,
 ) -> Result<Qcomplex, QuestError> {
     catch_quest_exception(|| unsafe { ffi::calcInnerProduct(bra.reg, ket.reg) })
         .map(Into::into)
@@ -3230,8 +3233,8 @@ pub fn calc_inner_product(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn calc_density_inner_product(
-    rho1: &Qureg,
-    rho2: &Qureg,
+    rho1: &Qureg<'_>,
+    rho2: &Qureg<'_>,
 ) -> Result<Qreal, QuestError> {
     catch_quest_exception(|| unsafe {
         ffi::calcDensityInnerProduct(rho1.reg, rho2.reg)
@@ -3342,7 +3345,7 @@ pub fn get_quest_seeds<'a: 'b, 'b>(env: &'a QuestEnv) -> &'b [u64] {
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
-pub fn start_recording_qasm(qureg: &mut Qureg) {
+pub fn start_recording_qasm(qureg: &mut Qureg<'_>) {
     catch_quest_exception(|| unsafe {
         ffi::startRecordingQASM(qureg.reg);
     })
@@ -3371,7 +3374,7 @@ pub fn start_recording_qasm(qureg: &mut Qureg) {
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
-pub fn stop_recording_qasm(qureg: &mut Qureg) {
+pub fn stop_recording_qasm(qureg: &mut Qureg<'_>) {
     catch_quest_exception(|| unsafe {
         ffi::stopRecordingQASM(qureg.reg);
     })
@@ -3401,7 +3404,7 @@ pub fn stop_recording_qasm(qureg: &mut Qureg) {
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
-pub fn clear_recorded_qasm(qureg: &mut Qureg) {
+pub fn clear_recorded_qasm(qureg: &mut Qureg<'_>) {
     catch_quest_exception(|| unsafe {
         ffi::clearRecordedQASM(qureg.reg);
     })
@@ -3429,7 +3432,7 @@ pub fn clear_recorded_qasm(qureg: &mut Qureg) {
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
-pub fn print_recorded_qasm(qureg: &mut Qureg) {
+pub fn print_recorded_qasm(qureg: &mut Qureg<'_>) {
     catch_quest_exception(|| unsafe {
         ffi::printRecordedQASM(qureg.reg);
     })
@@ -3456,7 +3459,7 @@ pub fn print_recorded_qasm(qureg: &mut Qureg) {
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn write_recorded_qasm_to_file(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     filename: &str,
 ) -> Result<(), QuestError> {
     unsafe {
@@ -3490,7 +3493,7 @@ pub fn write_recorded_qasm_to_file(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn mix_dephasing(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     target_qubit: i32,
     prob: Qreal,
 ) -> Result<(), QuestError> {
@@ -3530,7 +3533,7 @@ pub fn mix_dephasing(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn mix_two_qubit_dephasing(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     qubit1: i32,
     qubit2: i32,
     prob: Qreal,
@@ -3572,7 +3575,7 @@ pub fn mix_two_qubit_dephasing(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn mix_depolarising(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     target_qubit: i32,
     prob: Qreal,
 ) -> Result<(), QuestError> {
@@ -3610,7 +3613,7 @@ pub fn mix_depolarising(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn mix_damping(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     target_qubit: i32,
     prob: Qreal,
 ) -> Result<(), QuestError> {
@@ -3651,7 +3654,7 @@ pub fn mix_damping(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn mix_two_qubit_depolarising(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     qubit1: i32,
     qubit2: i32,
     prob: Qreal,
@@ -3696,7 +3699,7 @@ pub fn mix_two_qubit_depolarising(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn mix_pauli(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     target_qubit: i32,
     prob_x: Qreal,
     prob_y: Qreal,
@@ -3735,9 +3738,9 @@ pub fn mix_pauli(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn mix_density_matrix(
-    combine_qureg: &mut Qureg,
+    combine_qureg: &mut Qureg<'_>,
     prob: Qreal,
-    other_qureg: &Qureg,
+    other_qureg: &Qureg<'_>,
 ) -> Result<(), QuestError> {
     catch_quest_exception(|| unsafe {
         ffi::mixDensityMatrix(combine_qureg.reg, prob, other_qureg.reg);
@@ -3786,7 +3789,7 @@ pub fn mix_density_matrix(
 ///
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
-pub fn calc_purity(qureg: &Qureg) -> Result<Qreal, QuestError> {
+pub fn calc_purity(qureg: &Qureg<'_>) -> Result<Qreal, QuestError> {
     catch_quest_exception(|| unsafe { ffi::calcPurity(qureg.reg) })
 }
 
@@ -3848,8 +3851,8 @@ pub fn calc_purity(qureg: &Qureg) -> Result<Qreal, QuestError> {
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn calc_fidelity(
-    qureg: &Qureg,
-    pure_state: &Qureg,
+    qureg: &Qureg<'_>,
+    pure_state: &Qureg<'_>,
 ) -> Result<Qreal, QuestError> {
     catch_quest_exception(|| unsafe {
         ffi::calcFidelity(qureg.reg, pure_state.reg)
@@ -3906,7 +3909,7 @@ pub fn calc_fidelity(
 /// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn swap_gate(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     qubit1: i32,
     qubit2: i32,
 ) -> Result<(), QuestError> {
@@ -3941,7 +3944,7 @@ pub fn swap_gate(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn sqrt_swap_gate(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     qb1: i32,
     qb2: i32,
 ) -> Result<(), QuestError> {
@@ -3987,7 +3990,7 @@ pub fn sqrt_swap_gate(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn multi_state_controlled_unitary(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     control_qubits: &[i32],
     control_state: &[i32],
     target_qubit: i32,
@@ -4039,7 +4042,7 @@ pub fn multi_state_controlled_unitary(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn multi_rotate_z(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     qubits: &[i32],
     angle: Qreal,
 ) -> Result<(), QuestError> {
@@ -4079,7 +4082,7 @@ pub fn multi_rotate_z(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn multi_rotate_pauli(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     target_qubits: &[i32],
     target_paulis: &[PauliOpType],
     angle: Qreal,
@@ -4141,7 +4144,7 @@ pub fn multi_rotate_pauli(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn multi_controlled_multi_rotate_z(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     control_qubits: &[i32],
     target_qubits: &[i32],
     angle: Qreal,
@@ -4197,7 +4200,7 @@ pub fn multi_controlled_multi_rotate_z(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn multi_controlled_multi_rotate_pauli(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     control_qubits: &[i32],
     target_qubits: &[i32],
     target_paulis: &[PauliOpType],
@@ -4247,10 +4250,10 @@ pub fn multi_controlled_multi_rotate_pauli(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn calc_expec_pauli_prod(
-    qureg: &Qureg,
+    qureg: &Qureg<'_>,
     target_qubits: &[i32],
     pauli_codes: &[PauliOpType],
-    workspace: &mut Qureg,
+    workspace: &mut Qureg<'_>,
 ) -> Result<Qreal, QuestError> {
     let num_targets = target_qubits.len() as i32;
     if pauli_codes.len() as i32 != num_targets {
@@ -4302,10 +4305,10 @@ pub fn calc_expec_pauli_prod(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn calc_expec_pauli_sum(
-    qureg: &Qureg,
+    qureg: &Qureg<'_>,
     all_pauli_codes: &[PauliOpType],
     term_coeffs: &[Qreal],
-    workspace: &mut Qureg,
+    workspace: &mut Qureg<'_>,
 ) -> Result<Qreal, QuestError> {
     let num_sum_terms = term_coeffs.len() as i32;
     catch_quest_exception(|| unsafe {
@@ -4352,9 +4355,9 @@ pub fn calc_expec_pauli_sum(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn calc_expec_pauli_hamil(
-    qureg: &Qureg,
+    qureg: &Qureg<'_>,
     hamil: &PauliHamil,
-    workspace: &mut Qureg,
+    workspace: &mut Qureg<'_>,
 ) -> Result<Qreal, QuestError> {
     catch_quest_exception(|| unsafe {
         ffi::calcExpecPauliHamil(qureg.reg, hamil.0, workspace.reg)
@@ -4399,7 +4402,7 @@ pub fn calc_expec_pauli_hamil(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn two_qubit_unitary(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     target_qubit1: i32,
     target_qubit2: i32,
     u: &ComplexMatrix4,
@@ -4461,7 +4464,7 @@ pub fn two_qubit_unitary(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn controlled_two_qubit_unitary(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     control_qubit: i32,
     target_qubit1: i32,
     target_qubit2: i32,
@@ -4532,7 +4535,7 @@ pub fn controlled_two_qubit_unitary(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn multi_controlled_two_qubit_unitary(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     control_qubits: &[i32],
     target_qubit1: i32,
     target_qubit2: i32,
@@ -4597,7 +4600,7 @@ pub fn multi_controlled_two_qubit_unitary(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn multi_qubit_unitary(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     targs: &[i32],
     u: &ComplexMatrixN,
 ) -> Result<(), QuestError> {
@@ -4651,7 +4654,7 @@ pub fn multi_qubit_unitary(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn controlled_multi_qubit_unitary(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     ctrl: i32,
     targs: &[i32],
     u: &ComplexMatrixN,
@@ -4716,7 +4719,7 @@ pub fn controlled_multi_qubit_unitary(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn multi_controlled_multi_qubit_unitary(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     ctrls: &[i32],
     targs: &[i32],
     u: &ComplexMatrixN,
@@ -4771,7 +4774,7 @@ pub fn multi_controlled_multi_qubit_unitary(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn mix_kraus_map(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     target: i32,
     ops: &[&ComplexMatrix2],
 ) -> Result<(), QuestError> {
@@ -4829,7 +4832,7 @@ pub fn mix_kraus_map(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn mix_two_qubit_kraus_map(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     target1: i32,
     target2: i32,
     ops: &[&ComplexMatrix4],
@@ -4897,7 +4900,7 @@ pub fn mix_two_qubit_kraus_map(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn mix_multi_qubit_kraus_map(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     targets: &[i32],
     ops: &[&ComplexMatrixN],
 ) -> Result<(), QuestError> {
@@ -4950,7 +4953,7 @@ pub fn mix_multi_qubit_kraus_map(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn mix_nontp_kraus_map(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     target: i32,
     ops: &[&ComplexMatrix2],
 ) -> Result<(), QuestError> {
@@ -5004,7 +5007,7 @@ pub fn mix_nontp_kraus_map(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn mix_nontp_two_qubit_kraus_map(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     target1: i32,
     target2: i32,
     ops: &[&ComplexMatrix4],
@@ -5073,7 +5076,7 @@ pub fn mix_nontp_two_qubit_kraus_map(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn mix_nontp_multi_qubit_kraus_map(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     targets: &[i32],
     ops: &[&ComplexMatrixN],
 ) -> Result<(), QuestError> {
@@ -5120,8 +5123,8 @@ pub fn mix_nontp_multi_qubit_kraus_map(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn calc_hilbert_schmidt_distance(
-    a: &Qureg,
-    b: &Qureg,
+    a: &Qureg<'_>,
+    b: &Qureg<'_>,
 ) -> Result<Qreal, QuestError> {
     catch_quest_exception(|| unsafe {
         ffi::calcHilbertSchmidtDistance(a.reg, b.reg)
@@ -5169,11 +5172,11 @@ pub fn calc_hilbert_schmidt_distance(
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn set_weighted_qureg(
     fac1: Qcomplex,
-    qureg1: &Qureg,
+    qureg1: &Qureg<'_>,
     fac2: Qcomplex,
-    qureg2: &Qureg,
+    qureg2: &Qureg<'_>,
     fac_out: Qcomplex,
-    out: &mut Qureg,
+    out: &mut Qureg<'_>,
 ) -> Result<(), QuestError> {
     catch_quest_exception(|| unsafe {
         ffi::setWeightedQureg(
@@ -5221,10 +5224,10 @@ pub fn set_weighted_qureg(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn apply_pauli_sum(
-    in_qureg: &mut Qureg,
+    in_qureg: &mut Qureg<'_>,
     all_pauli_codes: &[PauliOpType],
     term_coeffs: &[Qreal],
-    out_qureg: &mut Qureg,
+    out_qureg: &mut Qureg<'_>,
 ) -> Result<(), QuestError> {
     let num_sum_terms = term_coeffs.len() as i32;
     catch_quest_exception(|| unsafe {
@@ -5278,9 +5281,9 @@ pub fn apply_pauli_sum(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn apply_pauli_hamil(
-    in_qureg: &mut Qureg,
+    in_qureg: &mut Qureg<'_>,
     hamil: &PauliHamil,
-    out_qureg: &mut Qureg,
+    out_qureg: &mut Qureg<'_>,
 ) -> Result<(), QuestError> {
     catch_quest_exception(|| unsafe {
         ffi::applyPauliHamil(in_qureg.reg, hamil.0, out_qureg.reg);
@@ -5319,7 +5322,7 @@ pub fn apply_pauli_hamil(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn apply_trotter_circuit(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     hamil: &PauliHamil,
     time: Qreal,
     order: i32,
@@ -5353,7 +5356,7 @@ pub fn apply_trotter_circuit(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn apply_matrix2(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     target_qubit: i32,
     u: &ComplexMatrix2,
 ) -> Result<(), QuestError> {
@@ -5402,7 +5405,7 @@ pub fn apply_matrix2(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn apply_matrix4(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     target_qubit1: i32,
     target_qubit2: i32,
     u: &ComplexMatrix4,
@@ -5460,7 +5463,7 @@ pub fn apply_matrix4(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn apply_matrix_n(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     targs: &[i32],
     u: &ComplexMatrixN,
 ) -> Result<(), QuestError> {
@@ -5517,7 +5520,7 @@ pub fn apply_matrix_n(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn apply_multi_controlled_matrix_n(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     ctrls: &[i32],
     targs: &[i32],
     u: &ComplexMatrixN,
@@ -5659,7 +5662,7 @@ pub fn apply_multi_controlled_matrix_n(
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn apply_phase_func(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     qubits: &[i32],
     encoding: BitEncoding,
     coeffs: &[Qreal],
@@ -5786,7 +5789,7 @@ pub fn apply_phase_func(
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::too_many_arguments)]
 pub fn apply_phase_func_overrides(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     qubits: &[i32],
     encoding: BitEncoding,
     coeffs: &[Qreal],
@@ -5856,7 +5859,7 @@ pub fn apply_phase_func_overrides(
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::too_many_arguments)]
 pub fn apply_multi_var_phase_func(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     qubits: &[i32],
     num_qubits_per_reg: &[i32],
     encoding: BitEncoding,
@@ -5922,7 +5925,7 @@ pub fn apply_multi_var_phase_func(
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::too_many_arguments)]
 pub fn apply_multi_var_phase_func_overrides(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     qubits: &[i32],
     num_qubits_per_reg: &[i32],
     encoding: BitEncoding,
@@ -5983,7 +5986,7 @@ pub fn apply_multi_var_phase_func_overrides(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn apply_named_phase_func(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     qubits: &[i32],
     num_qubits_per_reg: &[i32],
     encoding: BitEncoding,
@@ -6040,7 +6043,7 @@ pub fn apply_named_phase_func(
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::too_many_arguments)]
 pub fn apply_named_phase_func_overrides(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     qubits: &[i32],
     num_qubits_per_reg: &[i32],
     encoding: BitEncoding,
@@ -6100,7 +6103,7 @@ pub fn apply_named_phase_func_overrides(
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::too_many_arguments)]
 pub fn apply_param_named_phase_func(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     qubits: &[i32],
     num_qubits_per_reg: &[i32],
     encoding: BitEncoding,
@@ -6163,7 +6166,7 @@ pub fn apply_param_named_phase_func(
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::too_many_arguments)]
 pub fn apply_param_named_phase_func_overrides(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     qubits: &[i32],
     num_qubits_per_reg: &[i32],
     encoding: BitEncoding,
@@ -6235,7 +6238,7 @@ pub fn apply_param_named_phase_func_overrides(
 /// [api-apply-named-phase-func]: crate::apply_named_phase_func()
 /// [api-apply-qft]: crate::apply_qft()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
-pub fn apply_full_qft(qureg: &mut Qureg) {
+pub fn apply_full_qft(qureg: &mut Qureg<'_>) {
     catch_quest_exception(|| unsafe {
         ffi::applyFullQFT(qureg.reg);
     })
@@ -6304,7 +6307,7 @@ pub fn apply_full_qft(qureg: &mut Qureg) {
 /// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn apply_qft(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     qubits: &[i32],
 ) -> Result<(), QuestError> {
     let num_qubits = qubits.len() as i32;
@@ -6375,7 +6378,7 @@ pub fn apply_qft(
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn apply_projector(
-    qureg: &mut Qureg,
+    qureg: &mut Qureg<'_>,
     qubit: i32,
     outcome: i32,
 ) -> Result<(), QuestError> {
