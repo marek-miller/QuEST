@@ -12,6 +12,8 @@
 
   - Move free functions onto `Qureg` type:
 
+    - `get_num_qubits()`
+    - `get_num_amps()`
     - `report_state()`
     - `report_state_to_screen()` (signature change)
 

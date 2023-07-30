@@ -73,63 +73,6 @@ pub fn report_pauli_hamil(hamil: &PauliHamil) -> Result<(), QuestError> {
     })
 }
 
-/// Returns the number of qubits represented.
-///
-/// # Parameters
-///
-/// - `qureg` a state-vector or density matrix
-///
-/// # Examples
-///
-/// ```rust
-/// # use quest_bind::*;
-/// let env = &QuestEnv::new();
-/// let qureg = &Qureg::try_new(3, env).unwrap();
-///
-/// assert_eq!(get_num_qubits(qureg), 3);
-/// ```
-///
-/// See [QuEST API] for more information.
-///
-/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
-#[must_use]
-pub fn get_num_qubits(qureg: &Qureg<'_>) -> i32 {
-    catch_quest_exception(|| unsafe { ffi::getNumQubits(qureg.reg) })
-        .expect("get_num_qubits should never fail")
-}
-
-/// Return the number of complex amplitudes in a state-vector.
-///
-/// In distributed mode, this returns the total number of amplitudes in the
-/// full representation of `qureg`, and so may be larger than the number stored
-/// on each node.
-///
-/// # Parameters
-///
-/// - `qureg` a state-vector or density matrix
-///
-/// # Errors
-///
-/// - [`InvalidQuESTInputError`], if `qureg` is a density matrix
-///
-/// # Examples
-///
-/// ```rust
-/// # use quest_bind::*;
-/// let env = &QuestEnv::new();
-/// let qureg = &Qureg::try_new(3, env).unwrap();
-///
-/// assert_eq!(get_num_amps(qureg).unwrap(), 8);
-/// ```
-///
-/// See [QuEST API] for more information.
-///
-/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
-/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
-pub fn get_num_amps(qureg: &Qureg<'_>) -> Result<i64, QuestError> {
-    catch_quest_exception(|| unsafe { ffi::getNumAmps(qureg.reg) })
-}
-
 /// Initializes a `qureg` to have all-zero-amplitudes.
 ///
 /// This is an unphysical state, useful for iteratively building a state with
