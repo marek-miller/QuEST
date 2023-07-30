@@ -32,7 +32,7 @@ pub enum phaseGateType {
 #[derive(Debug, Clone, Copy)]
 pub struct QASMLogger {
     /// generated QASM string
-    buffer:     *mut c_char,
+    buffer:     SendPtr<c_char>,
     /// maximum number of chars before overflow
     bufferSize: c_int,
     /// number of chars currently in buffer
@@ -44,8 +44,8 @@ pub struct QASMLogger {
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
 pub struct ComplexArray {
-    pub real: *mut qreal,
-    pub imag: *mut qreal,
+    real: SendPtr<qreal>,
+    imag: SendPtr<qreal>,
 }
 
 #[repr(C)]
@@ -157,10 +157,10 @@ pub struct Qureg {
     pairStateVec: ComplexArray,
 
     deviceStateVec:       ComplexArray,
-    firstLevelReduction:  *mut qreal,
-    secondLevelReduction: *mut qreal,
+    firstLevelReduction:  SendPtr<qreal>,
+    secondLevelReduction: SendPtr<qreal>,
 
-    qasmLog: *mut QASMLogger,
+    qasmLog: SendPtr<QASMLogger>,
 }
 
 #[repr(C)]
