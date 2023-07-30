@@ -782,9 +782,9 @@ pub fn calc_expec_diagonal_op(
 ///
 /// - `qureg` a state-vector or density matrix
 ///
-/// See [QuEST API][quest-api] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn report_state(qureg: &Qureg) {
     catch_quest_exception(|| unsafe { ffi::reportState(qureg.reg) })
         .expect("report_state should never fail");
@@ -796,9 +796,9 @@ pub fn report_state(qureg: &Qureg) {
 /// to standard out. For debugging purposes. Each rank should print output
 /// serially.  Only print output for systems <= 5 qubits.
 ///
-/// See [QuEST API][quest-api] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn report_state_to_screen(
     qureg: &Qureg,
     env: &QuestEnv,
@@ -843,9 +843,9 @@ pub fn report_pauli_hamil(hamil: &PauliHamil) -> Result<(), QuestError> {
 /// assert_eq!(get_num_qubits(qureg), 3);
 /// ```
 ///
-/// See [QuEST API][quest-api] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[must_use]
 pub fn get_num_qubits(qureg: &Qureg) -> i32 {
     catch_quest_exception(|| unsafe { ffi::getNumQubits(qureg.reg) })
@@ -864,8 +864,7 @@ pub fn get_num_qubits(qureg: &Qureg) -> i32 {
 ///
 /// # Errors
 ///
-/// - [`InvalidQuESTInputError`][quest-error-except], if `qureg` is a density
-///   matrix
+/// - [`InvalidQuESTInputError`], if `qureg` is a density matrix
 ///
 /// # Examples
 ///
@@ -877,10 +876,10 @@ pub fn get_num_qubits(qureg: &Qureg) -> i32 {
 /// assert_eq!(get_num_amps(qureg).unwrap(), 8);
 /// ```
 ///
-/// See [QuEST API][quest-api] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [quest-error-except]: crate::QuestError::InvalidQuESTInputError
-/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn get_num_amps(qureg: &Qureg) -> Result<i64, QuestError> {
     catch_quest_exception(|| unsafe { ffi::getNumAmps(qureg.reg) })
 }
@@ -910,12 +909,12 @@ pub fn get_num_amps(qureg: &Qureg) -> Result<i64, QuestError> {
 /// assert!(get_prob_amp(qureg, 3).unwrap().abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][quest-api] for more information.
+/// See [QuEST API] for more information.
 ///
 /// [api-set-weighted-qureg]: crate::set_weighted_qureg()
 /// [api-init-zero-state]: crate::init_zero_state()
 /// [api-qureg]: crate::Qureg
-/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn init_blank_state(qureg: &mut Qureg) {
     catch_quest_exception(|| unsafe {
         ffi::initBlankState(qureg.reg);
@@ -949,10 +948,10 @@ pub fn init_blank_state(qureg: &mut Qureg) {
 /// assert!(get_prob_amp(qureg, 3).unwrap().abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][quest-api] for more information.
+/// See [QuEST API] for more information.
 ///
 /// [api-qureg]: crate::Qureg
-/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn init_zero_state(qureg: &mut Qureg) {
     catch_quest_exception(|| unsafe {
         ffi::initZeroState(qureg.reg);
@@ -989,10 +988,10 @@ pub fn init_zero_state(qureg: &mut Qureg) {
 /// assert!((get_prob_amp(qureg, 3).unwrap() - 0.25).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][quest-api] for more information.
+/// See [QuEST API] for more information.
 ///
 /// [api-qureg]: crate::Qureg
-/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn init_plus_state(qureg: &mut Qureg) {
     catch_quest_exception(|| unsafe {
         ffi::initPlusState(qureg.reg);
@@ -1028,9 +1027,8 @@ pub fn init_plus_state(qureg: &mut Qureg) {
 ///
 /// # Errors
 ///
-/// - [`InvalidQuESTInputError`][quest-error-except],
-///   - if `state_ind` is outside [0,
-///     [`qureg.num_qubits_represented()`][qureg-num-qubits]).
+/// - [`InvalidQuESTInputError`],
+///   - if `state_ind` is outside [0, [`qureg.num_qubits_represented()`]).
 ///
 /// # Examples
 ///
@@ -1046,12 +1044,12 @@ pub fn init_plus_state(qureg: &mut Qureg) {
 /// ```
 ///
 ///
-/// See [QuEST API][quest-api] for more information.
+/// See [QuEST API] for more information.
 ///
 /// [api-get-prob-amp]: crate::get_prob_amp()
-/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
-/// [quest-error-except]: crate::QuestError::InvalidQuESTInputError
-/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
+/// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn init_classical_state(
     qureg: &mut Qureg,
     state_ind: i64,
@@ -1419,9 +1417,8 @@ pub fn multi_controlled_phase_flip(
 ///
 /// # Errors
 ///
-/// - [`InvalidQuESTInputError`][quest-error-except],
-///   - if `target_qubit` is outside [0,
-///     [`qureg.num_qubits_represented()`][qureg-num-qubits]).
+/// - [`InvalidQuESTInputError`],
+///   - if `target_qubit` is outside [0, [`qureg.num_qubits_represented()`]).
 ///
 /// # Examples
 ///
@@ -1438,11 +1435,11 @@ pub fn multi_controlled_phase_flip(
 /// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][quest-api] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
-/// [quest-error-except]: crate::QuestError::InvalidQuESTInputError
-/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
+/// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn s_gate(
     qureg: &mut Qureg,
     target_qubit: i32,
@@ -1469,9 +1466,8 @@ pub fn s_gate(
 ///
 /// # Errors
 ///
-/// - [`InvalidQuESTInputError`][quest-error-except],
-///   - if `target_qubit` is outside [0,
-///     [`qureg.num_qubits_represented()`][qureg-num-qubits]).
+/// - [`InvalidQuESTInputError`],
+///   - if `target_qubit` is outside [0, [`qureg.num_qubits_represented()`]).
 ///
 ///
 /// # Examples
@@ -1489,11 +1485,11 @@ pub fn s_gate(
 /// assert!((amp - SQRT_2 / 2.).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][quest-api] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
-/// [quest-error-except]: crate::QuestError::InvalidQuESTInputError
-/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
+/// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn t_gate(
     qureg: &mut Qureg,
     target_qubit: i32,
@@ -1516,9 +1512,9 @@ pub fn t_gate(
 ///
 /// `1` if all processes succeeded, `0` if any one process failed
 ///
-/// See [QuEST API][quest-api] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[must_use]
 pub fn sync_quest_success(success_code: i32) -> i32 {
     catch_quest_exception(|| unsafe { ffi::syncQuESTSuccess(success_code) })
@@ -1552,11 +1548,11 @@ pub fn sync_quest_success(success_code: i32) -> i32 {
 /// copy_state_to_gpu(qureg);
 /// ```
 ///
-/// See [QuEST API][quest-api] for more information.
+/// See [QuEST API] for more information.
 ///
 /// [api-copy-state-from-gpu]: crate::copy_state_from_gpu()
 /// [api-set-amps]: crate::set_amps()
-/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn copy_state_to_gpu(qureg: &mut Qureg) {
     catch_quest_exception(|| unsafe {
         ffi::copyStateToGPU(qureg.reg);
@@ -1590,11 +1586,11 @@ pub fn copy_state_to_gpu(qureg: &mut Qureg) {
 /// copy_state_from_gpu(qureg);
 /// ```
 ///
-/// See [QuEST API][quest-api] for more information.
+/// See [QuEST API] for more information.
 ///
 /// [api-copy-state-to-gpu]: crate::copy_state_to_gpu()
 /// [api-set-amps]: crate::set_amps()
-/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn copy_state_from_gpu(qureg: &mut Qureg) {
     catch_quest_exception(|| unsafe { ffi::copyStateFromGPU(qureg.reg) })
         .expect("copy_state_from_gpu should always succeed");
@@ -1625,19 +1621,19 @@ pub fn copy_state_from_gpu(qureg: &mut Qureg) {
 ///
 /// # Errors
 ///
-/// - [`InvalidQuESTInputError`][quest-error-except],
+/// - [`InvalidQuESTInputError`],
 ///   - if `start_ind` is an invalid amplitude index
 ///   - if `num_amps` is greater than the remaining amplitudes in the state,
 ///     from `start_ind`
 ///
 ///
-/// See [QuEST API][quest-api] for more information.
+/// See [QuEST API] for more information.
 ///
 /// [api-copy-substate-from-gpu]: crate::copy_substate_from_gpu()
 /// [api-copy-state-to-gpu]: crate::copy_state_to_gpu()
 /// [api-set-amps]: crate::set_amps()
-/// [quest-error-except]: crate::QuestError::InvalidQuESTInputError
-/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn copy_substate_to_gpu(
     qureg: &mut Qureg,
     start_ind: i64,
@@ -1674,19 +1670,19 @@ pub fn copy_substate_to_gpu(
 ///
 /// # Errors
 ///
-/// - [`InvalidQuESTInputError`][quest-error-except],
+/// - [`InvalidQuESTInputError`],
 ///   - if `start_ind` is an invalid amplitude index
 ///   - if `num_amps` is greater than the remaining amplitudes in the state,
 ///     from `start_ind`
 ///
 ///
-/// See [QuEST API][quest-api] for more information.
+/// See [QuEST API] for more information.
 ///
 /// [api-copy-substate-to-gpu]: crate::copy_substate_to_gpu()
 /// [api-copy-state-from-gpu]: crate::copy_state_from_gpu()
 /// [api-set-amps]: crate::set_amps()
-/// [quest-error-except]: crate::QuestError::InvalidQuESTInputError
-/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn copy_substate_from_gpu(
     qureg: &mut Qureg,
     start_ind: i64,
@@ -1706,10 +1702,9 @@ pub fn copy_substate_from_gpu(
 ///
 /// # Errors
 ///
-/// - [`InvalidQuESTInputError`][quest-error-except],
+/// - [`InvalidQuESTInputError`],
 ///   - if `qureg` is a density matrix
-///   - if `index` is outside [0,
-///     [`qureg.num_qubits_represented()`][qureg-num-qubits]).
+///   - if `index` is outside [0, [`qureg.num_qubits_represented()`]).
 ///
 /// # Examples
 ///
@@ -1723,11 +1718,11 @@ pub fn copy_substate_from_gpu(
 /// assert!((amp - 0.5).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][quest-api] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [quest-error-except]: crate::QuestError::InvalidQuESTInputError
-/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
-/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+/// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn get_amp(
     qureg: &Qureg,
     index: i64,
@@ -1746,10 +1741,9 @@ pub fn get_amp(
 ///
 /// # Errors
 ///
-/// - [`InvalidQuESTInputError`][quest-error-except],
+/// - [`InvalidQuESTInputError`],
 ///   - if `qureg` is a density matrix
-///   - if `index` is outside [0,
-///     [`qureg.num_qubits_represented()`][qureg-num-qubits]).
+///   - if `index` is outside [0, [`qureg.num_qubits_represented()`]).
 ///
 /// # Examples
 ///
@@ -1763,11 +1757,11 @@ pub fn get_amp(
 /// assert!((amp - 0.5).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][quest-api] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [quest-error-except]: crate::QuestError::InvalidQuESTInputError
-/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
-/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+/// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn get_real_amp(
     qureg: &Qureg,
     index: i64,
@@ -1785,10 +1779,9 @@ pub fn get_real_amp(
 ///
 /// # Errors
 ///
-/// - [`InvalidQuESTInputError`][quest-error-except],
+/// - [`InvalidQuESTInputError`],
 ///   - if `qureg` is a density matrix
-///   - if `index` is outside [0,
-///     [`qureg.num_qubits_represented()`][qureg-num-qubits]).
+///   - if `index` is outside [0, [`qureg.num_qubits_represented()`]).
 ///
 /// # Examples
 ///
@@ -1802,11 +1795,11 @@ pub fn get_real_amp(
 /// assert!(amp.abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][quest-api] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [quest-error-except]: crate::QuestError::InvalidQuESTInputError
-/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
-/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+/// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn get_imag_amp(
     qureg: &Qureg,
     index: i64,
@@ -1823,10 +1816,9 @@ pub fn get_imag_amp(
 ///
 /// # Errors
 ///
-/// - [`InvalidQuESTInputError`][quest-error-except],
+/// - [`InvalidQuESTInputError`],
 ///   - if `qureg` is a density matrix
-///   - if `index` is outside [0,
-///     [`qureg.num_qubits_represented()`][qureg-num-qubits]).
+///   - if `index` is outside [0, [`qureg.num_qubits_represented()`]).
 ///
 /// # Examples
 ///
@@ -1840,11 +1832,11 @@ pub fn get_imag_amp(
 /// assert!((amp - 0.25).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][quest-api] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [quest-error-except]: crate::QuestError::InvalidQuESTInputError
-/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
-/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+/// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn get_prob_amp(
     qureg: &Qureg,
     index: i64,
@@ -1862,10 +1854,9 @@ pub fn get_prob_amp(
 ///
 /// # Errors
 ///
-/// - [`InvalidQuESTInputError`][quest-error-except],
+/// - [`InvalidQuESTInputError`],
 ///   - if `qureg` is a state vector
-///   - if `row` or `col` are outside [0,
-///     [`qureg.num_qubits_represented()`][qureg-num-qubits]).
+///   - if `row` or `col` are outside [0, [`qureg.num_qubits_represented()`]).
 ///
 /// # Examples
 ///
@@ -1879,11 +1870,11 @@ pub fn get_prob_amp(
 /// assert!((amp - 0.25).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][quest-api] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [quest-error-except]: crate::QuestError::InvalidQuESTInputError
-/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
-/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+/// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn get_density_amp(
     qureg: &Qureg,
     row: i64,
@@ -1940,10 +1931,9 @@ pub fn calc_total_prob(qureg: &Qureg) -> Qreal {
 ///
 /// # Errors
 ///
-/// - [`QubitIndexError`][quest-error-index],
-///   - if `target_qubit` is outside [0,
-///     [`qureg.num_qubits_represented()`][qureg-num-qubits]).
-/// - [`InvalidQuESTInputError`][quest-error-except],
+/// - [`QubitIndexError`],
+///   - if `target_qubit` is outside [0, [`qureg.num_qubits_represented()`]).
+/// - [`InvalidQuESTInputError`],
 ///   - if  `alpha`, `beta` don't satisfy: `|alpha|^2 + |beta|^2 = 1`.
 ///
 /// # Examples
@@ -1967,12 +1957,12 @@ pub fn calc_total_prob(qureg: &Qureg) -> Qreal {
 /// assert!((fidelity - 1.).abs() < 10. * EPSILON,);
 /// ```
 ///
-/// See [QuEST API][quest-api] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [quest-error-index]: crate::QuestError::QubitIndexError
-/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
-/// [quest-error-except]: crate::QuestError::InvalidQuESTInputError
-/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
+/// [`QubitIndexError`]: crate::QuestError::QubitIndexError
+/// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn compact_unitary(
     qureg: &mut Qureg,
     target_qubit: i32,
@@ -1999,10 +1989,9 @@ pub fn compact_unitary(
 ///
 /// # Errors
 ///
-/// - [`QubitIndexError`][quest-error-index],
-///   - if `target_qubit` is outside [0,
-///     [`qureg.num_qubits_represented()`][qureg-num-qubits]).
-/// - [`InvalidQuESTInputError`][quest-error-except],
+/// - [`QubitIndexError`],
+///   - if `target_qubit` is outside [0, [`qureg.num_qubits_represented()`]).
+/// - [`InvalidQuESTInputError`],
 ///   - if `u` is not unitary
 ///
 /// # Examples
@@ -2028,12 +2017,12 @@ pub fn compact_unitary(
 /// assert!((fidelity - 1.).abs() < 10. * EPSILON,);
 /// ```
 ///
-/// See [QuEST API][quest-api] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [quest-error-index]: crate::QuestError::QubitIndexError
-/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
-/// [quest-error-except]: crate::QuestError::InvalidQuESTInputError
-/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
+/// [`QubitIndexError`]: crate::QuestError::QubitIndexError
+/// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn unitary(
     qureg: &mut Qureg,
     target_qubit: i32,
@@ -2065,8 +2054,8 @@ pub fn unitary(
 ///
 /// # Errors
 ///
-/// - [`QubitIndexError`][quest-error-index],  if `rot_qubit` is outside [0,
-///   [`qureg.num_qubits_represented()`][qureg-num-qubits]).
+/// - [`QubitIndexError`],  if `rot_qubit` is outside [0,
+///   [`qureg.num_qubits_represented()`]).
 ///
 /// # Examples
 ///
@@ -2079,11 +2068,11 @@ pub fn unitary(
 /// rotate_x(qureg, 0, theta).unwrap();
 /// ```
 ///
-/// See [QuEST API][quest-api] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
-/// [quest-error-index]: crate::QuestError::QubitIndexError
-/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
+/// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [`QubitIndexError`]: crate::QuestError::QubitIndexError
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn rotate_x(
     qureg: &mut Qureg,
     rot_qubit: i32,
@@ -2114,8 +2103,8 @@ pub fn rotate_x(
 ///
 /// # Errors
 ///
-/// - [`QubitIndexError`][quest-error-index],  if `rot_qubit` is outside [0,
-///   [`qureg.num_qubits_represented()`][qureg-num-qubits]).
+/// - [`QubitIndexError`],  if `rot_qubit` is outside [0,
+///   [`qureg.num_qubits_represented()`]).
 ///
 /// # Examples
 ///
@@ -2128,11 +2117,11 @@ pub fn rotate_x(
 /// rotate_y(qureg, 0, theta).unwrap();
 /// ```
 ///
-/// See [QuEST API][quest-api] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
-/// [quest-error-index]: crate::QuestError::QubitIndexError
-/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
+/// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [`QubitIndexError`]: crate::QuestError::QubitIndexError
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn rotate_y(
     qureg: &mut Qureg,
     rot_qubit: i32,
@@ -2163,8 +2152,8 @@ pub fn rotate_y(
 ///
 /// # Errors
 ///
-/// - [`QubitIndexError`][quest-error-index],  if `rot_qubit` is outside [0,
-///   [`qureg.num_qubits_represented()`][qureg-num-qubits]).
+/// - [`QubitIndexError`],  if `rot_qubit` is outside [0,
+///   [`qureg.num_qubits_represented()`]).
 ///
 /// # Examples
 ///
@@ -2177,11 +2166,11 @@ pub fn rotate_y(
 /// rotate_z(qureg, 0, theta).unwrap();
 /// ```
 ///
-/// See [QuEST API][quest-api] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
-/// [quest-error-index]: crate::QuestError::QubitIndexError
-/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
+/// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [`QubitIndexError`]: crate::QuestError::QubitIndexError
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn rotate_z(
     qureg: &mut Qureg,
     rot_qubit: i32,
@@ -2405,10 +2394,9 @@ pub fn controlled_rotate_around_axis(
 ///
 /// # Errors
 ///
-/// - [`QubitIndexError`][quest-error-index], if either `target_qubit` or
-///   `control_qubit` is outside [0,
-///   [`qureg.num_qubits_represented()`][qureg-num-qubits]).
-/// - [`InvalidQuESTInputError`][quest-error-except],
+/// - [`QubitIndexError`], if either `target_qubit` or `control_qubit` is
+///   outside [0, [`qureg.num_qubits_represented()`]).
+/// - [`InvalidQuESTInputError`],
 ///   - if `control_qubits` and `target_qubit` are equal
 ///   - if  `alpha`, `beta` don't satisfy: `|alpha|^2 + |beta|^2 = 1`.
 ///
@@ -2426,12 +2414,12 @@ pub fn controlled_rotate_around_axis(
 /// controlled_compact_unitary(qureg, 0, 1, alpha, beta).unwrap();
 /// ```
 ///
-/// See [QuEST API][quest-api] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [quest-error-index]: crate::QuestError::QubitIndexError
-/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
-/// [quest-error-except]: crate::QuestError::InvalidQuESTInputError
-/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
+/// [`QubitIndexError`]: crate::QuestError::QubitIndexError
+/// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn controlled_compact_unitary(
     qureg: &mut Qureg,
     control_qubit: i32,
@@ -2469,10 +2457,9 @@ pub fn controlled_compact_unitary(
 ///
 /// # Errors
 ///
-/// - [`QubitIndexError`][quest-error-index], if either `target_qubit` or
-///   `control_qubit` is outside [0,
-///   [`qureg.num_qubits_represented()`][qureg-num-qubits]).
-/// - [`InvalidQuESTInputError`][quest-error-except],
+/// - [`QubitIndexError`], if either `target_qubit` or `control_qubit` is
+///   outside [0, [`qureg.num_qubits_represented()`]).
+/// - [`InvalidQuESTInputError`],
 ///   - if `control_qubits` and `target_qubit` are equal
 ///   - if `u` is not unitary
 ///
@@ -2492,12 +2479,12 @@ pub fn controlled_compact_unitary(
 /// controlled_unitary(qureg, 0, 1, mtr).unwrap();
 /// ```
 ///
-/// See [QuEST API][quest-api] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [quest-error-index]: crate::QuestError::QubitIndexError
-/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
-/// [quest-error-except]: crate::QuestError::InvalidQuESTInputError
-/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
+/// [`QubitIndexError`]: crate::QuestError::QubitIndexError
+/// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn controlled_unitary(
     qureg: &mut Qureg,
     control_qubit: i32,
@@ -2530,10 +2517,9 @@ pub fn controlled_unitary(
 ///
 /// # Errors
 ///
-/// - [`QubitIndexError`][quest-error-index], if `target_qubit` or any of
-///   `control_qubits` is outside [0,
-///   [`qureg.num_qubits_represented()`][qureg-num-qubits]).
-/// - [`InvalidQuESTInputError`][quest-error-except],
+/// - [`QubitIndexError`], if `target_qubit` or any of `control_qubits` is
+///   outside [0, [`qureg.num_qubits_represented()`]).
+/// - [`InvalidQuESTInputError`],
 ///   - if any qubit in `control_qubits` is repeated
 ///   - if `control_qubits` contains `target_qubit`
 ///   - if `u` is not unitary
@@ -2554,12 +2540,12 @@ pub fn controlled_unitary(
 /// multi_controlled_unitary(qureg, &[1, 2], 0, mtr).unwrap();
 /// ```
 ///
-/// See [QuEST API][quest-api] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [quest-error-index]: crate::QuestError::QubitIndexError
-/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
-/// [quest-error-except]: crate::QuestError::InvalidQuESTInputError
-/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
+/// [`QubitIndexError`]: crate::QuestError::QubitIndexError
+/// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn multi_controlled_unitary(
     qureg: &mut Qureg,
     control_qubits: &[i32],
@@ -2592,8 +2578,8 @@ pub fn multi_controlled_unitary(
 ///
 /// # Errors
 ///
-/// - [`QubitIndexError`][quest-error-index], if `qubit` is outside [0,
-///   [`qureg.num_qubits_represented()`][qureg-num-qubits]).
+/// - [`QubitIndexError`], if `qubit` is outside [0,
+///   [`qureg.num_qubits_represented()`]).
 ///
 /// # Examples
 ///
@@ -2609,11 +2595,11 @@ pub fn multi_controlled_unitary(
 /// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][quest-api] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [quest-error-index]: crate::QuestError::QubitIndexError
-/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
-/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
+/// [`QubitIndexError`]: crate::QuestError::QubitIndexError
+/// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn pauli_x(
     qureg: &mut Qureg,
     target_qubit: i32,
@@ -2635,8 +2621,8 @@ pub fn pauli_x(
 ///
 /// # Errors
 ///
-/// - [`QubitIndexError`][quest-error-index], if `qubit` is outside [0,
-///   [`qureg.num_qubits_represented()`][qureg-num-qubits]).
+/// - [`QubitIndexError`], if `qubit` is outside [0,
+///   [`qureg.num_qubits_represented()`]).
 ///
 /// # Examples
 ///
@@ -2652,11 +2638,11 @@ pub fn pauli_x(
 /// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][quest-api] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [quest-error-index]: crate::QuestError::QubitIndexError
-/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
-/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
+/// [`QubitIndexError`]: crate::QuestError::QubitIndexError
+/// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn pauli_y(
     qureg: &mut Qureg,
     target_qubit: i32,
@@ -2678,8 +2664,8 @@ pub fn pauli_y(
 ///
 /// # Errors
 ///
-/// - [`QubitIndexError`][quest-error-index], if `qubit` is outside [0,
-///   [`qureg.num_qubits_represented()`][qureg-num-qubits]).
+/// - [`QubitIndexError`], if `qubit` is outside [0,
+///   [`qureg.num_qubits_represented()`]).
 ///
 /// # Examples
 ///
@@ -2695,11 +2681,11 @@ pub fn pauli_y(
 /// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][quest-api] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [quest-error-index]: crate::QuestError::QubitIndexError
-/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
-/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
+/// [`QubitIndexError`]: crate::QuestError::QubitIndexError
+/// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn pauli_z(
     qureg: &mut Qureg,
     target_qubit: i32,
@@ -2730,7 +2716,7 @@ pub fn pauli_z(
 /// # Errors
 ///
 /// Returns [`QubitIndexError`][error-qubit-index] if `target_qubit` is
-/// outside [0, [`qureg.num_qubits_represented()`][qureg-num-qubits]).
+/// outside [0, [`qureg.num_qubits_represented()`]).
 ///
 /// # Examples
 ///
@@ -2746,11 +2732,11 @@ pub fn pauli_z(
 /// assert!((amp - SQRT_2.recip()).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][quest-api] for more information.
+/// See [QuEST API] for more information.
 ///
 /// [error-qubit-index]: crate::QuestError::QubitIndexError
-/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
-/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
+/// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn hadamard(
     qureg: &mut Qureg,
     target_qubit: i32,
@@ -2786,10 +2772,10 @@ pub fn hadamard(
 ///
 /// # Errors
 ///
-/// - [`QubitIndexError`][quest-error-index],
+/// - [`QubitIndexError`],
 ///   - if either `control_qubit` or `target_qubit` is outside [0,
-///     [`qureg.num_qubits_represented()`][qureg-num-qubits])
-/// - [`InvalidQuESTInputError`][quest-error-except],
+///     [`qureg.num_qubits_represented()`])
+/// - [`InvalidQuESTInputError`],
 ///   - if `control_qubit` and `target_qubit` are equal
 ///
 /// # Examples
@@ -2807,12 +2793,12 @@ pub fn hadamard(
 /// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][quest-api] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
-/// [quest-error-except]: crate::QuestError::InvalidQuESTInputError
-/// [quest-error-index]: crate::QuestError::QubitIndexError
-/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
+/// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+/// [`QubitIndexError`]: crate::QuestError::QubitIndexError
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn controlled_not(
     qureg: &mut Qureg,
     control_qubit: i32,
@@ -2850,13 +2836,13 @@ pub fn controlled_not(
 ///
 /// # Errors
 ///
-/// - [`QubitIndexError`][quest-error-index],
+/// - [`QubitIndexError`],
 ///   - if any qubit in `ctrls` and `targs` is invalid, i.e. outside [0,
-///     [`qureg.num_qubits_represented()`][qureg-num-qubits]).
-/// - [`ArrayLengthError`][quest-error-array-len],
+///     [`qureg.num_qubits_represented()`]).
+/// - [`ArrayLengthError`],
 ///   - if the length of `targs` or `ctrls` is larger than
-///     [`qureg.num_qubits_represented()`][qureg-num-qubits]
-/// - [`InvalidQuESTInputError`][quest-error-except],
+///     [`qureg.num_qubits_represented()`]
+/// - [`InvalidQuESTInputError`],
 ///   - if `ctrls` or `targs` contain any repetitions
 ///   - if any qubit in `ctrls` is also in `targs` (and vice versa)
 ///
@@ -2878,14 +2864,14 @@ pub fn controlled_not(
 /// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][quest-api] for more information.
+/// See [QuEST API] for more information.
 ///
 /// [api-pauli-x]: crate::pauli_x()
-/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
-/// [quest-error-except]: crate::QuestError::InvalidQuESTInputError
-/// [quest-error-index]: crate::QuestError::QubitIndexError
-/// [quest-error-array-len]: crate::QuestError::ArrayLengthError
-/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
+/// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+/// [`QubitIndexError`]: crate::QuestError::QubitIndexError
+/// [`ArrayLengthError`]: crate::QuestError::ArrayLengthError
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn multi_controlled_multi_qubit_not(
     qureg: &mut Qureg,
     ctrls: &[i32],
@@ -2936,13 +2922,13 @@ pub fn multi_controlled_multi_qubit_not(
 ///
 /// # Errors
 ///
-/// - [`QubitIndexError`][quest-error-index],
+/// - [`QubitIndexError`],
 ///   - if any qubit in `targs` is invalid, i.e. outside [0,
-///     [`qureg.num_qubits_represented()`][qureg-num-qubits]).
-/// - [`ArrayLengthError`][quest-error-array-len],
+///     [`qureg.num_qubits_represented()`]).
+/// - [`ArrayLengthError`],
 ///   - if the length of `targs` is larger than
-///     [`qureg.num_qubits_represented()`][qureg-num-qubits]
-/// - [`InvalidQuESTInputError`][quest-error-except],
+///     [`qureg.num_qubits_represented()`]
+/// - [`InvalidQuESTInputError`],
 ///   - if `targs` contains any repetitions
 ///
 /// # Examples
@@ -2960,14 +2946,14 @@ pub fn multi_controlled_multi_qubit_not(
 /// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][quest-api] for more information.
+/// See [QuEST API] for more information.
 ///
 /// [api-pauli-x]: crate::pauli_x()
-/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
-/// [quest-error-except]: crate::QuestError::InvalidQuESTInputError
-/// [quest-error-index]: crate::QuestError::QubitIndexError
-/// [quest-error-array-len]: crate::QuestError::ArrayLengthError
-/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
+/// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+/// [`QubitIndexError`]: crate::QuestError::QubitIndexError
+/// [`ArrayLengthError`]: crate::QuestError::ArrayLengthError
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn multi_qubit_not(
     qureg: &mut Qureg,
     targs: &[i32],
@@ -3780,7 +3766,7 @@ pub fn mix_density_matrix(
 ///
 /// # Errors
 ///
-/// Returns [`InvalidQuESTInputError`][quest-error-except],
+/// Returns [`InvalidQuESTInputError`],
 ///
 /// - if the argument `qureg` is not a density matrix
 ///
@@ -3796,10 +3782,10 @@ pub fn mix_density_matrix(
 /// assert!((purity - 1.).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][quest-api] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [quest-error-except]: crate::QuestError::InvalidQuESTInputError
-/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn calc_purity(qureg: &Qureg) -> Result<Qreal, QuestError> {
     catch_quest_exception(|| unsafe { ffi::calcPurity(qureg.reg) })
 }
@@ -3837,7 +3823,7 @@ pub fn calc_purity(qureg: &Qureg) -> Result<Qreal, QuestError> {
 ///
 /// # Errors
 ///
-/// Returns [`InvalidQuESTInputError`][quest-error-except],
+/// Returns [`InvalidQuESTInputError`],
 ///
 /// - if the second argument `pure_state` is not a state-vector
 /// - if the number of qubits `qureg` and `pure_state` do not match
@@ -3857,10 +3843,10 @@ pub fn calc_purity(qureg: &Qureg) -> Result<Qreal, QuestError> {
 /// assert!((fidelity - 0.25).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][quest-api] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [quest-error-except]: crate::QuestError::InvalidQuESTInputError
-/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn calc_fidelity(
     qureg: &Qureg,
     pure_state: &Qureg,
@@ -3893,10 +3879,9 @@ pub fn calc_fidelity(
 ///
 /// # Errors
 ///
-/// - [`QubitIndexError`][quest-error-index], if either `qubit1` or `qubit2` is
-///   outside [0, [`qureg.num_qubits_represented()`][qureg-num-qubits]).
-/// - [`InvalidQuESTInputError`][quest-error-except], if `qubit1` and `qubit2`
-///   are equal
+/// - [`QubitIndexError`], if either `qubit1` or `qubit2` is outside [0,
+///   [`qureg.num_qubits_represented()`]).
+/// - [`InvalidQuESTInputError`], if `qubit1` and `qubit2` are equal
 ///
 /// # Examples
 ///
@@ -3914,12 +3899,12 @@ pub fn calc_fidelity(
 /// assert_eq!(outcome, 0);
 /// ```
 ///
-/// See [QuEST API][quest-api] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [quest-error-index]: crate::QuestError::QubitIndexError
-/// [quest-error-except]: crate::QuestError::InvalidQuESTInputError
-/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
-/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
+/// [`QubitIndexError`]: crate::QuestError::QubitIndexError
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+/// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn swap_gate(
     qureg: &mut Qureg,
     qubit1: i32,
@@ -5633,9 +5618,9 @@ pub fn apply_multi_controlled_matrix_n(
 ///
 /// # Errors
 ///
-/// - [`ArrayLengthError`][quest-error-array-len], if the length of `coeffs` is
-///   different than that of `exponents`
-/// - [`InvalidQuESTInputError`][quest-error-except]
+/// - [`ArrayLengthError`], if the length of `coeffs` is different than that of
+///   `exponents`
+/// - [`InvalidQuESTInputError`]
 ///   - if any qubit in `qubits` has an invalid index (i.e. does not satisfy `0
 ///     <= qubit < qureg.num_qubits_represented()`
 ///   - if the elements of `qubits` are not unique
@@ -5664,15 +5649,15 @@ pub fn apply_multi_controlled_matrix_n(
 /// apply_phase_func(qureg, qubits, encoding, coeffs, exponents).unwrap();
 /// ```
 ///
-/// See [QuEST API][quest-api] for more information.
+/// See [QuEST API] for more information.
 ///
 /// [api-bit-encoding-twos-cplm]: crate::BitEncoding::TWOS_COMPLEMENT
 /// [api-bit-encoding]: crate::BitEncoding
 /// [api-apply-phase-func-overrides]: crate::apply_phase_func_overrides()
-/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
-/// [quest-error-array-len]: crate::QuestError::ArrayLengthError
-/// [quest-error-except]: crate::QuestError::InvalidQuESTInputError
-/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
+/// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [`ArrayLengthError`]: crate::QuestError::ArrayLengthError
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn apply_phase_func(
     qureg: &mut Qureg,
     qubits: &[i32],
@@ -5742,11 +5727,11 @@ pub fn apply_phase_func(
 ///
 /// # Errors
 ///
-/// - [`ArrayLengthError`][quest-error-array-len],
+/// - [`ArrayLengthError`],
 ///   - if the length of `coeffs` is different than that of `exponents`
 ///   - if the length of `override_inds` is different than that of
 ///     `override_phases`
-/// - [`InvalidQuESTInputError`][quest-error-except],
+/// - [`InvalidQuESTInputError`],
 ///   - if any qubit in `qubits` has an invalid index (i.e. does not satisfy `0
 ///     <= qubit < qureg.num_qubits_represented()`
 ///   - if the elements of `qubits` are not unique
@@ -5792,13 +5777,13 @@ pub fn apply_phase_func(
 /// .unwrap();
 /// ```
 ///
-/// See [QuEST API][quest-api] for more information.
+/// See [QuEST API] for more information.
 ///
 /// [api-apply-phase-func]: crate::apply_phase_func()
 /// [api-bit-encoding]: crate::BitEncoding
-/// [quest-error-array-len]: crate::QuestError::ArrayLengthError
-/// [quest-error-except]: crate::QuestError::InvalidQuESTInputError
-/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
+/// [`ArrayLengthError`]: crate::QuestError::ArrayLengthError
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::too_many_arguments)]
 pub fn apply_phase_func_overrides(
     qureg: &mut Qureg,
@@ -6245,11 +6230,11 @@ pub fn apply_param_named_phase_func_overrides(
 ///
 /// apply_full_qft(qureg);
 /// ```
-/// See [QuEST API][quest-api] for more information.
+/// See [QuEST API] for more information.
 ///
 /// [api-apply-named-phase-func]: crate::apply_named_phase_func()
 /// [api-apply-qft]: crate::apply_qft()
-/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn apply_full_qft(qureg: &mut Qureg) {
     catch_quest_exception(|| unsafe {
         ffi::applyFullQFT(qureg.reg);
@@ -6260,7 +6245,7 @@ pub fn apply_full_qft(qureg: &mut Qureg) {
 /// Applies the quantum Fourier transform (QFT) to a specific subset of qubits.
 ///
 /// The order of qubits affects the ultimate unitary.
-/// The canonical full-state QFT ([`apply_full_qft()`][api-apply-full-qft]) is
+/// The canonical full-state QFT ([`apply_full_qft()`]) is
 /// achieved by targeting every qubit in increasing order.
 ///
 /// - If `qureg` is a state-vector, the output amplitudes are a kronecker
@@ -6272,7 +6257,7 @@ pub fn apply_full_qft(qureg: &mut Qureg) {
 ///   unnormalised.
 ///
 /// This function merges contiguous controlled-phase gates into single
-/// invocations of [apply_named_phase_func()][api-apply-named-phase-func], and
+/// invocations of [`apply_named_phase_func()`], and
 /// hence is significantly faster than performing
 /// the QFT circuit directly.
 ///
@@ -6281,7 +6266,7 @@ pub fn apply_full_qft(qureg: &mut Qureg) {
 /// rounds of pair-wise communication, and hence is exponentially faster than
 /// directly performing the DFT on the amplitudes of `qureg`.
 ///
-/// See [`apply_full_qft()`][api-apply-full-qft] to apply the QFT to he entirety
+/// See [`apply_full_qft()`] to apply the QFT to he entirety
 /// of `qureg`.
 ///
 /// # Parameters
@@ -6291,12 +6276,11 @@ pub fn apply_full_qft(qureg: &mut Qureg) {
 ///
 /// # Errors
 ///
-/// - [`ArrayLengthError`][quest-error-array-len], if the length of `qubits` is
-///   less than [`qureg.num_qubits_represented()`][qureg-num-qubits]
-/// - [`QubitIndexError`][quest-error-index], if any of `qubits` is outside [0,
-///   [`qureg.num_qubits_represented()`][qureg-num-qubits]).
-/// - [`InvalidQuESTInputError`][quest-error-except], if `qubits` contains any
-///   repetitions
+/// - [`ArrayLengthError`], if the length of `qubits` is less than
+///   [`qureg.num_qubits_represented()`]
+/// - [`QubitIndexError`], if any of `qubits` is outside [0,
+///   [`qureg.num_qubits_represented()`]).
+/// - [`InvalidQuESTInputError`], if `qubits` contains any repetitions
 ///
 ///
 /// # Examples
@@ -6310,15 +6294,15 @@ pub fn apply_full_qft(qureg: &mut Qureg) {
 /// apply_qft(qureg, &[0, 1]).unwrap();
 /// ```
 ///
-/// See [QuEST API][quest-api] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [api-apply-full-qft]: crate::apply_full_qft()
-/// [api-apply-named-phase-func]: crate::apply_named_phase_func()
-/// [quest-error-array-len]: crate::QuestError::ArrayLengthError
-/// [quest-error-except]: crate::QuestError::InvalidQuESTInputError
-/// [quest-error-index]: crate::QuestError::QubitIndexError
-/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
-/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
+/// [`apply_full_qft()`]: crate::apply_full_qft()
+/// [`apply_named_phase_func()`]: crate::apply_named_phase_func()
+/// [`ArrayLengthError`]: crate::QuestError::ArrayLengthError
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+/// [`QubitIndexError`]: crate::QuestError::QubitIndexError
+/// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn apply_qft(
     qureg: &mut Qureg,
     qubits: &[i32],
@@ -6345,16 +6329,15 @@ pub fn apply_qft(
 ///
 /// This function zeroes all amplitudes in the state-vector or density-matrix
 /// which correspond to the opposite `outcome` given. Unlike
-/// [`collapse_to_outcome()`][api-collapse-to-outcome], it does not
-/// thereafter normalise `qureg`, and hence may leave it in a non-physical
-/// state.
+/// [`collapse_to_outcome()`], it does not thereafter normalise `qureg`, and
+/// hence may leave it in a non-physical state.
 ///
 /// Note there is no requirement that the `outcome` state has a non-zero
 /// proability, and hence this function may leave `qureg` in a blank state,
-/// like that produced by [`init_blank_state()`][api-init-blank-state].
+/// like that produced by [`init_blank_state()`].
 ///
-/// See [`collapse_to_outcome()`][api-collapse-to-outcome] for a norm-preserving
-/// equivalent, like a forced   measurement
+/// See [`collapse_to_outcome()`] for a norm-preserving equivalent, like a
+/// forced   measurement
 ///
 /// # Parameters
 ///
@@ -6364,10 +6347,9 @@ pub fn apply_qft(
 ///
 /// # Errors
 ///
-/// - [`QubitIndexError`][quest-error-index],
-///   - if `qubit` is outside [0,
-///     [`qureg.num_qubits_represented()`][qureg-num-qubits]).
-/// - [`InvalidQuESTInputError`][quest-error-except],
+/// - [`QubitIndexError`],
+///   - if `qubit` is outside [0, [`qureg.num_qubits_represented()`]).
+/// - [`InvalidQuESTInputError`],
 ///   - if `outcome` is not in {0,1}
 ///
 /// # Examples
@@ -6384,14 +6366,14 @@ pub fn apply_qft(
 /// assert!(amp.abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][quest-api] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [api-collapse-to-outcome]: crate::collapse_to_outcome()
-/// [api-init-blank-state]: crate::init_blank_state()
-/// [qureg-num-qubits]: crate::Qureg::num_qubits_represented()
-/// [quest-error-except]: crate::QuestError::InvalidQuESTInputError
-/// [quest-error-index]: crate::QuestError::QubitIndexError
-/// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
+/// [`collapse_to_outcome()`]: crate::collapse_to_outcome()
+/// [`init_blank_state()`]: crate::init_blank_state()
+/// [`QubitIndexError`]: crate::QuestError::QubitIndexError
+/// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn apply_projector(
     qureg: &mut Qureg,
     qubit: i32,
