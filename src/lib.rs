@@ -6404,7 +6404,7 @@ pub fn apply_projector(
 #[cfg(test)]
 mod tests;
 
-/// The impl of SendPtr was taken from [`rayon`] crate.
+/// The impl of `SendPtr` was taken from [`rayon`] crate.
 /// Rayon is distributed under MIT License.
 ///
 /// We need to transmit raw pointers across threads. It is possible to do this
