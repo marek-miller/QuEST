@@ -1,5 +1,9 @@
 # Releases
 
+## v0.3.5 (??/??/????)
+
+- Implement Sync and Send traits for `QuestEnv` and `Qureg`.
+
 ## v0.3.4 (29/07/2023)
 
 - Improve documentation
@@ -7,7 +11,6 @@
 - Internal exception handler passes error messages via a lock-free channel
   (added dependency: crossbeam, to be able to share between threads the global
   channel's receiver end -- the Standard Library's channel is not Sync).
-- Implement Sync and Send traits for `QuestEnv` and `Qureg`.
 
 ## v0.3.3 (18/07/2023)
 
