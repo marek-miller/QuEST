@@ -15,7 +15,10 @@ use std::ffi::{
     c_ulong,
 };
 
-use super::precision::qreal;
+use crate::{
+    precision::qreal,
+    SendPtr,
+};
 
 #[repr(C)]
 #[derive(Debug, Clone, Copy)]
@@ -165,7 +168,7 @@ pub struct Qureg {
 pub struct QuESTEnv {
     rank:     c_int,
     numRanks: c_int,
-    seeds:    *mut c_ulong,
+    seeds:    SendPtr<c_ulong>,
     numSeeds: c_int,
 }
 
