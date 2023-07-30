@@ -30,29 +30,39 @@ Now write some code and put it in `./src/main.rs`:
 use quest_bind::*;
 
 fn main() -> Result<(), QuestError> {
-    // Initialize QuEST environment
+    // Initialize QuEST environment and report to screen
     let env = &QuestEnv::new();
-    report_quest_env(env);
+    env.report_quest_env();
 
-    // Initialize 2-qubit register in |00> state
+    // Create a 2-qubit register and report its parameters
     let qureg = &mut Qureg::try_new(2, env)?;
     report_qureg_params(qureg);
+    // Initialize |00> state and print out the state to screen
     init_zero_state(qureg);
+    qureg.report_state_to_screen(0);
 
+    // Prepare a Bell state `|00> + |11>`: apply Hadamard gate
+    // on qubit 0, then NOT on qubit 1, controlled by qubit 0.
     println!("---\nPrepare Bell state: |00> + |11>");
     hadamard(qureg, 0).and(controlled_not(qureg, 0, 1))?;
 
-    // Measure each qubit
+    // Measure both qubits
     let outcome0 = measure(qureg, 0)?;
     let outcome1 = measure(qureg, 1)?;
-
     println!("Qubit \"0\" measured in state: |{outcome0}>");
     println!("Qubit \"1\" measured in state: |{outcome1}>");
-    assert_eq!(outcome0, outcome1);
-    println!("They match!");
 
-    // Both `env` and `qureg` are safely discarded here
-    Ok(())
+    // Because the state was entangled, the outcomes
+    // should always be the same
+    if outcome0 == outcome1 {
+        println!("They match!");
+        Ok(())
+    } else {
+        panic!("qubits in Bell state should be perfectly correlated");
+    }
+
+    // At this point both `qureg` and `env` are dropped and
+    // the allocated memory is freed.
 }
 ```
 
