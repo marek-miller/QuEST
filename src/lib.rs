@@ -121,14 +121,14 @@ impl ComplexMatrixN {
     /// let mtr = ComplexMatrixN::try_new(3).unwrap();
     /// ```
     ///
-    /// See [QuEST API][1] for more information.
+    /// See [QuEST API] for more information.
     ///
     /// # Errors
     ///
     /// Returns [`QuestError::InvalidQuESTInputError`](crate::QuestError::InvalidQuESTInputError)
     /// on failure.  This is an exception thrown by `QuEST`.
     ///
-    /// [1]: https://quest-kit.github.io/QuEST/modules.html
+    /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
     pub fn try_new(num_qubits: i32) -> Result<Self, QuestError> {
         catch_quest_exception(|| {
             Self(unsafe { ffi::createComplexMatrixN(num_qubits) })
@@ -373,14 +373,14 @@ impl PauliHamil {
     /// let hamil = PauliHamil::try_new(2, 3).unwrap();
     /// ```
     ///
-    /// See [QuEST API][1] for more information.
+    /// See [QuEST API] for more information.
     ///
     /// # Errors
     ///
     /// Returns [`QuestError::InvalidQuESTInputError`](crate::QuestError::InvalidQuESTInputError) on
     /// failure. This is an exception thrown by `QuEST`.
     ///
-    /// [1]: https://quest-kit.github.io/QuEST/modules.html
+    /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
     pub fn try_new(
         num_qubits: i32,
         num_sum_terms: i32,
@@ -480,7 +480,7 @@ impl<'a> Drop for DiagonalOp<'a> {
 /// .unwrap();
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
 /// # Errors
 ///
@@ -490,7 +490,7 @@ impl<'a> Drop for DiagonalOp<'a> {
 /// [`QuestError::InvalidQuESTInputError`](crate::QuestError::InvalidQuESTInputError) on
 /// failure. This is an exception thrown by `QuEST`.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::cast_sign_loss)]
 pub fn init_complex_matrix_n(
     m: &mut ComplexMatrixN,
@@ -538,9 +538,9 @@ pub fn init_complex_matrix_n(
 /// .unwrap();
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn init_pauli_hamil(
     hamil: &mut PauliHamil,
     coeffs: &[Qreal],
@@ -562,9 +562,9 @@ pub fn init_pauli_hamil(
 ///
 /// sync_diagonal_op(op).unwrap();
 /// ```
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn sync_diagonal_op(op: &mut DiagonalOp) -> Result<(), QuestError> {
     catch_quest_exception(|| unsafe {
         ffi::syncDiagonalOp(op.op);
@@ -584,14 +584,14 @@ pub fn sync_diagonal_op(op: &mut DiagonalOp) -> Result<(), QuestError> {
 /// let imag = &[5., 6., 7., 8.];
 /// init_diagonal_op(op, real, imag);
 /// ```
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
 /// # Panics
 ///
 /// This function will panic, if either `real` or `imag`
 /// have length smaller than `2.pow(num_qubits)`.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::cast_sign_loss)]
 pub fn init_diagonal_op(
     op: &mut DiagonalOp,
@@ -631,9 +631,9 @@ pub fn init_diagonal_op(
 /// init_diagonal_op_from_pauli_hamil(op, hamil).unwrap();
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn init_diagonal_op_from_pauli_hamil(
     op: &mut DiagonalOp,
     hamil: &PauliHamil,
@@ -667,9 +667,9 @@ pub fn init_diagonal_op_from_pauli_hamil(
 /// `real.len() >= num_elems as usize`, or
 /// `imag.len() >= num_elems as usize`.
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::cast_sign_loss)]
 #[allow(clippy::cast_possible_truncation)]
 pub fn set_diagonal_op_elems(
@@ -707,9 +707,9 @@ pub fn set_diagonal_op_elems(
 /// apply_diagonal_op(qureg, &op).unwrap();
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn apply_diagonal_op(
     qureg: &mut Qureg,
     op: &DiagonalOp,
@@ -741,9 +741,9 @@ pub fn apply_diagonal_op(
 /// assert!((expec_val.im - 5.).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn calc_expec_diagonal_op(
     qureg: &Qureg,
     op: &DiagonalOp,
@@ -1075,9 +1075,9 @@ pub fn init_classical_state(
 /// assert!((calc_purity(qureg).unwrap() - 1.0).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn init_pure_state(
     qureg: &mut Qureg,
     pure_: &Qureg,
@@ -1089,9 +1089,9 @@ pub fn init_pure_state(
 
 /// Initializes `qureg` to be in the debug state.
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn init_debug_state(qureg: &mut Qureg) {
     catch_quest_exception(|| unsafe {
         ffi::initDebugState(qureg.reg);
@@ -1114,9 +1114,9 @@ pub fn init_debug_state(qureg: &mut Qureg) {
 /// assert!((prob - 1.).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn init_state_from_amps(
     qureg: &mut Qureg,
     reals: &[Qreal],
@@ -1156,9 +1156,9 @@ pub fn init_state_from_amps(
 /// set_amps(qureg, 4, re, im, num_amps);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn set_amps(
     qureg: &mut Qureg,
     start_ind: i64,
@@ -1196,9 +1196,9 @@ pub fn set_amps(
 /// set_density_amps(qureg, 0, 0, re, im, num_amps);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn set_density_amps(
     qureg: &mut Qureg,
     start_row: i64,
@@ -1232,9 +1232,9 @@ pub fn set_density_amps(
 /// clone_qureg(target_qureg, copy_qureg);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn clone_qureg(
     target_qureg: &mut Qureg,
     copy_qureg: &Qureg,
@@ -1259,9 +1259,9 @@ pub fn clone_qureg(
 /// phase_shift(qureg, target_qubit, angle).unwrap();
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn phase_shift(
     qureg: &mut Qureg,
     target_quibit: i32,
@@ -1287,9 +1287,9 @@ pub fn phase_shift(
 /// controlled_phase_shift(qureg, id_qubit1, id_qubit2, angle).unwrap();
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn controlled_phase_shift(
     qureg: &mut Qureg,
     id_qubit1: i32,
@@ -1315,9 +1315,9 @@ pub fn controlled_phase_shift(
 /// multi_controlled_phase_shift(qureg, control_qubits, angle).unwrap();
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn multi_controlled_phase_shift(
     qureg: &mut Qureg,
     control_qubits: &[i32],
@@ -1357,9 +1357,9 @@ pub fn multi_controlled_phase_shift(
 /// controlled_phase_flip(qureg, 0, 1);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn controlled_phase_flip(
     qureg: &mut Qureg,
     id_qubit1: i32,
@@ -1384,9 +1384,9 @@ pub fn controlled_phase_flip(
 /// multi_controlled_phase_flip(qureg, control_qubits);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn multi_controlled_phase_flip(
     qureg: &mut Qureg,
     control_qubits: &[i32],
@@ -1901,9 +1901,9 @@ pub fn get_density_amp(
 /// assert!((amp - 1.).abs() < EPSILON)
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[must_use]
 pub fn calc_total_prob(qureg: &Qureg) -> Qreal {
     catch_quest_exception(|| unsafe { ffi::calcTotalProb(qureg.reg) })
@@ -2199,9 +2199,9 @@ pub fn rotate_z(
 /// rotate_around_axis(qureg, 0, angle, axis).unwrap();
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn rotate_around_axis(
     qureg: &mut Qureg,
     rot_qubit: i32,
@@ -2232,9 +2232,9 @@ pub fn rotate_around_axis(
 /// controlled_rotate_x(qureg, control_qubit, target_qubit, angle).unwrap();
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn controlled_rotate_x(
     qureg: &mut Qureg,
     control_qubit: i32,
@@ -2267,9 +2267,9 @@ pub fn controlled_rotate_x(
 /// controlled_rotate_y(qureg, control_qubit, target_qubit, angle).unwrap();
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn controlled_rotate_y(
     qureg: &mut Qureg,
     control_qubit: i32,
@@ -2302,9 +2302,9 @@ pub fn controlled_rotate_y(
 /// controlled_rotate_z(qureg, control_qubit, target_qubit, angle).unwrap();
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn controlled_rotate_z(
     qureg: &mut Qureg,
     control_qubit: i32,
@@ -2344,9 +2344,9 @@ pub fn controlled_rotate_z(
 /// .unwrap();
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn controlled_rotate_around_axis(
     qureg: &mut Qureg,
     control_qubit: i32,
@@ -2990,9 +2990,9 @@ pub fn multi_qubit_not(
 /// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn controlled_pauli_y(
     qureg: &mut Qureg,
     control_qubit: i32,
@@ -3019,9 +3019,9 @@ pub fn controlled_pauli_y(
 /// assert!(prob.abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn calc_prob_of_outcome(
     qureg: &Qureg,
     measure_qubit: i32,
@@ -3048,14 +3048,14 @@ pub fn calc_prob_of_outcome(
 /// assert_eq!(outcome_probs, &vec![1., 0., 0., 0.]);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
 /// # Panics
 ///
 /// This function will panic if
 /// `outcome_probs.len() < num_qubits as usize`
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::cast_sign_loss)]
 pub fn calc_prob_of_all_outcomes(
     outcome_probs: &mut [Qreal],
@@ -3096,9 +3096,9 @@ pub fn calc_prob_of_all_outcomes(
 /// collapse_to_outcome(qureg, 0, 1).unwrap_err();
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn collapse_to_outcome(
     qureg: &mut Qureg,
     measure_qubit: i32,
@@ -3132,9 +3132,9 @@ pub fn collapse_to_outcome(
 /// assert_eq!(outcome1, outcome2);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn measure(
     qureg: &mut Qureg,
     measure_qubit: i32,
@@ -3168,9 +3168,9 @@ pub fn measure(
 /// assert_eq!(outcome1, outcome2);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn measure_with_stats(
     qureg: &mut Qureg,
     measure_qubit: i32,
@@ -3199,9 +3199,9 @@ pub fn measure_with_stats(
 /// assert!((prod.im).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn calc_inner_product(
     bra: &Qureg,
     ket: &Qureg,
@@ -3226,9 +3226,9 @@ pub fn calc_inner_product(
 /// assert!((prod - 0.25).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn calc_density_inner_product(
     rho1: &Qureg,
     rho2: &Qureg,
@@ -3252,9 +3252,9 @@ pub fn calc_density_inner_product(
 /// seed_quest_default(env);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn seed_quest_default(env: &mut QuestEnv) {
     catch_quest_exception(|| unsafe {
         let env_ptr = std::ptr::addr_of_mut!(env.0);
@@ -3274,9 +3274,9 @@ pub fn seed_quest_default(env: &mut QuestEnv) {
 /// seed_quest(env, &[1, 2, 3]);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn seed_quest(
     env: &mut QuestEnv,
     seed_array: &[u64],
@@ -3303,9 +3303,9 @@ pub fn seed_quest(
 /// assert!(seeds.len() > 0);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::cast_sign_loss)]
 #[must_use]
 pub fn get_quest_seeds<'a: 'b, 'b>(env: &'a QuestEnv) -> &'b [u64] {
@@ -3339,9 +3339,9 @@ pub fn get_quest_seeds<'a: 'b, 'b>(env: &'a QuestEnv) -> &'b [u64] {
 /// print_recorded_qasm(qureg);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn start_recording_qasm(qureg: &mut Qureg) {
     catch_quest_exception(|| unsafe {
         ffi::startRecordingQASM(qureg.reg);
@@ -3368,9 +3368,9 @@ pub fn start_recording_qasm(qureg: &mut Qureg) {
 /// print_recorded_qasm(qureg);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn stop_recording_qasm(qureg: &mut Qureg) {
     catch_quest_exception(|| unsafe {
         ffi::stopRecordingQASM(qureg.reg);
@@ -3398,9 +3398,9 @@ pub fn stop_recording_qasm(qureg: &mut Qureg) {
 /// print_recorded_qasm(qureg);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn clear_recorded_qasm(qureg: &mut Qureg) {
     catch_quest_exception(|| unsafe {
         ffi::clearRecordedQASM(qureg.reg);
@@ -3426,9 +3426,9 @@ pub fn clear_recorded_qasm(qureg: &mut Qureg) {
 /// print_recorded_qasm(qureg);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn print_recorded_qasm(qureg: &mut Qureg) {
     catch_quest_exception(|| unsafe {
         ffi::printRecordedQASM(qureg.reg);
@@ -3452,9 +3452,9 @@ pub fn print_recorded_qasm(qureg: &mut Qureg) {
 /// write_recorded_qasm_to_file(qureg, "/dev/null").unwrap();
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn write_recorded_qasm_to_file(
     qureg: &mut Qureg,
     filename: &str,
@@ -3486,9 +3486,9 @@ pub fn write_recorded_qasm_to_file(
 /// assert!(amp.re.abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn mix_dephasing(
     qureg: &mut Qureg,
     target_qubit: i32,
@@ -3526,9 +3526,9 @@ pub fn mix_dephasing(
 /// assert!(amp.re.abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn mix_two_qubit_dephasing(
     qureg: &mut Qureg,
     qubit1: i32,
@@ -3568,9 +3568,9 @@ pub fn mix_two_qubit_dephasing(
 /// assert!((amp.re - 0.5) < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn mix_depolarising(
     qureg: &mut Qureg,
     target_qubit: i32,
@@ -3606,9 +3606,9 @@ pub fn mix_depolarising(
 /// assert!((amp.re - 1.) < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn mix_damping(
     qureg: &mut Qureg,
     target_qubit: i32,
@@ -3647,9 +3647,9 @@ pub fn mix_damping(
 /// assert!(amp.re.abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn mix_two_qubit_depolarising(
     qureg: &mut Qureg,
     qubit1: i32,
@@ -3692,9 +3692,9 @@ pub fn mix_two_qubit_depolarising(
 /// assert!((outcome_prob - 0.5).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn mix_pauli(
     qureg: &mut Qureg,
     target_qubit: i32,
@@ -3731,9 +3731,9 @@ pub fn mix_pauli(
 /// mix_density_matrix(combine_qureg, 0.5, other_qureg).unwrap();
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn mix_density_matrix(
     combine_qureg: &mut Qureg,
     prob: Qreal,
@@ -3937,9 +3937,9 @@ pub fn swap_gate(
 /// assert_eq!(outcome, 0);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn sqrt_swap_gate(
     qureg: &mut Qureg,
     qb1: i32,
@@ -3983,9 +3983,9 @@ pub fn sqrt_swap_gate(
 /// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn multi_state_controlled_unitary(
     qureg: &mut Qureg,
     control_qubits: &[i32],
@@ -4035,9 +4035,9 @@ pub fn multi_state_controlled_unitary(
 /// assert!((amp - 0.5).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn multi_rotate_z(
     qureg: &mut Qureg,
     qubits: &[i32],
@@ -4075,9 +4075,9 @@ pub fn multi_rotate_z(
 /// assert!((amp + 1.).abs() < 2. * EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn multi_rotate_pauli(
     qureg: &mut Qureg,
     target_qubits: &[i32],
@@ -4137,9 +4137,9 @@ pub fn multi_rotate_pauli(
 /// assert!((amp + 1.).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn multi_controlled_multi_rotate_z(
     qureg: &mut Qureg,
     control_qubits: &[i32],
@@ -4193,9 +4193,9 @@ pub fn multi_controlled_multi_rotate_z(
 /// assert!((amp + 1.).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn multi_controlled_multi_rotate_pauli(
     qureg: &mut Qureg,
     control_qubits: &[i32],
@@ -4243,9 +4243,9 @@ pub fn multi_controlled_multi_rotate_pauli(
 /// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn calc_expec_pauli_prod(
     qureg: &Qureg,
     target_qubits: &[i32],
@@ -4298,9 +4298,9 @@ pub fn calc_expec_pauli_prod(
 /// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn calc_expec_pauli_sum(
     qureg: &Qureg,
     all_pauli_codes: &[PauliOpType],
@@ -4348,9 +4348,9 @@ pub fn calc_expec_pauli_sum(
 /// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn calc_expec_pauli_hamil(
     qureg: &Qureg,
     hamil: &PauliHamil,
@@ -4395,9 +4395,9 @@ pub fn calc_expec_pauli_hamil(
 /// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn two_qubit_unitary(
     qureg: &mut Qureg,
     target_qubit1: i32,
@@ -4457,9 +4457,9 @@ pub fn two_qubit_unitary(
 /// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn controlled_two_qubit_unitary(
     qureg: &mut Qureg,
     control_qubit: i32,
@@ -4528,9 +4528,9 @@ pub fn controlled_two_qubit_unitary(
 /// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn multi_controlled_two_qubit_unitary(
     qureg: &mut Qureg,
     control_qubits: &[i32],
@@ -4593,9 +4593,9 @@ pub fn multi_controlled_two_qubit_unitary(
 /// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn multi_qubit_unitary(
     qureg: &mut Qureg,
     targs: &[i32],
@@ -4647,9 +4647,9 @@ pub fn multi_qubit_unitary(
 /// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn controlled_multi_qubit_unitary(
     qureg: &mut Qureg,
     ctrl: i32,
@@ -4712,9 +4712,9 @@ pub fn controlled_multi_qubit_unitary(
 /// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn multi_controlled_multi_qubit_unitary(
     qureg: &mut Qureg,
     ctrls: &[i32],
@@ -4767,9 +4767,9 @@ pub fn multi_controlled_multi_qubit_unitary(
 /// assert!((amp.re - 1.).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn mix_kraus_map(
     qureg: &mut Qureg,
     target: i32,
@@ -4825,9 +4825,9 @@ pub fn mix_kraus_map(
 /// assert!((amp.re - 1.).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn mix_two_qubit_kraus_map(
     qureg: &mut Qureg,
     target1: i32,
@@ -4893,9 +4893,9 @@ pub fn mix_two_qubit_kraus_map(
 /// assert!((amp.re - 1.).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn mix_multi_qubit_kraus_map(
     qureg: &mut Qureg,
     targets: &[i32],
@@ -4946,9 +4946,9 @@ pub fn mix_multi_qubit_kraus_map(
 /// assert!(amp.re.abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn mix_nontp_kraus_map(
     qureg: &mut Qureg,
     target: i32,
@@ -5000,9 +5000,9 @@ pub fn mix_nontp_kraus_map(
 /// assert!(amp.re.abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn mix_nontp_two_qubit_kraus_map(
     qureg: &mut Qureg,
     target1: i32,
@@ -5069,9 +5069,9 @@ pub fn mix_nontp_two_qubit_kraus_map(
 /// assert!(amp.re.abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn mix_nontp_multi_qubit_kraus_map(
     qureg: &mut Qureg,
     targets: &[i32],
@@ -5116,9 +5116,9 @@ pub fn mix_nontp_multi_qubit_kraus_map(
 /// assert!((dist - SQRT_2).abs() < EPSILON, "{:?}", dist);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn calc_hilbert_schmidt_distance(
     a: &Qureg,
     b: &Qureg,
@@ -5164,9 +5164,9 @@ pub fn calc_hilbert_schmidt_distance(
 /// assert!((amp - 1.).abs() < 10. * EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn set_weighted_qureg(
     fac1: Qcomplex,
     qureg1: &Qureg,
@@ -5217,9 +5217,9 @@ pub fn set_weighted_qureg(
 /// assert!(qb1 != qb2);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn apply_pauli_sum(
     in_qureg: &mut Qureg,
     all_pauli_codes: &[PauliOpType],
@@ -5274,9 +5274,9 @@ pub fn apply_pauli_sum(
 /// assert!(qb1 != qb2);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn apply_pauli_hamil(
     in_qureg: &mut Qureg,
     hamil: &PauliHamil,
@@ -5315,9 +5315,9 @@ pub fn apply_pauli_hamil(
 /// assert_eq!(qb1, 1);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn apply_trotter_circuit(
     qureg: &mut Qureg,
     hamil: &PauliHamil,
@@ -5349,9 +5349,9 @@ pub fn apply_trotter_circuit(
 /// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn apply_matrix2(
     qureg: &mut Qureg,
     target_qubit: i32,
@@ -5398,9 +5398,9 @@ pub fn apply_matrix2(
 /// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn apply_matrix4(
     qureg: &mut Qureg,
     target_qubit1: i32,
@@ -5456,9 +5456,9 @@ pub fn apply_matrix4(
 /// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn apply_matrix_n(
     qureg: &mut Qureg,
     targs: &[i32],
@@ -5513,9 +5513,9 @@ pub fn apply_matrix_n(
 /// assert!((amp - 1.).abs() < EPSILON);
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn apply_multi_controlled_matrix_n(
     qureg: &mut Qureg,
     ctrls: &[i32],
@@ -5851,9 +5851,9 @@ pub fn apply_phase_func_overrides(
 /// .unwrap();
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::too_many_arguments)]
 pub fn apply_multi_var_phase_func(
     qureg: &mut Qureg,
@@ -5917,9 +5917,9 @@ pub fn apply_multi_var_phase_func(
 /// .unwrap();
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::too_many_arguments)]
 pub fn apply_multi_var_phase_func_overrides(
     qureg: &mut Qureg,
@@ -5979,9 +5979,9 @@ pub fn apply_multi_var_phase_func_overrides(
 /// .unwrap();
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn apply_named_phase_func(
     qureg: &mut Qureg,
     qubits: &[i32],
@@ -6035,9 +6035,9 @@ pub fn apply_named_phase_func(
 /// .unwrap();
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::too_many_arguments)]
 pub fn apply_named_phase_func_overrides(
     qureg: &mut Qureg,
@@ -6095,9 +6095,9 @@ pub fn apply_named_phase_func_overrides(
 /// .unwrap();
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::too_many_arguments)]
 pub fn apply_param_named_phase_func(
     qureg: &mut Qureg,
@@ -6158,9 +6158,9 @@ pub fn apply_param_named_phase_func(
 /// .unwrap();
 /// ```
 ///
-/// See [QuEST API][1] for more information.
+/// See [QuEST API] for more information.
 ///
-/// [1]: https://quest-kit.github.io/QuEST/modules.html
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::too_many_arguments)]
 pub fn apply_param_named_phase_func_overrides(
     qureg: &mut Qureg,
