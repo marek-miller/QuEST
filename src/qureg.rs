@@ -87,6 +87,61 @@ impl<'a> Qureg<'a> {
     pub fn num_qubits_represented(&self) -> i32 {
         self.reg.numQubitsRepresented
     }
+
+    /// Print the current state vector of probability amplitudes to file.
+    ///
+    /// ## File format:
+    ///
+    /// ```text
+    /// real, imag
+    /// realComponent1, imagComponent1
+    /// realComponent2, imagComponent2
+    /// ...
+    /// realComponentN, imagComponentN
+    /// ```
+    ///
+    ///  ## File naming convention:
+    ///
+    /// For each node that the program runs on, a file
+    /// `state_rank_[node_rank].csv` is generated. If there is  more than
+    /// one node, ranks after the first do not include the header:
+    ///
+    /// ```text
+    /// real, imag
+    /// ```
+    ///
+    /// so that files are easier to combine.
+    ///
+    /// # Parameters
+    ///
+    /// - `qureg` a state-vector or density matrix
+    ///
+    /// See [QuEST API] for more information.
+    ///
+    /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+    pub fn report_state(&self) {
+        catch_quest_exception(|| unsafe { ffi::reportState(self.reg) })
+            .expect("report_state should never fail");
+    }
+
+    /// Print the current state vector of probability amplitudes.
+    ///
+    /// Print the current state vector of probability amplitudes for a set of
+    /// qubits to standard out. For debugging purposes. Each rank should
+    /// print output serially.  Only print output for systems <= 5 qubits.
+    ///
+    /// See [QuEST API] for more information.
+    ///
+    /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+    pub fn report_state_to_screen(
+        &self,
+        report_rank: i32,
+    ) {
+        catch_quest_exception(|| unsafe {
+            ffi::reportStateToScreen(self.reg, self.env.0, report_rank)
+        })
+        .expect("report_state_to screen should never fail");
+    }
 }
 
 impl<'a> Drop for Qureg<'a> {

@@ -11,7 +11,6 @@ use quest_bind::{
     init_zero_state,
     measure,
     report_qureg_params,
-    report_state_to_screen,
     QuestEnv,
     QuestError,
     Qureg,
@@ -27,7 +26,7 @@ fn main() -> Result<(), QuestError> {
     report_qureg_params(qureg);
     // Initialize |00> state and print out the state to screen
     init_zero_state(qureg);
-    report_state_to_screen(qureg, env, 0);
+    qureg.report_state_to_screen(0);
 
     // Prepare a Bell state `|00> + |11>`: apply Hadamard gate
     // on qubit 0, then NOT on qubit 1, controlled by qubit 0.
