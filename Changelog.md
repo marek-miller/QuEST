@@ -2,6 +2,11 @@
 
 ## v0.3.5 (??/??/????)
 
+- API breaking changes:
+  - move free function: `report_quest_env()` onto QuestEnv type as
+    `QuestEnv::report_quest_env()`
+  - move free function: `get_environment_string`() onto QuestEnv type as
+    `QuestEnv::get_environment_string()`
 - Implement Sync and Send traits for `QuestEnv` and `Qureg`.
 
 ## v0.3.4 (29/07/2023)

@@ -10,7 +10,7 @@ use quest_bind::*;
 fn main() -> Result<(), QuestError> {
     // Initialize QuEST environment and report to screen
     let env = &QuestEnv::new();
-    report_quest_env(env);
+    env.report_quest_env();
 
     // Create a 2-qubit register and report its parameters
     let qureg = &mut Qureg::try_new(2, env)?;
