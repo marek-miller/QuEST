@@ -313,9 +313,7 @@ impl Vector {
 ///
 /// Returns [`Error::ArrayLengthError`](crate::QuestError::ArrayLengthError), if
 /// either `real` or `imag` is not a square array of dimension equal to the
-/// number of qubits in `m`.  Otherwise, returns
-/// [`QuestError::InvalidQuESTInputError`](crate::QuestError::InvalidQuESTInputError) on
-/// failure. This is an exception thrown by `QuEST`.
+/// number of qubits in `m`.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::cast_sign_loss)]
