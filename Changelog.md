@@ -4,7 +4,9 @@
 
 - Implement Sync and Send traits for `QuestEnv` and `Qureg`.
 - Rewrite exception handling using `panic` mechanism. No more global API locks!
-  Our wrapper is now fully concurrent.
+  Our wrapper is now fully concurrent and much faster.
+- Remove spurious checks that existed due to imperfect error catching.
+
 - API breaking changes:
 
   - Move free functions onto `QuestEnv` type:
@@ -18,6 +20,12 @@
     - `get_num_amps()`
     - `report_state()`
     - `report_state_to_screen()` (signature change)
+
+  - Remove `QuestError` variants not needed anymore:
+
+    - `QubitIndexError`
+    - `NotDensityMatrix`
+    - `NegativeProbability`
 
 ## v0.3.4 (29/07/2023)
 
