@@ -3184,15 +3184,6 @@ pub fn multi_state_controlled_unitary(
     u: &ComplexMatrix2,
 ) -> Result<(), QuestError> {
     let num_control_qubits = control_qubits.len() as i32;
-    let num_qubits_rep = qureg.num_qubits_represented();
-    for &idx in control_qubits {
-        if idx >= num_qubits_rep {
-            return Err(QuestError::QubitIndexError);
-        }
-    }
-    if target_qubit >= qureg.num_qubits_represented() || target_qubit < 0 {
-        return Err(QuestError::QubitIndexError);
-    }
     catch_quest_exception(|| unsafe {
         ffi::multiStateControlledUnitary(
             qureg.reg,
@@ -3234,10 +3225,6 @@ pub fn multi_rotate_z(
     angle: Qreal,
 ) -> Result<(), QuestError> {
     let num_qubits = qubits.len() as i32;
-    if num_qubits > qureg.num_qubits_represented() {
-        return Err(QuestError::ArrayLengthError);
-    }
-
     catch_quest_exception(|| unsafe {
         ffi::multiRotateZ(qureg.reg, qubits.as_ptr(), num_qubits, angle);
     })
@@ -3275,18 +3262,6 @@ pub fn multi_rotate_pauli(
     angle: Qreal,
 ) -> Result<(), QuestError> {
     let num_targets = target_qubits.len() as i32;
-    let num_qubits_rep = qureg.num_qubits_represented();
-    if num_targets > num_qubits_rep {
-        return Err(QuestError::ArrayLengthError);
-    }
-    for &idx in target_qubits {
-        if idx >= num_qubits_rep || idx < 0 {
-            return Err(QuestError::QubitIndexError);
-        }
-    }
-    if target_paulis.len() < target_qubits.len() {
-        return Err(QuestError::ArrayLengthError);
-    }
     catch_quest_exception(|| unsafe {
         ffi::multiRotatePauli(
             qureg.reg,
@@ -3395,9 +3370,6 @@ pub fn multi_controlled_multi_rotate_pauli(
 ) -> Result<(), QuestError> {
     let num_controls = control_qubits.len() as i32;
     let num_targets = target_qubits.len() as i32;
-    if target_paulis.len() != target_qubits.len() {
-        return Err(QuestError::ArrayLengthError);
-    }
     catch_quest_exception(|| unsafe {
         ffi::multiControlledMultiRotatePauli(
             qureg.reg,
@@ -3443,14 +3415,6 @@ pub fn calc_expec_pauli_prod(
     workspace: &mut Qureg<'_>,
 ) -> Result<Qreal, QuestError> {
     let num_targets = target_qubits.len() as i32;
-    if pauli_codes.len() as i32 != num_targets {
-        return Err(QuestError::ArrayLengthError);
-    }
-    for &idx in target_qubits {
-        if idx < 0 || idx > qureg.num_qubits_represented() {
-            return Err(QuestError::QubitIndexError);
-        }
-    }
     catch_quest_exception(|| unsafe {
         ffi::calcExpecPauliProd(
             qureg.reg,
@@ -3594,12 +3558,6 @@ pub fn two_qubit_unitary(
     target_qubit2: i32,
     u: &ComplexMatrix4,
 ) -> Result<(), QuestError> {
-    let num_qubits_rep = qureg.num_qubits_represented();
-    if !((0..num_qubits_rep).contains(&target_qubit1)
-        && (0..num_qubits_rep).contains(&target_qubit2))
-    {
-        return Err(QuestError::QubitIndexError);
-    }
     catch_quest_exception(|| unsafe {
         ffi::twoQubitUnitary(qureg.reg, target_qubit1, target_qubit2, u.0);
     })
@@ -3657,13 +3615,6 @@ pub fn controlled_two_qubit_unitary(
     target_qubit2: i32,
     u: &ComplexMatrix4,
 ) -> Result<(), QuestError> {
-    let num_qubits_rep = qureg.num_qubits_represented();
-    if !((0..num_qubits_rep).contains(&target_qubit1)
-        && (0..num_qubits_rep).contains(&target_qubit2)
-        && (0..num_qubits_rep).contains(&control_qubit))
-    {
-        return Err(QuestError::QubitIndexError);
-    }
     catch_quest_exception(|| unsafe {
         ffi::controlledTwoQubitUnitary(
             qureg.reg,
@@ -3728,18 +3679,7 @@ pub fn multi_controlled_two_qubit_unitary(
     target_qubit2: i32,
     u: &ComplexMatrix4,
 ) -> Result<(), QuestError> {
-    let num_qubits_rep = qureg.num_qubits_represented();
     let num_control_qubits = control_qubits.len() as i32;
-    for idx in control_qubits {
-        if !(0..num_qubits_rep).contains(idx) {
-            return Err(QuestError::QubitIndexError);
-        }
-    }
-    if !((0..num_qubits_rep).contains(&target_qubit1)
-        && (0..num_qubits_rep).contains(&target_qubit2))
-    {
-        return Err(QuestError::QubitIndexError);
-    }
     catch_quest_exception(|| unsafe {
         ffi::multiControlledTwoQubitUnitary(
             qureg.reg,
@@ -3792,11 +3732,6 @@ pub fn multi_qubit_unitary(
     u: &ComplexMatrixN,
 ) -> Result<(), QuestError> {
     let num_targs = targs.len() as i32;
-    for &idx in targs {
-        if idx < 0 || idx >= qureg.num_qubits_represented() {
-            return Err(QuestError::QubitIndexError);
-        }
-    }
     catch_quest_exception(|| unsafe {
         ffi::multiQubitUnitary(qureg.reg, targs.as_ptr(), num_targs, u.0);
     })
@@ -3846,15 +3781,7 @@ pub fn controlled_multi_qubit_unitary(
     targs: &[i32],
     u: &ComplexMatrixN,
 ) -> Result<(), QuestError> {
-    if ctrl < 0 || ctrl >= qureg.num_qubits_represented() {
-        return Err(QuestError::QubitIndexError);
-    }
     let num_targs = targs.len() as i32;
-    for &idx in targs {
-        if idx < 0 || idx >= qureg.num_qubits_represented() {
-            return Err(QuestError::QubitIndexError);
-        }
-    }
     catch_quest_exception(|| unsafe {
         ffi::controlledMultiQubitUnitary(
             qureg.reg,
@@ -3911,19 +3838,8 @@ pub fn multi_controlled_multi_qubit_unitary(
     targs: &[i32],
     u: &ComplexMatrixN,
 ) -> Result<(), QuestError> {
-    let num_qubits_rep = qureg.num_qubits_represented();
     let num_ctrls = ctrls.len() as i32;
-    for &idx in ctrls {
-        if idx < 0 || idx >= num_qubits_rep {
-            return Err(QuestError::QubitIndexError);
-        }
-    }
     let num_targs = targs.len() as i32;
-    for &idx in targs {
-        if idx < 0 || idx >= num_qubits_rep {
-            return Err(QuestError::QubitIndexError);
-        }
-    }
     catch_quest_exception(|| unsafe {
         ffi::multiControlledMultiQubitUnitary(
             qureg.reg,
@@ -3965,15 +3881,7 @@ pub fn mix_kraus_map(
     target: i32,
     ops: &[&ComplexMatrix2],
 ) -> Result<(), QuestError> {
-    let num_qubits_rep = qureg.num_qubits_represented();
-    if target < 0 || target >= num_qubits_rep {
-        return Err(QuestError::QubitIndexError);
-    }
-
     let num_ops = ops.len() as i32;
-    if !(1..=4).contains(&num_ops) {
-        return Err(QuestError::ArrayLengthError);
-    }
     let ops_inner = ops.iter().map(|x| x.0).collect::<Vec<_>>();
     catch_quest_exception(|| unsafe {
         ffi::mixKrausMap(qureg.reg, target, ops_inner.as_ptr(), num_ops);
@@ -4024,17 +3932,7 @@ pub fn mix_two_qubit_kraus_map(
     target2: i32,
     ops: &[&ComplexMatrix4],
 ) -> Result<(), QuestError> {
-    let num_qubits_rep = qureg.num_qubits_represented();
-    if target1 < 0 || target1 >= num_qubits_rep {
-        return Err(QuestError::QubitIndexError);
-    }
-    if target2 < 0 || target2 >= num_qubits_rep {
-        return Err(QuestError::QubitIndexError);
-    }
     let num_ops = ops.len() as i32;
-    if !(1..=16).contains(&num_ops) {
-        return Err(QuestError::ArrayLengthError);
-    }
     let ops_inner = ops.iter().map(|x| x.0).collect::<Vec<_>>();
     catch_quest_exception(|| unsafe {
         ffi::mixTwoQubitKrausMap(
@@ -4091,17 +3989,8 @@ pub fn mix_multi_qubit_kraus_map(
     targets: &[i32],
     ops: &[&ComplexMatrixN],
 ) -> Result<(), QuestError> {
-    let num_qubits_rep = qureg.num_qubits_represented();
     let num_targets = targets.len() as i32;
-    for &target in targets {
-        if target < 0 || target >= num_qubits_rep {
-            return Err(QuestError::QubitIndexError);
-        }
-    }
     let num_ops = ops.len() as i32;
-    if !(1..=1 << (2 * num_qubits_rep)).contains(&num_ops) {
-        return Err(QuestError::ArrayLengthError);
-    }
     let ops_inner = ops.iter().map(|x| x.0).collect::<Vec<_>>();
     catch_quest_exception(|| unsafe {
         ffi::mixMultiQubitKrausMap(
@@ -4145,9 +4034,6 @@ pub fn mix_nontp_kraus_map(
     ops: &[&ComplexMatrix2],
 ) -> Result<(), QuestError> {
     let num_ops = ops.len() as i32;
-    if !(0..qureg.num_qubits_represented()).contains(&target) {
-        return Err(QuestError::QubitIndexError);
-    }
     let ops_inner = ops.iter().map(|x| x.0).collect::<Vec<_>>();
     catch_quest_exception(|| unsafe {
         ffi::mixNonTPKrausMap(qureg.reg, target, ops_inner.as_ptr(), num_ops);
@@ -4199,17 +4085,7 @@ pub fn mix_nontp_two_qubit_kraus_map(
     target2: i32,
     ops: &[&ComplexMatrix4],
 ) -> Result<(), QuestError> {
-    let num_qubits_rep = qureg.num_qubits_represented();
-    if target1 < 0 || target1 >= num_qubits_rep {
-        return Err(QuestError::QubitIndexError);
-    }
-    if target2 < 0 || target2 >= num_qubits_rep {
-        return Err(QuestError::QubitIndexError);
-    }
     let num_ops = ops.len() as i32;
-    if !(1..=16).contains(&num_ops) {
-        return Err(QuestError::ArrayLengthError);
-    }
     let ops_inner = ops.iter().map(|x| x.0).collect::<Vec<_>>();
     catch_quest_exception(|| unsafe {
         ffi::mixNonTPTwoQubitKrausMap(
@@ -4267,17 +4143,8 @@ pub fn mix_nontp_multi_qubit_kraus_map(
     targets: &[i32],
     ops: &[&ComplexMatrixN],
 ) -> Result<(), QuestError> {
-    let num_qubits_rep = qureg.num_qubits_represented();
     let num_targets = targets.len() as i32;
-    for &target in targets {
-        if target < 0 || target >= num_qubits_rep {
-            return Err(QuestError::QubitIndexError);
-        }
-    }
     let num_ops = ops.len() as i32;
-    if !(1..=1 << (2 * num_qubits_rep)).contains(&num_ops) {
-        return Err(QuestError::ArrayLengthError);
-    }
     let ops_inner = ops.iter().map(|x| x.0).collect::<Vec<_>>();
     catch_quest_exception(|| unsafe {
         ffi::mixNonTPMultiQubitKrausMap(
@@ -4547,9 +4414,6 @@ pub fn apply_matrix2(
     target_qubit: i32,
     u: &ComplexMatrix2,
 ) -> Result<(), QuestError> {
-    if target_qubit >= qureg.num_qubits_represented() || target_qubit < 0 {
-        return Err(QuestError::QubitIndexError);
-    }
     catch_quest_exception(|| unsafe {
         ffi::applyMatrix2(qureg.reg, target_qubit, u.0);
     })
@@ -4597,12 +4461,6 @@ pub fn apply_matrix4(
     target_qubit2: i32,
     u: &ComplexMatrix4,
 ) -> Result<(), QuestError> {
-    if target_qubit1 >= qureg.num_qubits_represented() || target_qubit1 < 0 {
-        return Err(QuestError::QubitIndexError);
-    }
-    if target_qubit2 >= qureg.num_qubits_represented() || target_qubit2 < 0 {
-        return Err(QuestError::QubitIndexError);
-    }
     catch_quest_exception(|| unsafe {
         ffi::applyMatrix4(qureg.reg, target_qubit1, target_qubit2, u.0);
     })
@@ -4655,15 +4513,6 @@ pub fn apply_matrix_n(
     u: &ComplexMatrixN,
 ) -> Result<(), QuestError> {
     let num_targs = targs.len() as i32;
-    let num_qubits_rep = qureg.num_qubits_represented();
-    if num_targs > num_qubits_rep {
-        return Err(QuestError::ArrayLengthError);
-    }
-    for &idx in targs {
-        if idx < 0 || idx >= num_qubits_rep {
-            return Err(QuestError::QubitIndexError);
-        }
-    }
     catch_quest_exception(|| unsafe {
         ffi::applyMatrixN(qureg.reg, targs.as_ptr(), num_targs, u.0);
     })
@@ -4808,9 +4657,8 @@ pub fn apply_multi_controlled_matrix_n(
 ///
 /// # Errors
 ///
-/// - [`ArrayLengthError`], if the length of `coeffs` is different than that of
-///   `exponents`
 /// - [`InvalidQuESTInputError`]
+///   - if the length of `coeffs` is different than that of  `exponents`
 ///   - if any qubit in `qubits` has an invalid index (i.e. does not satisfy `0
 ///     <= qubit < qureg.num_qubits_represented()`
 ///   - if the elements of `qubits` are not unique
@@ -4845,7 +4693,6 @@ pub fn apply_multi_controlled_matrix_n(
 /// [api-bit-encoding]: crate::BitEncoding
 /// [api-apply-phase-func-overrides]: crate::apply_phase_func_overrides()
 /// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
-/// [`ArrayLengthError`]: crate::QuestError::ArrayLengthError
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn apply_phase_func(
@@ -4856,11 +4703,7 @@ pub fn apply_phase_func(
     exponents: &[Qreal],
 ) -> Result<(), QuestError> {
     let num_qubits = qubits.len() as i32;
-    let num_terms = coeffs.len();
-    if exponents.len() != num_terms {
-        return Err(QuestError::ArrayLengthError);
-    }
-    let num_terms = num_terms as i32;
+    let num_terms = coeffs.len() as i32;
     catch_quest_exception(|| unsafe {
         ffi::applyPhaseFunc(
             qureg.reg,
@@ -4917,11 +4760,10 @@ pub fn apply_phase_func(
 ///
 /// # Errors
 ///
-/// - [`ArrayLengthError`],
-///   - if the length of `coeffs` is different than that of `exponents`
+/// - [`InvalidQuESTInputError`],
 ///   - if the length of `override_inds` is different than that of
 ///     `override_phases`
-/// - [`InvalidQuESTInputError`],
+///   - if the length of `coeffs` is different than that of `exponents`
 ///   - if any qubit in `qubits` has an invalid index (i.e. does not satisfy `0
 ///     <= qubit < qureg.num_qubits_represented()`
 ///   - if the elements of `qubits` are not unique
@@ -4971,7 +4813,6 @@ pub fn apply_phase_func(
 ///
 /// [api-apply-phase-func]: crate::apply_phase_func()
 /// [api-bit-encoding]: crate::BitEncoding
-/// [`ArrayLengthError`]: crate::QuestError::ArrayLengthError
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::too_many_arguments)]
@@ -4985,16 +4826,8 @@ pub fn apply_phase_func_overrides(
     override_phases: &[Qreal],
 ) -> Result<(), QuestError> {
     let num_qubits = qubits.len() as i32;
-    let num_terms = coeffs.len();
-    if exponents.len() != num_terms {
-        return Err(QuestError::ArrayLengthError);
-    }
-    let num_terms = num_terms as i32;
-    let num_overrides = override_inds.len();
-    if override_phases.len() != num_overrides {
-        return Err(QuestError::ArrayLengthError);
-    }
-    let num_overrides = num_overrides as i32;
+    let num_terms = coeffs.len() as i32;
+    let num_overrides = override_inds.len() as i32;
     catch_quest_exception(|| unsafe {
         ffi::applyPhaseFuncOverrides(
             qureg.reg,
@@ -5466,11 +5299,11 @@ pub fn apply_full_qft(qureg: &mut Qureg<'_>) {
 ///
 /// # Errors
 ///
-/// - [`ArrayLengthError`], if the length of `qubits` is less than
-///   [`qureg.num_qubits_represented()`]
-/// - [`QubitIndexError`], if any of `qubits` is outside [0,
-///   [`qureg.num_qubits_represented()`]).
-/// - [`InvalidQuESTInputError`], if `qubits` contains any repetitions
+/// - [`InvalidQuESTInputError`],
+///   - if the length of `qubits` is less than
+///     [`qureg.num_qubits_represented()`]
+///   - if any of `qubits` is outside [0, [`qureg.num_qubits_represented()`]).
+///   - if `qubits` contains any repetitions
 ///
 ///
 /// # Examples
@@ -5488,9 +5321,7 @@ pub fn apply_full_qft(qureg: &mut Qureg<'_>) {
 ///
 /// [`apply_full_qft()`]: crate::apply_full_qft()
 /// [`apply_named_phase_func()`]: crate::apply_named_phase_func()
-/// [`ArrayLengthError`]: crate::QuestError::ArrayLengthError
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
-/// [`QubitIndexError`]: crate::QuestError::QubitIndexError
 /// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn apply_qft(
@@ -5498,15 +5329,6 @@ pub fn apply_qft(
     qubits: &[i32],
 ) -> Result<(), QuestError> {
     let num_qubits = qubits.len() as i32;
-    let num_qubits_rep = qureg.num_qubits_represented();
-    if num_qubits > num_qubits_rep {
-        return Err(QuestError::ArrayLengthError);
-    }
-    for &idx in qubits {
-        if idx >= num_qubits_rep {
-            return Err(QuestError::QubitIndexError);
-        }
-    }
     catch_quest_exception(|| unsafe {
         ffi::applyQFT(qureg.reg, qubits.as_ptr(), num_qubits);
     })
@@ -5537,9 +5359,8 @@ pub fn apply_qft(
 ///
 /// # Errors
 ///
-/// - [`QubitIndexError`],
-///   - if `qubit` is outside [0, [`qureg.num_qubits_represented()`]).
 /// - [`InvalidQuESTInputError`],
+///   - if `qubit` is outside [0, [`qureg.num_qubits_represented()`]).
 ///   - if `outcome` is not in {0,1}
 ///
 /// # Examples
@@ -5569,9 +5390,6 @@ pub fn apply_projector(
     qubit: i32,
     outcome: i32,
 ) -> Result<(), QuestError> {
-    if qubit >= qureg.num_qubits_represented() || qubit < 0 {
-        return Err(QuestError::QubitIndexError);
-    }
     catch_quest_exception(|| unsafe {
         ffi::applyProjector(qureg.reg, qubit, outcome);
     })
