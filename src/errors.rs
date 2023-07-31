@@ -23,7 +23,4 @@ pub enum QuestError {
     NulError(std::ffi::NulError),
     IntoStringError(std::ffi::IntoStringError),
     ArrayLengthError,
-    QubitIndexError,
-    NotDensityMatrix,
-    NegativeProbability,
 }
