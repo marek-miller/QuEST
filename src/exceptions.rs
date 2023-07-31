@@ -26,7 +26,7 @@ use std::{
     sync::{
         Mutex,
         OnceLock,
-    },
+    }, panic::UnwindSafe,
 };
 
 use crossbeam::channel::{
@@ -63,16 +63,12 @@ unsafe extern "C" fn invalidQuESTInputError(
     let err_msg = unsafe { CStr::from_ptr(errMsg) }.to_str().unwrap();
     let err_func = unsafe { CStr::from_ptr(errFunc) }.to_str().unwrap();
 
-    QUEST_EXCEPT_ERROR
-        .get_or_init(unbounded)
-        .0
-        .send(QuestError::InvalidQuESTInputError {
-            err_msg:  err_msg.to_owned(),
-            err_func: err_func.to_owned(),
-        })
-        .expect("channel transmitting error messages disconnected");
+    std::panic::resume_unwind(Box::new(QuestError::InvalidQuESTInputError {
+        err_msg:  err_msg.to_owned(),
+        err_func: err_func.to_owned(),
+    }));
 
-    log::error!("QueST Error in function {err_func}: {err_msg}");
+    // log::error!("QueST Error in function {err_func}: {err_msg}");
 }
 
 /// Execute a call to `QuEST` API and catch exceptions.
@@ -89,20 +85,20 @@ unsafe extern "C" fn invalidQuESTInputError(
 /// the parallelism available in the system.
 pub fn catch_quest_exception<T, F>(f: F) -> Result<T, QuestError>
 where
-    F: FnOnce() -> T,
+    F: FnOnce() -> T + UnwindSafe,
 {
     // Lock QuEST to our call
     let guard = QUEST_EXCEPT_GUARD.lock().unwrap();
 
     // Call QuEST API
-    let res = f();
+    let res = std::panic::catch_unwind(|| f());
 
-    // At this point all exceptions have been thrown.
-    // Get the first exception thrown.  Drain the nonblocking iterator to leave
-    // it empty for the next call.
-    let mut err_iter = QUEST_EXCEPT_ERROR.get_or_init(unbounded).1.try_iter();
-    let err = err_iter.next();
-    let _ = err_iter.last();
+    // // At this point all exceptions have been thrown.
+    // // Get the first exception thrown.  Drain the nonblocking iterator to leave
+    // // it empty for the next call.
+    // let mut err_iter = QUEST_EXCEPT_ERROR.get_or_init(unbounded).1.try_iter();
+    // let err = err_iter.next();
+    // let _ = err_iter.last();
 
     // Drop the guard as soon as we don't need it anymore:
     drop(guard);
@@ -110,9 +106,9 @@ where
     // This might be a little confusing:
     // If there is Some error, report it;
     // if there is None, everything's Ok.
-    match err {
-        Some(e) => Err(e),
-        None => Ok(res),
+    match res {
+        Err(boxed) => Err(QuestError::QubitIndexError),
+        Ok(res) => Ok(res),
     }
 }
 

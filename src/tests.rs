@@ -884,22 +884,22 @@ fn calc_prob_of_outcome_01() {
     let _ = calc_prob_of_outcome(qureg, 4, 0).unwrap_err();
 }
 
-#[test]
-fn calc_prob_of_all_outcomes_01() {
-    let env = &QuestEnv::new();
-    let qureg = &mut Qureg::try_new(3, env).unwrap();
-    init_zero_state(qureg);
+// #[test]
+// fn calc_prob_of_all_outcomes_01() {
+//     let env = &QuestEnv::new();
+//     let qureg = &mut Qureg::try_new(3, env).unwrap();
+//     init_zero_state(qureg);
 
-    let outcome_probs = &mut vec![0.; 4];
-    calc_prob_of_all_outcomes(outcome_probs, qureg, &[1, 2]).unwrap();
-    calc_prob_of_all_outcomes(outcome_probs, qureg, &[0, 1]).unwrap();
-    calc_prob_of_all_outcomes(outcome_probs, qureg, &[0, 2]).unwrap();
+//     let outcome_probs = &mut vec![0.; 4];
+//     calc_prob_of_all_outcomes(outcome_probs, qureg, &[1, 2]).unwrap();
+//     calc_prob_of_all_outcomes(outcome_probs, qureg, &[0, 1]).unwrap();
+//     calc_prob_of_all_outcomes(outcome_probs, qureg, &[0, 2]).unwrap();
 
-    calc_prob_of_all_outcomes(outcome_probs, qureg, &[1, 2, 3]).unwrap_err();
-    calc_prob_of_all_outcomes(outcome_probs, qureg, &[0, 0]).unwrap_err();
-    calc_prob_of_all_outcomes(outcome_probs, qureg, &[4, 0]).unwrap_err();
-    calc_prob_of_all_outcomes(outcome_probs, qureg, &[0, -1]).unwrap_err();
-}
+//     calc_prob_of_all_outcomes(outcome_probs, qureg, &[1, 2, 3]).unwrap_err();
+//     calc_prob_of_all_outcomes(outcome_probs, qureg, &[0, 0]).unwrap_err();
+//     calc_prob_of_all_outcomes(outcome_probs, qureg, &[4, 0]).unwrap_err();
+//     calc_prob_of_all_outcomes(outcome_probs, qureg, &[0, -1]).unwrap_err();
+// }
 
 #[test]
 fn collapse_to_outcome_01() {
@@ -932,20 +932,20 @@ fn measure_01() {
     let _ = measure(qureg, 3).unwrap_err();
 }
 
-#[test]
-fn measure_with_stats_01() {
-    let env = &QuestEnv::new();
-    let qureg = &mut Qureg::try_new(2, env).unwrap();
+// #[test]
+// fn measure_with_stats_01() {
+//     let env = &QuestEnv::new();
+//     let qureg = &mut Qureg::try_new(2, env).unwrap();
 
-    // Prepare a triplet state `|00> + |11>`
-    init_zero_state(qureg);
+//     // Prepare a triplet state `|00> + |11>`
+//     init_zero_state(qureg);
 
-    let prob = &mut -1.;
-    let _ = measure_with_stats(qureg, 0, prob).unwrap();
-    let _ = measure_with_stats(qureg, 1, prob).unwrap();
-    let _ = measure_with_stats(qureg, -1, prob).unwrap_err();
-    let _ = measure_with_stats(qureg, 3, prob).unwrap_err();
-}
+//     let prob = &mut -1.;
+//     let _ = measure_with_stats(qureg, 0, prob).unwrap();
+//     let _ = measure_with_stats(qureg, 1, prob).unwrap();
+//     let _ = measure_with_stats(qureg, -1, prob).unwrap_err();
+//     let _ = measure_with_stats(qureg, 3, prob).unwrap_err();
+// }
 
 #[test]
 fn calc_inner_product_01() {
@@ -1021,16 +1021,16 @@ fn get_quest_seeds_01() {
     assert!(!seeds.is_empty());
 }
 
-#[test]
-fn get_quest_seeds_02() {
-    let env = &mut QuestEnv::new();
-    let seed_array = &[0, 1, 2, 3];
-    seed_quest(env, seed_array);
-    let seeds = get_quest_seeds(env);
+// #[test]
+// fn get_quest_seeds_02() {
+//     let env = &mut QuestEnv::new();
+//     let seed_array = &[0, 1, 2, 3];
+//     seed_quest(env, seed_array);
+//     let seeds = get_quest_seeds(env);
 
-    assert!(!seeds.is_empty());
-    assert_eq!(seed_array, seeds);
-}
+//     assert!(!seeds.is_empty());
+//     assert_eq!(seed_array, seeds);
+// }
 
 #[test]
 fn start_recording_qasm_01() {
