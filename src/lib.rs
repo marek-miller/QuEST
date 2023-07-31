@@ -2026,13 +2026,11 @@ pub fn controlled_not(
 ///
 /// # Errors
 ///
-/// - [`QubitIndexError`],
+/// - [`InvalidQuESTInputError`],
 ///   - if any qubit in `ctrls` and `targs` is invalid, i.e. outside [0,
 ///     [`qureg.num_qubits_represented()`]).
-/// - [`ArrayLengthError`],
 ///   - if the length of `targs` or `ctrls` is larger than
 ///     [`qureg.num_qubits_represented()`]
-/// - [`InvalidQuESTInputError`],
 ///   - if `ctrls` or `targs` contain any repetitions
 ///   - if any qubit in `ctrls` is also in `targs` (and vice versa)
 ///
@@ -2059,8 +2057,6 @@ pub fn controlled_not(
 /// [api-pauli-x]: crate::pauli_x()
 /// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
-/// [`QubitIndexError`]: crate::QuestError::QubitIndexError
-/// [`ArrayLengthError`]: crate::QuestError::ArrayLengthError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn multi_controlled_multi_qubit_not(
     qureg: &mut Qureg<'_>,
@@ -2069,17 +2065,6 @@ pub fn multi_controlled_multi_qubit_not(
 ) -> Result<(), QuestError> {
     let num_ctrls = ctrls.len() as i32;
     let num_targs = targs.len() as i32;
-    if num_ctrls > qureg.num_qubits_represented()
-        || num_targs > qureg.num_qubits_represented()
-    {
-        return Err(QuestError::ArrayLengthError);
-    }
-    for idx in ctrls.iter().chain(targs) {
-        if *idx >= qureg.num_qubits_represented() {
-            return Err(QuestError::QubitIndexError);
-        }
-    }
-
     catch_quest_exception(|| unsafe {
         ffi::multiControlledMultiQubitNot(
             qureg.reg,
@@ -2112,13 +2097,11 @@ pub fn multi_controlled_multi_qubit_not(
 ///
 /// # Errors
 ///
-/// - [`QubitIndexError`],
+/// - [`InvalidQuESTInputError`],
 ///   - if any qubit in `targs` is invalid, i.e. outside [0,
 ///     [`qureg.num_qubits_represented()`]).
-/// - [`ArrayLengthError`],
 ///   - if the length of `targs` is larger than
 ///     [`qureg.num_qubits_represented()`]
-/// - [`InvalidQuESTInputError`],
 ///   - if `targs` contains any repetitions
 ///
 /// # Examples
@@ -2141,22 +2124,12 @@ pub fn multi_controlled_multi_qubit_not(
 /// [api-pauli-x]: crate::pauli_x()
 /// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
-/// [`QubitIndexError`]: crate::QuestError::QubitIndexError
-/// [`ArrayLengthError`]: crate::QuestError::ArrayLengthError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn multi_qubit_not(
     qureg: &mut Qureg<'_>,
     targs: &[i32],
 ) -> Result<(), QuestError> {
     let num_targs = targs.len() as i32;
-    if num_targs > qureg.num_qubits_represented() {
-        return Err(QuestError::ArrayLengthError);
-    }
-    for idx in targs {
-        if *idx >= qureg.num_qubits_represented() {
-            return Err(QuestError::QubitIndexError);
-        }
-    }
     catch_quest_exception(|| unsafe {
         let targs_ptr = targs.as_ptr();
         ffi::multiQubitNot(qureg.reg, targs_ptr, num_targs);
@@ -2253,12 +2226,6 @@ pub fn calc_prob_of_all_outcomes(
     qubits: &[i32],
 ) -> Result<(), QuestError> {
     let num_qubits = qubits.len() as i32;
-    if num_qubits > qureg.num_qubits_represented()
-        || outcome_probs.len() < (1 << num_qubits)
-    {
-        return Err(QuestError::ArrayLengthError);
-    }
-
     let outcome_probs_ptr = outcome_probs.as_mut_ptr();
     catch_quest_exception(|| unsafe {
         ffi::calcProbOfAllOutcomes(
@@ -2295,9 +2262,6 @@ pub fn collapse_to_outcome(
     measure_qubit: i32,
     outcome: i32,
 ) -> Result<Qreal, QuestError> {
-    if measure_qubit >= qureg.num_qubits_represented() {
-        return Err(QuestError::QubitIndexError);
-    }
     catch_quest_exception(|| unsafe {
         ffi::collapseToOutcome(qureg.reg, measure_qubit, outcome)
     })
@@ -2684,15 +2648,6 @@ pub fn mix_dephasing(
     target_qubit: i32,
     prob: Qreal,
 ) -> Result<(), QuestError> {
-    if !qureg.is_density_matrix() {
-        return Err(QuestError::NotDensityMatrix);
-    }
-    if target_qubit < 0 || target_qubit > qureg.num_qubits_represented() {
-        return Err(QuestError::QubitIndexError);
-    }
-    if prob < 0. {
-        return Err(QuestError::NegativeProbability);
-    }
     catch_quest_exception(|| unsafe {
         ffi::mixDephasing(qureg.reg, target_qubit, prob);
     })
@@ -2725,18 +2680,6 @@ pub fn mix_two_qubit_dephasing(
     qubit2: i32,
     prob: Qreal,
 ) -> Result<(), QuestError> {
-    if !qureg.is_density_matrix() {
-        return Err(QuestError::NotDensityMatrix);
-    }
-    if qubit1 < 0 || qubit1 > qureg.num_qubits_represented() {
-        return Err(QuestError::QubitIndexError);
-    }
-    if qubit2 < 0 || qubit2 > qureg.num_qubits_represented() {
-        return Err(QuestError::QubitIndexError);
-    }
-    if prob < 0. {
-        return Err(QuestError::NegativeProbability);
-    }
     catch_quest_exception(|| unsafe {
         ffi::mixTwoQubitDephasing(qureg.reg, qubit1, qubit2, prob);
     })
@@ -2766,15 +2709,6 @@ pub fn mix_depolarising(
     target_qubit: i32,
     prob: Qreal,
 ) -> Result<(), QuestError> {
-    if !qureg.is_density_matrix() {
-        return Err(QuestError::NotDensityMatrix);
-    }
-    if target_qubit < 0 || target_qubit > qureg.num_qubits_represented() {
-        return Err(QuestError::QubitIndexError);
-    }
-    if prob < 0. {
-        return Err(QuestError::NegativeProbability);
-    }
     catch_quest_exception(|| unsafe {
         ffi::mixDepolarising(qureg.reg, target_qubit, prob);
     })
@@ -2804,15 +2738,6 @@ pub fn mix_damping(
     target_qubit: i32,
     prob: Qreal,
 ) -> Result<(), QuestError> {
-    if !qureg.is_density_matrix() {
-        return Err(QuestError::NotDensityMatrix);
-    }
-    if target_qubit < 0 || target_qubit > qureg.num_qubits_represented() {
-        return Err(QuestError::QubitIndexError);
-    }
-    if prob < 0. {
-        return Err(QuestError::NegativeProbability);
-    }
     catch_quest_exception(|| unsafe {
         ffi::mixDamping(qureg.reg, target_qubit, prob);
     })
@@ -2846,18 +2771,6 @@ pub fn mix_two_qubit_depolarising(
     qubit2: i32,
     prob: Qreal,
 ) -> Result<(), QuestError> {
-    if !qureg.is_density_matrix() {
-        return Err(QuestError::NotDensityMatrix);
-    }
-    if qubit1 < 0 || qubit1 > qureg.num_qubits_represented() {
-        return Err(QuestError::QubitIndexError);
-    }
-    if qubit2 < 0 || qubit2 > qureg.num_qubits_represented() {
-        return Err(QuestError::QubitIndexError);
-    }
-    if prob < 0. {
-        return Err(QuestError::NegativeProbability);
-    }
     catch_quest_exception(|| unsafe {
         ffi::mixTwoQubitDepolarising(qureg.reg, qubit1, qubit2, prob);
     })
@@ -2892,12 +2805,6 @@ pub fn mix_pauli(
     prob_y: Qreal,
     prob_z: Qreal,
 ) -> Result<(), QuestError> {
-    if target_qubit >= qureg.num_qubits_represented() || target_qubit < 0 {
-        return Err(QuestError::QubitIndexError);
-    }
-    if !qureg.is_density_matrix() {
-        return Err(QuestError::NotDensityMatrix);
-    }
     catch_quest_exception(|| unsafe {
         ffi::mixPauli(qureg.reg, target_qubit, prob_x, prob_y, prob_z);
     })
@@ -3069,9 +2976,10 @@ pub fn calc_fidelity(
 ///
 /// # Errors
 ///
-/// - [`QubitIndexError`], if either `qubit1` or `qubit2` is outside [0,
-///   [`qureg.num_qubits_represented()`]).
-/// - [`InvalidQuESTInputError`], if `qubit1` and `qubit2` are equal
+/// - [`InvalidQuESTInputError`],
+///   - if either `qubit1` or `qubit2` is outside [0,
+///     [`qureg.num_qubits_represented()`]).
+///   - if `qubit1` and `qubit2` are equal
 ///
 /// # Examples
 ///
@@ -3091,7 +2999,6 @@ pub fn calc_fidelity(
 ///
 /// See [QuEST API] for more information.
 ///
-/// [`QubitIndexError`]: crate::QuestError::QubitIndexError
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
@@ -3100,12 +3007,6 @@ pub fn swap_gate(
     qubit1: i32,
     qubit2: i32,
 ) -> Result<(), QuestError> {
-    if qubit1 >= qureg.num_qubits_represented() || qubit1 < 0 {
-        return Err(QuestError::QubitIndexError);
-    }
-    if qubit2 >= qureg.num_qubits_represented() || qubit2 < 0 {
-        return Err(QuestError::QubitIndexError);
-    }
     catch_quest_exception(|| unsafe {
         ffi::swapGate(qureg.reg, qubit1, qubit2);
     })
@@ -3135,12 +3036,6 @@ pub fn sqrt_swap_gate(
     qb1: i32,
     qb2: i32,
 ) -> Result<(), QuestError> {
-    if qb1 >= qureg.num_qubits_represented() || qb1 < 0 {
-        return Err(QuestError::QubitIndexError);
-    }
-    if qb2 >= qureg.num_qubits_represented() || qb2 < 0 {
-        return Err(QuestError::QubitIndexError);
-    }
     catch_quest_exception(|| unsafe {
         ffi::sqrtSwapGate(qureg.reg, qb1, qb2);
     })
