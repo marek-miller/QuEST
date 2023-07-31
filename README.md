@@ -194,16 +194,14 @@ On failure, QuEST throws exceptions via user-configurable global
 By default, this function prints an error message and aborts, which is
 problematic in a large distributed setup.
 
-We opt for catching all exceptions early. The exception handler is locked during
-an API call. This means that calling QuEST functions is synchronous and should
-be thread-safe, but comes at the expense of being able to run only one QuEST API
-call at the time. Bear in mind, though, that each QuEST function retains access
-to all parallel computation resources available in the system.
+We opt for catching all exceptions early by reimplementing
+`invalidQuESTInputError()` to unwind the stack using Rust's
+[`panic`](https://doc.rust-lang.org/std/panic/index.html) mechanism.
 
-Current implementation returns inside `Result<_, QuestError>` only the first
-exception caught. All subsequent messages reported by QuEST, together with that
-first one, are nevertheless logged as errors. To be able to see them, add a
-logger as a dependency to your crate, e.g.:
+Current implementation returns inside `Result<_, QuestError>` the first
+exception caught. Additionally, all error messages reported by QuEST are logged
+as errors. To be able to see them, add a logger as a dependency to your crate,
+e.g.:
 
 ```sh
 cargo add env_logger
