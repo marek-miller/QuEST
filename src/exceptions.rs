@@ -24,24 +24,9 @@ use std::{
         CStr,
     },
     panic::UnwindSafe,
-    sync::{
-        Mutex,
-        OnceLock,
-    },
-};
-
-use crossbeam::channel::{
-    Receiver,
-    Sender,
 };
 
 use super::QuestError;
-
-static QUEST_EXCEPT_GUARD: Mutex<()> = Mutex::new(());
-static QUEST_EXCEPT_ERROR: OnceLock<(
-    Sender<QuestError>,
-    Receiver<QuestError>,
-)> = OnceLock::new();
 
 /// Report error in a `QuEST` API call.
 ///
@@ -88,7 +73,6 @@ where
     F: FnOnce() -> T + UnwindSafe,
 {
     // Lock QuEST to our call
-    let guard = QUEST_EXCEPT_GUARD.lock().unwrap();
 
     // Call QuEST API
     let res = std::panic::catch_unwind(f);
@@ -102,7 +86,6 @@ where
     // let _ = err_iter.last();
 
     // Drop the guard as soon as we don't need it anymore:
-    drop(guard);
 
     // This might be a little confusing:
     // If there is Some error, report it;
