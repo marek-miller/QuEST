@@ -229,7 +229,7 @@ pub fn init_plus_state(qureg: &mut Qureg<'_>) {
 /// init_classical_state(qureg, 8);
 /// let prob = get_prob_amp(qureg, 0).unwrap();
 ///
-/// assert!(prob.abs() < EPSILON);
+/// assert!((prob.abs() - 1.) < EPSILON);
 /// ```
 ///
 ///
@@ -2222,52 +2222,53 @@ pub fn calc_prob_of_outcome(
     })
 }
 
-// /// Calculate probabilities of every outcome of the sub-register.
-// ///
-// /// # Examples
-// ///
-// /// ```rust
-// /// # use quest_bind::*;
-// /// let env = &QuestEnv::new();
-// /// let qureg = &mut Qureg::try_new(3, env).unwrap();
-// /// init_zero_state(qureg);
-// ///
-// /// let qubits = &[1, 2];
-// /// let outcome_probs = &mut vec![0.; 4];
-// /// calc_prob_of_all_outcomes(outcome_probs, qureg, qubits).unwrap();
-// /// assert_eq!(outcome_probs, &vec![1., 0., 0., 0.]);
-// /// ```
-// ///
-// /// See [QuEST API] for more information.
-// ///
-// /// # Panics
-// ///
-// /// This function will panic if
-// /// `outcome_probs.len() < num_qubits as usize`
-// ///
-// /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
-// #[allow(clippy::cast_sign_loss)]
-// pub fn calc_prob_of_all_outcomes(
-//     outcome_probs: &mut [Qreal],
-//     qureg: &Qureg<'_>,
-//     qubits: &[i32],
-// ) -> Result<(), QuestError> {
-//     let num_qubits = qubits.len() as i32;
-//     if num_qubits > qureg.num_qubits_represented()
-//         || outcome_probs.len() < (1 << num_qubits)
-//     {
-//         return Err(QuestError::ArrayLengthError);
-//     }
+/// Calculate probabilities of every outcome of the sub-register.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(3, env).unwrap();
+/// init_zero_state(qureg);
+///
+/// let qubits = &[1, 2];
+/// let outcome_probs = &mut vec![0.; 4];
+/// calc_prob_of_all_outcomes(outcome_probs, qureg, qubits).unwrap();
+/// assert_eq!(outcome_probs, &vec![1., 0., 0., 0.]);
+/// ```
+///
+/// See [QuEST API] for more information.
+///
+/// # Panics
+///
+/// This function will panic if
+/// `outcome_probs.len() < num_qubits as usize`
+///
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::cast_sign_loss)]
+pub fn calc_prob_of_all_outcomes(
+    outcome_probs: &mut [Qreal],
+    qureg: &Qureg<'_>,
+    qubits: &[i32],
+) -> Result<(), QuestError> {
+    let num_qubits = qubits.len() as i32;
+    if num_qubits > qureg.num_qubits_represented()
+        || outcome_probs.len() < (1 << num_qubits)
+    {
+        return Err(QuestError::ArrayLengthError);
+    }
 
-//     catch_quest_exception(|| unsafe {
-//         ffi::calcProbOfAllOutcomes(
-//             outcome_probs.as_mut_ptr(),
-//             qureg.reg,
-//             qubits.as_ptr(),
-//             num_qubits,
-//         );
-//     })
-// }
+    let outcome_probs_ptr = outcome_probs.as_mut_ptr();
+    catch_quest_exception(|| unsafe {
+        ffi::calcProbOfAllOutcomes(
+            outcome_probs_ptr,
+            qureg.reg,
+            qubits.as_ptr(),
+            num_qubits,
+        );
+    })
+}
 
 /// Updates `qureg` to be consistent with measuring qubit in the given outcome.
 ///
@@ -2332,45 +2333,45 @@ pub fn measure(
     catch_quest_exception(|| unsafe { ffi::measure(qureg.reg, measure_qubit) })
 }
 
-// /// Measures a single qubit, collapsing it randomly to 0 or 1
-// ///
-// /// Additionally, the function gives the probability of that outcome.
-// ///
-// /// # Examples
-// ///
-// /// ```rust
-// /// # use quest_bind::*;
-// /// let env = &QuestEnv::new();
-// /// let qureg = &mut Qureg::try_new(2, env).unwrap();
-// ///
-// /// // Prepare an entangled state `|00> + |11>`
-// /// init_zero_state(qureg);
-// /// hadamard(qureg, 0).and(controlled_not(qureg, 0, 1)).unwrap();
-// ///
-// /// // Qubits are entangled now
-// /// let prob = &mut -1.;
-// /// let outcome1 = measure_with_stats(qureg, 0, prob).unwrap();
-// /// assert!((*prob - 0.5).abs() < EPSILON);
-// ///
-// /// let outcome2 = measure_with_stats(qureg, 1, prob).unwrap();
-// /// assert!((*prob - 1.).abs() < EPSILON);
-// ///
-// /// assert_eq!(outcome1, outcome2);
-// /// ```
-// ///
-// /// See [QuEST API] for more information.
-// ///
-// /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
-// pub fn measure_with_stats(
-//     qureg: &mut Qureg<'_>,
-//     measure_qubit: i32,
-//     outcome_prob: &mut Qreal,
-// ) -> Result<i32, QuestError> {
-//     catch_quest_exception(|| unsafe {
-//         let outcome_prob_ptr = outcome_prob as *mut _;
-//         ffi::measureWithStats(qureg.reg, measure_qubit, outcome_prob_ptr)
-//     })
-// }
+/// Measures a single qubit, collapsing it randomly to 0 or 1
+///
+/// Additionally, the function gives the probability of that outcome.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+///
+/// // Prepare an entangled state `|00> + |11>`
+/// init_zero_state(qureg);
+/// hadamard(qureg, 0).and(controlled_not(qureg, 0, 1)).unwrap();
+///
+/// // Qubits are entangled now
+/// let prob = &mut -1.;
+/// let outcome1 = measure_with_stats(qureg, 0, prob).unwrap();
+/// assert!((*prob - 0.5).abs() < EPSILON);
+///
+/// let outcome2 = measure_with_stats(qureg, 1, prob).unwrap();
+/// assert!((*prob - 1.).abs() < EPSILON);
+///
+/// assert_eq!(outcome1, outcome2);
+/// ```
+///
+/// See [QuEST API] for more information.
+///
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+pub fn measure_with_stats(
+    qureg: &mut Qureg<'_>,
+    measure_qubit: i32,
+    outcome_prob: &mut Qreal,
+) -> Result<i32, QuestError> {
+    let outcome_prob_ptr = outcome_prob as *mut _;
+    catch_quest_exception(|| unsafe {
+        ffi::measureWithStats(qureg.reg, measure_qubit, outcome_prob_ptr)
+    })
+}
 
 /// Computes the inner product of two equal-size state vectors.
 ///
@@ -2428,58 +2429,57 @@ pub fn calc_density_inner_product(
     })
 }
 
-// /// Seed the random number generator.
-// ///
-// /// Seeds the random number generator with the (master node) current time and
-// /// process ID.
-// ///
-// /// # Examples
-// ///
-// /// ```rust
-// /// # use quest_bind::*;
-// /// let env = &mut QuestEnv::new();
-// ///
-// /// seed_quest_default(env);
-// /// ```
-// ///
-// /// See [QuEST API] for more information.
-// ///
-// /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
-// pub fn seed_quest_default(env: &mut QuestEnv) {
-//     catch_quest_exception(|| unsafe {
-//         let env_ptr = std::ptr::addr_of_mut!(env.0);
-//         ffi::seedQuESTDefault(env_ptr);
-//     })
-//     .expect("seed_quest_default should always succeed");
-// }
+/// Seed the random number generator.
+///
+/// Seeds the random number generator with the (master node) current time and
+/// process ID.
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// let env = &mut QuestEnv::new();
+///
+/// seed_quest_default(env);
+/// ```
+///
+/// See [QuEST API] for more information.
+///
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+pub fn seed_quest_default(env: &mut QuestEnv) {
+    let env_ptr = std::ptr::addr_of_mut!(env.0);
+    catch_quest_exception(|| unsafe {
+        ffi::seedQuESTDefault(env_ptr);
+    })
+    .expect("seed_quest_default should always succeed");
+}
 
-// /// Seeds the random number generator with a custom array of key(s).
-// ///
-// /// # Examples
-// ///
-// /// ```rust
-// /// # use quest_bind::*;
-// /// let env = &mut QuestEnv::new();
-// ///
-// /// seed_quest(env, &[1, 2, 3]);
-// /// ```
-// ///
-// /// See [QuEST API] for more information.
-// ///
-// /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
-// pub fn seed_quest(
-//     env: &mut QuestEnv,
-//     seed_array: &[u64],
-// ) {
-//     let num_seeds = seed_array.len() as i32;
-//     // QuEST's function signature is `c_ulong`. Let's use u64 for now...
-//     catch_quest_exception(|| unsafe {
-//         let env_ptr = std::ptr::addr_of_mut!(env.0);
-//         let seed_array_ptr = seed_array.as_ptr();
-//         ffi::seedQuEST(env_ptr, seed_array_ptr, num_seeds);
-//     })
-//     .expect("seed_quest should always succeed");
-// }
+/// Seeds the random number generator with a custom array of key(s).
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// let env = &mut QuestEnv::new();
+///
+/// seed_quest(env, &[1, 2, 3]);
+/// ```
+///
+/// See [QuEST API] for more information.
+///
+/// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+pub fn seed_quest(
+    env: &mut QuestEnv,
+    seed_array: &[u64],
+) {
+    let num_seeds = seed_array.len() as i32; // QuEST's function signature is`c_ulong`. Let's use u64 for now...
+    let env_ptr = std::ptr::addr_of_mut!(env.0);
+    let seed_array_ptr = seed_array.as_ptr();
+    catch_quest_exception(|| unsafe {
+        ffi::seedQuEST(env_ptr, seed_array_ptr, num_seeds);
+    })
+    .expect("seed_quest should always succeed");
+}
 
 /// Obtain the seeds presently used in random number generation.
 ///

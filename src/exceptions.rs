@@ -23,14 +23,14 @@ use std::{
         c_char,
         CStr,
     },
+    panic::UnwindSafe,
     sync::{
         Mutex,
         OnceLock,
-    }, panic::UnwindSafe,
+    },
 };
 
 use crossbeam::channel::{
-    unbounded,
     Receiver,
     Sender,
 };
@@ -91,12 +91,13 @@ where
     let guard = QUEST_EXCEPT_GUARD.lock().unwrap();
 
     // Call QuEST API
-    let res = std::panic::catch_unwind(|| f());
+    let res = std::panic::catch_unwind(f);
 
     // // At this point all exceptions have been thrown.
-    // // Get the first exception thrown.  Drain the nonblocking iterator to leave
-    // // it empty for the next call.
-    // let mut err_iter = QUEST_EXCEPT_ERROR.get_or_init(unbounded).1.try_iter();
+    // // Get the first exception thrown.  Drain the nonblocking iterator to
+    // leave // it empty for the next call.
+    // let mut err_iter =
+    // QUEST_EXCEPT_ERROR.get_or_init(unbounded).1.try_iter();
     // let err = err_iter.next();
     // let _ = err_iter.last();
 
@@ -107,7 +108,7 @@ where
     // If there is Some error, report it;
     // if there is None, everything's Ok.
     match res {
-        Err(boxed) => Err(QuestError::QubitIndexError),
+        Err(_boxed) => Err(QuestError::QubitIndexError),
         Ok(res) => Ok(res),
     }
 }

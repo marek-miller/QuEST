@@ -1021,16 +1021,16 @@ fn get_quest_seeds_01() {
     assert!(!seeds.is_empty());
 }
 
-// #[test]
-// fn get_quest_seeds_02() {
-//     let env = &mut QuestEnv::new();
-//     let seed_array = &[0, 1, 2, 3];
-//     seed_quest(env, seed_array);
-//     let seeds = get_quest_seeds(env);
+#[test]
+fn get_quest_seeds_02() {
+    let env = &mut QuestEnv::new();
+    let seed_array = &[0, 1, 2, 3];
+    seed_quest(env, seed_array);
+    let seeds = get_quest_seeds(env);
 
-//     assert!(!seeds.is_empty());
-//     assert_eq!(seed_array, seeds);
-// }
+    assert!(!seeds.is_empty());
+    assert_eq!(seed_array, seeds);
+}
 
 #[test]
 fn start_recording_qasm_01() {
