@@ -3,6 +3,8 @@
 ## v0.3.5 (??/??/????)
 
 - Implement Sync and Send traits for `QuestEnv` and `Qureg`.
+- Rewrite exception handling using `panic` mechanism. No more global API locks!
+  Our wrapper is now fully concurrent.
 - API breaking changes:
 
   - Move free functions onto `QuestEnv` type:
