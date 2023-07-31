@@ -137,6 +137,7 @@ impl<'a> Drop for DiagonalOp<'a> {
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn init_pauli_hamil(
     hamil: &mut PauliHamil,
     coeffs: &[Qreal],
@@ -161,6 +162,7 @@ pub fn init_pauli_hamil(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn sync_diagonal_op(op: &mut DiagonalOp<'_>) -> Result<(), QuestError> {
     catch_quest_exception(|| unsafe {
         ffi::syncDiagonalOp(op.op);
@@ -189,6 +191,7 @@ pub fn sync_diagonal_op(op: &mut DiagonalOp<'_>) -> Result<(), QuestError> {
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::cast_sign_loss)]
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn init_diagonal_op(
     op: &mut DiagonalOp<'_>,
     real: &[Qreal],
@@ -230,6 +233,7 @@ pub fn init_diagonal_op(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn init_diagonal_op_from_pauli_hamil(
     op: &mut DiagonalOp<'_>,
     hamil: &PauliHamil,
@@ -268,6 +272,7 @@ pub fn init_diagonal_op_from_pauli_hamil(
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::cast_sign_loss)]
 #[allow(clippy::cast_possible_truncation)]
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn set_diagonal_op_elems(
     op: &mut DiagonalOp<'_>,
     start_ind: i64,
@@ -306,6 +311,7 @@ pub fn set_diagonal_op_elems(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn apply_diagonal_op(
     qureg: &mut Qureg<'_>,
     op: &DiagonalOp<'_>,

@@ -317,6 +317,7 @@ impl Vector {
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::cast_sign_loss)]
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn init_complex_matrix_n(
     m: &mut ComplexMatrixN,
     real: &[&[Qreal]],

@@ -104,6 +104,7 @@ pub fn report_pauli_hamil(hamil: &PauliHamil) -> Result<(), QuestError> {
 /// [api-init-zero-state]: crate::init_zero_state()
 /// [api-qureg]: crate::Qureg
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn init_blank_state(qureg: &mut Qureg<'_>) {
     catch_quest_exception(|| unsafe {
         ffi::initBlankState(qureg.reg);
@@ -141,6 +142,7 @@ pub fn init_blank_state(qureg: &mut Qureg<'_>) {
 ///
 /// [api-qureg]: crate::Qureg
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn init_zero_state(qureg: &mut Qureg<'_>) {
     catch_quest_exception(|| unsafe {
         ffi::initZeroState(qureg.reg);
@@ -181,6 +183,7 @@ pub fn init_zero_state(qureg: &mut Qureg<'_>) {
 ///
 /// [api-qureg]: crate::Qureg
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn init_plus_state(qureg: &mut Qureg<'_>) {
     catch_quest_exception(|| unsafe {
         ffi::initPlusState(qureg.reg);
@@ -239,6 +242,7 @@ pub fn init_plus_state(qureg: &mut Qureg<'_>) {
 /// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn init_classical_state(
     qureg: &mut Qureg<'_>,
     state_ind: i64,
@@ -267,6 +271,7 @@ pub fn init_classical_state(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn init_pure_state(
     qureg: &mut Qureg<'_>,
     pure_: &Qureg<'_>,
@@ -281,6 +286,7 @@ pub fn init_pure_state(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn init_debug_state(qureg: &mut Qureg<'_>) {
     catch_quest_exception(|| unsafe {
         ffi::initDebugState(qureg.reg);
@@ -306,6 +312,7 @@ pub fn init_debug_state(qureg: &mut Qureg<'_>) {
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn init_state_from_amps(
     qureg: &mut Qureg<'_>,
     reals: &[Qreal],
@@ -348,6 +355,7 @@ pub fn init_state_from_amps(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn set_amps(
     qureg: &mut Qureg<'_>,
     start_ind: i64,
@@ -388,6 +396,7 @@ pub fn set_amps(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn set_density_amps(
     qureg: &mut Qureg<'_>,
     start_row: i64,
@@ -424,6 +433,7 @@ pub fn set_density_amps(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn clone_qureg(
     target_qureg: &mut Qureg<'_>,
     copy_qureg: &Qureg<'_>,
@@ -451,6 +461,7 @@ pub fn clone_qureg(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn phase_shift(
     qureg: &mut Qureg<'_>,
     target_quibit: i32,
@@ -479,6 +490,7 @@ pub fn phase_shift(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn controlled_phase_shift(
     qureg: &mut Qureg<'_>,
     id_qubit1: i32,
@@ -507,6 +519,7 @@ pub fn controlled_phase_shift(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn multi_controlled_phase_shift(
     qureg: &mut Qureg<'_>,
     control_qubits: &[i32],
@@ -541,6 +554,7 @@ pub fn multi_controlled_phase_shift(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn controlled_phase_flip(
     qureg: &mut Qureg<'_>,
     id_qubit1: i32,
@@ -568,6 +582,7 @@ pub fn controlled_phase_flip(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn multi_controlled_phase_flip(
     qureg: &mut Qureg<'_>,
     control_qubits: &[i32],
@@ -621,6 +636,7 @@ pub fn multi_controlled_phase_flip(
 /// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn s_gate(
     qureg: &mut Qureg<'_>,
     target_qubit: i32,
@@ -671,6 +687,7 @@ pub fn s_gate(
 /// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn t_gate(
     qureg: &mut Qureg<'_>,
     target_qubit: i32,
@@ -734,6 +751,7 @@ pub fn sync_quest_success(success_code: i32) -> i32 {
 /// [api-copy-state-from-gpu]: crate::copy_state_from_gpu()
 /// [api-set-amps]: crate::set_amps()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn copy_state_to_gpu(qureg: &mut Qureg<'_>) {
     catch_quest_exception(|| unsafe {
         ffi::copyStateToGPU(qureg.reg);
@@ -772,6 +790,7 @@ pub fn copy_state_to_gpu(qureg: &mut Qureg<'_>) {
 /// [api-copy-state-to-gpu]: crate::copy_state_to_gpu()
 /// [api-set-amps]: crate::set_amps()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn copy_state_from_gpu(qureg: &mut Qureg<'_>) {
     catch_quest_exception(|| unsafe { ffi::copyStateFromGPU(qureg.reg) })
         .expect("copy_state_from_gpu should always succeed");
@@ -815,6 +834,7 @@ pub fn copy_state_from_gpu(qureg: &mut Qureg<'_>) {
 /// [api-set-amps]: crate::set_amps()
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn copy_substate_to_gpu(
     qureg: &mut Qureg<'_>,
     start_ind: i64,
@@ -864,6 +884,7 @@ pub fn copy_substate_to_gpu(
 /// [api-set-amps]: crate::set_amps()
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn copy_substate_from_gpu(
     qureg: &mut Qureg<'_>,
     start_ind: i64,
@@ -1142,6 +1163,7 @@ pub fn calc_total_prob(qureg: &Qureg<'_>) -> Qreal {
 /// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn compact_unitary(
     qureg: &mut Qureg<'_>,
     target_qubit: i32,
@@ -1198,6 +1220,7 @@ pub fn compact_unitary(
 /// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn unitary(
     qureg: &mut Qureg<'_>,
     target_qubit: i32,
@@ -1244,6 +1267,7 @@ pub fn unitary(
 /// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn rotate_x(
     qureg: &mut Qureg<'_>,
     rot_qubit: i32,
@@ -1290,6 +1314,7 @@ pub fn rotate_x(
 /// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn rotate_y(
     qureg: &mut Qureg<'_>,
     rot_qubit: i32,
@@ -1336,6 +1361,7 @@ pub fn rotate_y(
 /// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn rotate_z(
     qureg: &mut Qureg<'_>,
     rot_qubit: i32,
@@ -1364,6 +1390,7 @@ pub fn rotate_z(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn rotate_around_axis(
     qureg: &mut Qureg<'_>,
     rot_qubit: i32,
@@ -1394,6 +1421,7 @@ pub fn rotate_around_axis(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn controlled_rotate_x(
     qureg: &mut Qureg<'_>,
     control_qubit: i32,
@@ -1424,6 +1452,7 @@ pub fn controlled_rotate_x(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn controlled_rotate_y(
     qureg: &mut Qureg<'_>,
     control_qubit: i32,
@@ -1454,6 +1483,7 @@ pub fn controlled_rotate_y(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn controlled_rotate_z(
     qureg: &mut Qureg<'_>,
     control_qubit: i32,
@@ -1491,6 +1521,7 @@ pub fn controlled_rotate_z(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn controlled_rotate_around_axis(
     qureg: &mut Qureg<'_>,
     control_qubit: i32,
@@ -1558,6 +1589,7 @@ pub fn controlled_rotate_around_axis(
 /// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn controlled_compact_unitary(
     qureg: &mut Qureg<'_>,
     control_qubit: i32,
@@ -1617,6 +1649,7 @@ pub fn controlled_compact_unitary(
 /// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn controlled_unitary(
     qureg: &mut Qureg<'_>,
     control_qubit: i32,
@@ -1672,6 +1705,7 @@ pub fn controlled_unitary(
 /// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn multi_controlled_unitary(
     qureg: &mut Qureg<'_>,
     control_qubits: &[i32],
@@ -1722,6 +1756,7 @@ pub fn multi_controlled_unitary(
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn pauli_x(
     qureg: &mut Qureg<'_>,
     target_qubit: i32,
@@ -1763,6 +1798,7 @@ pub fn pauli_x(
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn pauli_y(
     qureg: &mut Qureg<'_>,
     target_qubit: i32,
@@ -1804,6 +1840,7 @@ pub fn pauli_y(
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn pauli_z(
     qureg: &mut Qureg<'_>,
     target_qubit: i32,
@@ -1853,6 +1890,7 @@ pub fn pauli_z(
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn hadamard(
     qureg: &mut Qureg<'_>,
     target_qubit: i32,
@@ -1910,6 +1948,7 @@ pub fn hadamard(
 /// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn controlled_not(
     qureg: &mut Qureg<'_>,
     control_qubit: i32,
@@ -1974,6 +2013,7 @@ pub fn controlled_not(
 /// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn multi_controlled_multi_qubit_not(
     qureg: &mut Qureg<'_>,
     ctrls: &[i32],
@@ -2041,6 +2081,7 @@ pub fn multi_controlled_multi_qubit_not(
 /// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn multi_qubit_not(
     qureg: &mut Qureg<'_>,
     targs: &[i32],
@@ -2072,6 +2113,7 @@ pub fn multi_qubit_not(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn controlled_pauli_y(
     qureg: &mut Qureg<'_>,
     control_qubit: i32,
@@ -2136,6 +2178,7 @@ pub fn calc_prob_of_outcome(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::cast_sign_loss)]
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn calc_prob_of_all_outcomes(
     outcome_probs: &mut [Qreal],
     qureg: &Qureg<'_>,
@@ -2173,6 +2216,7 @@ pub fn calc_prob_of_all_outcomes(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn collapse_to_outcome(
     qureg: &mut Qureg<'_>,
     measure_qubit: i32,
@@ -2206,6 +2250,7 @@ pub fn collapse_to_outcome(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn measure(
     qureg: &mut Qureg<'_>,
     measure_qubit: i32,
@@ -2242,6 +2287,7 @@ pub fn measure(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn measure_with_stats(
     qureg: &mut Qureg<'_>,
     measure_qubit: i32,
@@ -2326,6 +2372,7 @@ pub fn calc_density_inner_product(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn seed_quest_default(env: &mut QuestEnv) {
     let env_ptr = std::ptr::addr_of_mut!(env.0);
     catch_quest_exception(|| unsafe {
@@ -2412,6 +2459,7 @@ pub fn get_quest_seeds<'a: 'b, 'b>(env: &'a QuestEnv) -> &'b [u64] {
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn start_recording_qasm(qureg: &mut Qureg<'_>) {
     catch_quest_exception(|| unsafe {
         ffi::startRecordingQASM(qureg.reg);
@@ -2441,6 +2489,7 @@ pub fn start_recording_qasm(qureg: &mut Qureg<'_>) {
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn stop_recording_qasm(qureg: &mut Qureg<'_>) {
     catch_quest_exception(|| unsafe {
         ffi::stopRecordingQASM(qureg.reg);
@@ -2471,6 +2520,7 @@ pub fn stop_recording_qasm(qureg: &mut Qureg<'_>) {
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn clear_recorded_qasm(qureg: &mut Qureg<'_>) {
     catch_quest_exception(|| unsafe {
         ffi::clearRecordedQASM(qureg.reg);
@@ -2499,6 +2549,7 @@ pub fn clear_recorded_qasm(qureg: &mut Qureg<'_>) {
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn print_recorded_qasm(qureg: &mut Qureg<'_>) {
     catch_quest_exception(|| unsafe {
         ffi::printRecordedQASM(qureg.reg);
@@ -2525,6 +2576,7 @@ pub fn print_recorded_qasm(qureg: &mut Qureg<'_>) {
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn write_recorded_qasm_to_file(
     qureg: &mut Qureg<'_>,
     filename: &str,
@@ -2559,6 +2611,7 @@ pub fn write_recorded_qasm_to_file(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn mix_dephasing(
     qureg: &mut Qureg<'_>,
     target_qubit: i32,
@@ -2590,6 +2643,7 @@ pub fn mix_dephasing(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn mix_two_qubit_dephasing(
     qureg: &mut Qureg<'_>,
     qubit1: i32,
@@ -2620,6 +2674,7 @@ pub fn mix_two_qubit_dephasing(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn mix_depolarising(
     qureg: &mut Qureg<'_>,
     target_qubit: i32,
@@ -2649,6 +2704,7 @@ pub fn mix_depolarising(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn mix_damping(
     qureg: &mut Qureg<'_>,
     target_qubit: i32,
@@ -2681,6 +2737,7 @@ pub fn mix_damping(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn mix_two_qubit_depolarising(
     qureg: &mut Qureg<'_>,
     qubit1: i32,
@@ -2714,6 +2771,7 @@ pub fn mix_two_qubit_depolarising(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn mix_pauli(
     qureg: &mut Qureg<'_>,
     target_qubit: i32,
@@ -2747,6 +2805,7 @@ pub fn mix_pauli(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn mix_density_matrix(
     combine_qureg: &mut Qureg<'_>,
     prob: Qreal,
@@ -2918,6 +2977,7 @@ pub fn calc_fidelity(
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn swap_gate(
     qureg: &mut Qureg<'_>,
     qubit1: i32,
@@ -2947,6 +3007,7 @@ pub fn swap_gate(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn sqrt_swap_gate(
     qureg: &mut Qureg<'_>,
     qb1: i32,
@@ -2987,6 +3048,7 @@ pub fn sqrt_swap_gate(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn multi_state_controlled_unitary(
     qureg: &mut Qureg<'_>,
     control_qubits: &[i32],
@@ -3030,6 +3092,7 @@ pub fn multi_state_controlled_unitary(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn multi_rotate_z(
     qureg: &mut Qureg<'_>,
     qubits: &[i32],
@@ -3066,6 +3129,7 @@ pub fn multi_rotate_z(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn multi_rotate_pauli(
     qureg: &mut Qureg<'_>,
     target_qubits: &[i32],
@@ -3116,6 +3180,7 @@ pub fn multi_rotate_pauli(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn multi_controlled_multi_rotate_z(
     qureg: &mut Qureg<'_>,
     control_qubits: &[i32],
@@ -3172,6 +3237,7 @@ pub fn multi_controlled_multi_rotate_z(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn multi_controlled_multi_rotate_pauli(
     qureg: &mut Qureg<'_>,
     control_qubits: &[i32],
@@ -3219,6 +3285,7 @@ pub fn multi_controlled_multi_rotate_pauli(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn calc_expec_pauli_prod(
     qureg: &Qureg<'_>,
     target_qubits: &[i32],
@@ -3266,6 +3333,7 @@ pub fn calc_expec_pauli_prod(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn calc_expec_pauli_sum(
     qureg: &Qureg<'_>,
     all_pauli_codes: &[PauliOpType],
@@ -3316,6 +3384,7 @@ pub fn calc_expec_pauli_sum(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn calc_expec_pauli_hamil(
     qureg: &Qureg<'_>,
     hamil: &PauliHamil,
@@ -3363,6 +3432,7 @@ pub fn calc_expec_pauli_hamil(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn two_qubit_unitary(
     qureg: &mut Qureg<'_>,
     target_qubit1: i32,
@@ -3419,6 +3489,7 @@ pub fn two_qubit_unitary(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn controlled_two_qubit_unitary(
     qureg: &mut Qureg<'_>,
     control_qubit: i32,
@@ -3483,6 +3554,7 @@ pub fn controlled_two_qubit_unitary(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn multi_controlled_two_qubit_unitary(
     qureg: &mut Qureg<'_>,
     control_qubits: &[i32],
@@ -3537,6 +3609,7 @@ pub fn multi_controlled_two_qubit_unitary(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn multi_qubit_unitary(
     qureg: &mut Qureg<'_>,
     targs: &[i32],
@@ -3586,6 +3659,7 @@ pub fn multi_qubit_unitary(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn controlled_multi_qubit_unitary(
     qureg: &mut Qureg<'_>,
     ctrl: i32,
@@ -3643,6 +3717,7 @@ pub fn controlled_multi_qubit_unitary(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn multi_controlled_multi_qubit_unitary(
     qureg: &mut Qureg<'_>,
     ctrls: &[i32],
@@ -3687,6 +3762,7 @@ pub fn multi_controlled_multi_qubit_unitary(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn mix_kraus_map(
     qureg: &mut Qureg<'_>,
     target: i32,
@@ -3737,6 +3813,7 @@ pub fn mix_kraus_map(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn mix_two_qubit_kraus_map(
     qureg: &mut Qureg<'_>,
     target1: i32,
@@ -3795,6 +3872,7 @@ pub fn mix_two_qubit_kraus_map(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn mix_multi_qubit_kraus_map(
     qureg: &mut Qureg<'_>,
     targets: &[i32],
@@ -3839,6 +3917,7 @@ pub fn mix_multi_qubit_kraus_map(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn mix_nontp_kraus_map(
     qureg: &mut Qureg<'_>,
     target: i32,
@@ -3890,6 +3969,7 @@ pub fn mix_nontp_kraus_map(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn mix_nontp_two_qubit_kraus_map(
     qureg: &mut Qureg<'_>,
     target1: i32,
@@ -3949,6 +4029,7 @@ pub fn mix_nontp_two_qubit_kraus_map(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn mix_nontp_multi_qubit_kraus_map(
     qureg: &mut Qureg<'_>,
     targets: &[i32],
@@ -4035,6 +4116,7 @@ pub fn calc_hilbert_schmidt_distance(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn set_weighted_qureg(
     fac1: Qcomplex,
     qureg1: &Qureg<'_>,
@@ -4088,6 +4170,7 @@ pub fn set_weighted_qureg(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn apply_pauli_sum(
     in_qureg: &mut Qureg<'_>,
     all_pauli_codes: &[PauliOpType],
@@ -4145,6 +4228,7 @@ pub fn apply_pauli_sum(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn apply_pauli_hamil(
     in_qureg: &mut Qureg<'_>,
     hamil: &PauliHamil,
@@ -4186,6 +4270,7 @@ pub fn apply_pauli_hamil(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn apply_trotter_circuit(
     qureg: &mut Qureg<'_>,
     hamil: &PauliHamil,
@@ -4220,6 +4305,7 @@ pub fn apply_trotter_circuit(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn apply_matrix2(
     qureg: &mut Qureg<'_>,
     target_qubit: i32,
@@ -4266,6 +4352,7 @@ pub fn apply_matrix2(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn apply_matrix4(
     qureg: &mut Qureg<'_>,
     target_qubit1: i32,
@@ -4318,6 +4405,7 @@ pub fn apply_matrix4(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn apply_matrix_n(
     qureg: &mut Qureg<'_>,
     targs: &[i32],
@@ -4366,6 +4454,7 @@ pub fn apply_matrix_n(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn apply_multi_controlled_matrix_n(
     qureg: &mut Qureg<'_>,
     ctrls: &[i32],
@@ -4506,6 +4595,7 @@ pub fn apply_multi_controlled_matrix_n(
 /// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn apply_phase_func(
     qureg: &mut Qureg<'_>,
     qubits: &[i32],
@@ -4627,6 +4717,7 @@ pub fn apply_phase_func(
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::too_many_arguments)]
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn apply_phase_func_overrides(
     qureg: &mut Qureg<'_>,
     qubits: &[i32],
@@ -4689,6 +4780,7 @@ pub fn apply_phase_func_overrides(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::too_many_arguments)]
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn apply_multi_var_phase_func(
     qureg: &mut Qureg<'_>,
     qubits: &[i32],
@@ -4755,6 +4847,7 @@ pub fn apply_multi_var_phase_func(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::too_many_arguments)]
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn apply_multi_var_phase_func_overrides(
     qureg: &mut Qureg<'_>,
     qubits: &[i32],
@@ -4816,6 +4909,7 @@ pub fn apply_multi_var_phase_func_overrides(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn apply_named_phase_func(
     qureg: &mut Qureg<'_>,
     qubits: &[i32],
@@ -4873,6 +4967,7 @@ pub fn apply_named_phase_func(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::too_many_arguments)]
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn apply_named_phase_func_overrides(
     qureg: &mut Qureg<'_>,
     qubits: &[i32],
@@ -4933,6 +5028,7 @@ pub fn apply_named_phase_func_overrides(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::too_many_arguments)]
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn apply_param_named_phase_func(
     qureg: &mut Qureg<'_>,
     qubits: &[i32],
@@ -4996,6 +5092,7 @@ pub fn apply_param_named_phase_func(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::too_many_arguments)]
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn apply_param_named_phase_func_overrides(
     qureg: &mut Qureg<'_>,
     qubits: &[i32],
@@ -5069,6 +5166,7 @@ pub fn apply_param_named_phase_func_overrides(
 /// [api-apply-named-phase-func]: crate::apply_named_phase_func()
 /// [api-apply-qft]: crate::apply_qft()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn apply_full_qft(qureg: &mut Qureg<'_>) {
     catch_quest_exception(|| unsafe {
         ffi::applyFullQFT(qureg.reg);
@@ -5135,6 +5233,7 @@ pub fn apply_full_qft(qureg: &mut Qureg<'_>) {
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn apply_qft(
     qureg: &mut Qureg<'_>,
     qubits: &[i32],
@@ -5196,6 +5295,7 @@ pub fn apply_qft(
 /// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+#[allow(clippy::needless_pass_by_ref_mut)]
 pub fn apply_projector(
     qureg: &mut Qureg<'_>,
     qubit: i32,
