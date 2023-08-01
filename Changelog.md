@@ -2,6 +2,7 @@
 
 ## v0.3.5 (??/??/????)
 
+- Change git repository name to: `quest_bind`
 - Implement Sync and Send traits for `QuestEnv` and `Qureg`.
 - Rewrite exception handling using `panic` mechanism. No more global API locks!
   Our wrapper is now fully concurrent and much faster.
