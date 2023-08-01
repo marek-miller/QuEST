@@ -210,19 +210,35 @@ fn set_amps_01() {
     let env = &QuestEnv::new();
     let mut qureg = Qureg::try_new(3, env).unwrap();
 
-    let num_amps = 4;
     let re = [1., 2., 3., 4.];
     let im = [1., 2., 3., 4.];
 
-    set_amps(&mut qureg, 0, &re, &im, num_amps).unwrap();
-
+    set_amps(&mut qureg, 0, &re, &im).unwrap();
     assert!((get_real_amp(&qureg, 0).unwrap() - 1.).abs() < EPSILON);
 
-    set_amps(&mut qureg, 9, &re, &im, 4).unwrap_err();
-    set_amps(&mut qureg, 7, &re, &im, 4).unwrap_err();
-    set_amps(&mut qureg, 3, &re, &im, 9).unwrap_err();
-    set_amps(&mut qureg, -1, &re, &im, 9).unwrap_err();
-    set_amps(&mut qureg, 1, &re, &im, -9).unwrap_err();
+    set_amps(&mut qureg, 3, &re, &im).unwrap();
+
+    set_amps(&mut qureg, 9, &re, &im).unwrap_err();
+    set_amps(&mut qureg, 7, &re, &im).unwrap_err();
+    set_amps(&mut qureg, -1, &re, &im).unwrap_err();
+}
+
+#[test]
+fn set_amps_02() {
+    let env = &QuestEnv::new();
+    let mut qureg = Qureg::try_new(2, env).unwrap();
+
+    let re = [1.];
+    let im = [1., 2.];
+
+    let res = set_amps(&mut qureg, 0, &re, &im).unwrap_err();
+    assert_eq!(res, QuestError::ArrayLengthError);
+
+    let re = [1., 2.];
+    let im = [1.];
+
+    let res = set_amps(&mut qureg, 0, &re, &im).unwrap_err();
+    assert_eq!(res, QuestError::ArrayLengthError);
 }
 
 #[test]
@@ -236,7 +252,7 @@ fn set_density_amps_01() {
     set_density_amps(qureg, 0, 0, re, im, 4).unwrap();
     assert!((get_density_amp(qureg, 0, 0).unwrap().re - 1.).abs() < EPSILON);
 
-    set_amps(qureg, 0, re, im, 4).unwrap_err();
+    set_amps(qureg, 0, re, im).unwrap_err();
 
     set_density_amps(qureg, 0, 9, re, im, 4).unwrap_err();
     set_density_amps(qureg, 8, 7, re, im, 4).unwrap_err();
