@@ -254,6 +254,22 @@ pub fn init_classical_state(
 
 /// Initialize `qureg` into a pure state.
 ///
+/// - If `qureg` is a state-vector, this merely clones `pure` into `qureg`.
+/// - If `qureg` is a density matrix, this makes `qureg` 100% likely to be in
+///   the `pure` state.
+///
+/// # Parameters
+///
+/// - `qureg`: the register to modify
+/// - `pure`: a state-vector containing the pure state into which to initialise
+///   `qureg`
+///
+/// # Errors
+///
+/// - [`InvalidQuESTInputError`],
+///   - if `qureg` and `pure` have mismatching dimensions
+///   - if `pure` is a density matrix
+///
 /// # Examples
 ///
 /// ```rust
@@ -270,6 +286,7 @@ pub fn init_classical_state(
 ///
 /// See [QuEST API] for more information.
 ///
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
 pub fn init_pure_state(
