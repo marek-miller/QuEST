@@ -261,7 +261,7 @@ pub fn init_classical_state(
 /// # Parameters
 ///
 /// - `qureg`: the register to modify
-/// - `pure`: a state-vector containing the pure state into which to initialise
+/// - `pure`: a state-vector containing the pure state into which to initialize
 ///   `qureg`
 ///
 /// # Errors
@@ -299,14 +299,14 @@ pub fn init_pure_state(
 }
 
 /// Initialize `qureg` to be in a debug state.
-/// 
-/// Set `qureg` to be in the un-normalized, non-physical state with 
+///
+/// Set `qureg` to be in the un-normalized, non-physical state with
 /// with `n`th complex amplitude given by:
-/// 
+///
 /// ```text
-///   2n/10 + i*(2n+1)/10. 
+///   2n/10 + i*(2n+1)/10.
 /// ```
-/// 
+///
 /// This is used internally for debugging and testing.
 ///
 /// See [QuEST API] for more information.
@@ -322,6 +322,31 @@ pub fn init_debug_state(qureg: &mut Qureg<'_>) {
 
 /// Initialize `qureg` by specifying all amplitudes.
 ///
+/// For density matrices, it is assumed the amplitudes have been flattened
+/// column-wise into the given arrays.
+///
+/// The real and imaginary components of the amplitudes are passed in separate
+/// arrays, `reals` and `imags`, each of which must have length
+/// [`qureg.get_num_amps()`]. There is no automatic checking that the passed
+/// arrays are L2 normalized, so this can be used to prepare `qureg` in a
+/// non-physical state.
+///
+/// In distributed mode, this would require the complete state to fit in
+/// every node. To manually prepare a state for which all amplitudes cannot fit
+/// into a single node, use [`set_amps()`]
+///
+/// # Parameters
+///
+/// - `qureg`: the register to overwrite
+/// - `reals`: array of the real components of the new amplitudes
+/// - `imags`: array of the imaginary components of the new amplitudes
+///
+/// # Errors
+///
+/// - [`ArrayLengthError`],
+///   - if either `reals` or `imags` have fewer than [`qureg.get_num_amps()`]
+///     elements
+////
 /// # Examples
 ///
 /// ```rust
@@ -337,6 +362,9 @@ pub fn init_debug_state(qureg: &mut Qureg<'_>) {
 ///
 /// See [QuEST API] for more information.
 ///
+/// [`qureg.get_num_amps()`]: crate::Qureg::get_num_amps()
+/// [`set_amps()`]: crate::set_amps()
+/// [`ArrayLengthError`]: crate::QuestError::ArrayLengthError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
 pub fn init_state_from_amps(

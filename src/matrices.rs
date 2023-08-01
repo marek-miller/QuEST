@@ -311,7 +311,7 @@ impl Vector {
 ///
 /// # Errors
 ///
-/// Returns [`Error::ArrayLengthError`](crate::QuestError::ArrayLengthError), if
+/// Returns [`ArrayLengthError`](crate::QuestError::ArrayLengthError), if
 /// either `real` or `imag` is not a square array of dimension equal to the
 /// number of qubits in `m`.
 ///
