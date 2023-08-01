@@ -3497,3 +3497,25 @@ fn multi_controlled_multi_rotate_pauli_01() {
     multi_controlled_multi_rotate_pauli(qureg, &[0, 3], &[2, 3], tar_paul, 0.)
         .unwrap_err();
 }
+
+#[test]
+fn check_array_length_init_state_from_amps() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+
+    let reals = [0.; 4];
+    let imags = [0.; 4];
+    init_state_from_amps(qureg, &reals, &imags).unwrap();
+
+    let reals = [0.; 3];
+    let imags = [0.; 4];
+    init_state_from_amps(qureg, &reals, &imags).unwrap_err();
+
+    let reals = [0.; 4];
+    let imags = [0.; 3];
+    init_state_from_amps(qureg, &reals, &imags).unwrap_err();
+
+    let reals = [0.; 5];
+    let imags = [0.; 5];
+    init_state_from_amps(qureg, &reals, &imags).unwrap();
+}

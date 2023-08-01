@@ -327,8 +327,8 @@ pub fn init_debug_state(qureg: &mut Qureg<'_>) {
 ///
 /// The real and imaginary components of the amplitudes are passed in separate
 /// arrays, `reals` and `imags`, each of which must have length
-/// [`qureg.get_num_amps()`]. There is no automatic checking that the passed
-/// arrays are L2 normalized, so this can be used to prepare `qureg` in a
+/// [`qureg.get_num_amps_total()`]. There is no automatic checking that the
+/// passed arrays are L2 normalized, so this can be used to prepare `qureg` in a
 /// non-physical state.
 ///
 /// In distributed mode, this would require the complete state to fit in
@@ -344,8 +344,8 @@ pub fn init_debug_state(qureg: &mut Qureg<'_>) {
 /// # Errors
 ///
 /// - [`ArrayLengthError`],
-///   - if either `reals` or `imags` have fewer than [`qureg.get_num_amps()`]
-///     elements
+///   - if either `reals` or `imags` have fewer than
+///     [`qureg.get_num_amps_total()`] elements
 ////
 /// # Examples
 ///
@@ -362,7 +362,7 @@ pub fn init_debug_state(qureg: &mut Qureg<'_>) {
 ///
 /// See [QuEST API] for more information.
 ///
-/// [`qureg.get_num_amps()`]: crate::Qureg::get_num_amps()
+/// [`qureg.get_num_amps_total()`]: crate::Qureg::get_num_amps_total()
 /// [`set_amps()`]: crate::set_amps()
 /// [`ArrayLengthError`]: crate::QuestError::ArrayLengthError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
@@ -372,6 +372,10 @@ pub fn init_state_from_amps(
     reals: &[Qreal],
     imags: &[Qreal],
 ) -> Result<(), QuestError> {
+    let num_amps_total = qureg.get_num_amps_total() as usize;
+    if reals.len() < num_amps_total || imags.len() < num_amps_total {
+        return Err(QuestError::ArrayLengthError);
+    }
     catch_quest_exception(|| unsafe {
         ffi::initStateFromAmps(qureg.reg, reals.as_ptr(), imags.as_ptr());
     })
