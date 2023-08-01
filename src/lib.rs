@@ -298,7 +298,16 @@ pub fn init_pure_state(
     })
 }
 
-/// Initializes `qureg` to be in the debug state.
+/// Initialize `qureg` to be in a debug state.
+/// 
+/// Set `qureg` to be in the un-normalized, non-physical state with 
+/// with `n`th complex amplitude given by:
+/// 
+/// ```text
+///   2n/10 + i*(2n+1)/10. 
+/// ```
+/// 
+/// This is used internally for debugging and testing.
 ///
 /// See [QuEST API] for more information.
 ///
@@ -308,7 +317,7 @@ pub fn init_debug_state(qureg: &mut Qureg<'_>) {
     catch_quest_exception(|| unsafe {
         ffi::initDebugState(qureg.reg);
     })
-    .expect("init_debug_state should always succeed");
+    .expect("init_debug_state() should always succeed");
 }
 
 /// Initialize `qureg` by specifying all amplitudes.
