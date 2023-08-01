@@ -1,4 +1,4 @@
-#[derive(Debug)]
+#[derive(Debug, PartialEq)]
 #[non_exhaustive]
 pub enum QuestError {
     /// An exception thrown by the C library.  From QuEST documentation:
