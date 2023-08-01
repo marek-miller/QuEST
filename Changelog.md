@@ -8,6 +8,8 @@
   Our wrapper is now fully concurrent and much faster.
 - Remove spurious checks that existed due to imperfect error catching.
 
+- Add method: `Qureg::get_num_amps_total()`
+
 - API breaking changes:
 
   - Move free functions onto `QuestEnv` type:
