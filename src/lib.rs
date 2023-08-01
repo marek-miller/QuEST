@@ -4489,6 +4489,7 @@ pub fn apply_multi_controlled_matrix_n(
 ///     \sum\limits_{i}^{\text{num_terms}} \text{coeffs}[i] \;
 ///     r^{\, \text{exponents}[i]}\,, \f],
 ///   ```
+///
 ///   where both `coeffs` and `exponents` can be negative, positive and
 ///   fractional. For example,
 ///  
@@ -4499,10 +4500,10 @@ pub fn apply_multi_controlled_matrix_n(
 ///  
 ///   constitutes the function: `f(r) =  1 * r^2 - 3.14 * r^(-5.5)`.  Note
 ///   that you cannot use fractional exponents with `encoding` being
-///   [`BitEncoding::TWOS_COMPLEMENT`][api-bit-encoding-twos-cplm],  since the
+///   [`BitEncoding::TWOS_COMPLEMENT`],  since the
 ///   negative   indices would generate (illegal) complex phases, and  must be
 ///   overriden with
-///   [`apply_phase_func_overrides()`][api-apply-phase-func-overrides].  
+///   [`apply_phase_func_overrides()`].  
 ///  
 ///   If your function `f(r)` diverges at one or more `r` values, you
 ///   must instead use `apply_phase_func_overrides()` and specify explicit phase
@@ -4520,20 +4521,20 @@ pub fn apply_multi_controlled_matrix_n(
 ///   The index `r` associated with each computational basis
 ///   state is determined by the binary value of the specified `qubits`
 ///   (ordered least to most significant), interpreted under the given
-///   [`BitEncoding`][api-bit-encoding] encoding.
+///   [`BitEncoding`] encoding.
 ///
 /// - If `qureg` is a density matrix `rho`, this function modifies `qureg` to:
 ///
-/// ```latex
-/// \rho \rightarrow \hat{D} \, \rho \, \hat{D}^\dagger,
-/// ```
+///   ```latex
+///   \rho \rightarrow \hat{D} \, \rho \, \hat{D}^\dagger,
+///   ```
 ///
-///  where   `\hat{D}` is the diagonal unitary operator:
+///   where   `\hat{D}` is the diagonal unitary operator:
 ///
-/// ```latex
-///  \hat{D} = \text{diag}
-///   \, \{ \; e^{i f(r_0)}, \; e^{i f(r_1)}, \;  \dots \; \}.
-/// ```
+///   ```latex
+///    \hat{D} = \text{diag}
+///     \, \{ \; e^{i f(r_0)}, \; e^{i f(r_1)}, \;  \dots \; \}.
+///   ```
 ///
 /// - The interpreted phase function can be previewed in the QASM log, as a
 ///   comment.
@@ -4546,8 +4547,8 @@ pub fn apply_multi_controlled_matrix_n(
 /// - `qureg`: the state-vector or density matrix to be modified
 /// - `qubits`: a list of the indices of the qubits which will inform `r` for
 ///   each amplitude in `qureg`
-/// - `encoding`: the [`BitEncoding`][api-bit-encoding] under which to infer the
-///   binary value `r` from the bits of `qubits` in each basis state of `qureg`
+/// - `encoding`: the [`BitEncoding`] under which to infer the binary value `r`
+///   from the bits of `qubits` in each basis state of `qureg`
 /// - `coeffs`: the coefficients of the exponential polynomial phase function
 ///   `f(r)`
 /// - `exponents`: the exponents of the exponential polynomial phase function
@@ -4572,6 +4573,7 @@ pub fn apply_multi_controlled_matrix_n(
 ///     apply_phase_func_overrides()` and override the zero index)
 ///
 /// # Examples
+///
 /// ```rust
 /// # use quest_bind::*;
 /// let env = &QuestEnv::new();
@@ -4589,9 +4591,9 @@ pub fn apply_multi_controlled_matrix_n(
 ///
 /// See [QuEST API] for more information.
 ///
-/// [api-bit-encoding-twos-cplm]: crate::BitEncoding::TWOS_COMPLEMENT
-/// [api-bit-encoding]: crate::BitEncoding
-/// [api-apply-phase-func-overrides]: crate::apply_phase_func_overrides()
+/// [`BitEncoding::TWOS_COMPLEMENT`]: crate::BitEncoding::TWOS_COMPLEMENT
+/// [`BitEncoding`]: crate::BitEncoding
+/// [`apply_phase_func_overrides()`]: crate::apply_phase_func_overrides()
 /// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
@@ -4624,7 +4626,7 @@ pub fn apply_phase_func(
 /// passed  exponential polynomial "phase function", and an explicit set of
 /// 'overriding' values at specific state indices.
 ///
-/// See [`apply_phase_func()`][api-apply-phase-func] for a full desctiption.
+/// See [`apply_phase_func()`] for a full desctiption.
 ///
 /// - As in `apply_phase_func()`, the arguments `coeffs` and `exponents` specify
 ///   a phase function `f(r)`, where `r` is determined by `qubits` and
@@ -4648,8 +4650,8 @@ pub fn apply_phase_func(
 /// - `qureg`:  the state-vector or density matrix to be modified
 /// - `qubits`: a list of the indices of the qubits which will inform `r` for
 ///   each amplitude in `qureg`
-/// - `encoding`: [`BitEncoding`][api-bit-encoding] under which to infer the
-///   binary value `r` from the bits of `qubits` in each basis state of `qureg`
+/// - `encoding`: [`BitEncoding`] under which to infer the binary value `r` from
+///   the bits of `qubits` in each basis state of `qureg`
 /// - `coeffs`: the coefficients of the exponential polynomial phase function
 ///   `f(r)`
 /// - `exponents`: the exponents of the exponential polynomial phase function
@@ -4712,8 +4714,8 @@ pub fn apply_phase_func(
 ///
 /// See [QuEST API] for more information.
 ///
-/// [api-apply-phase-func]: crate::apply_phase_func()
-/// [api-bit-encoding]: crate::BitEncoding
+/// [`apply_phase_func()`]: crate::apply_phase_func()
+/// [`BitEncoding`]: crate::BitEncoding
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::too_many_arguments)]
@@ -4748,6 +4750,116 @@ pub fn apply_phase_func_overrides(
 
 /// Apply a multi-variable exponential polynomial.
 ///
+/// Induces a phase change upon each amplitude of `qureg`, determined by the
+/// multi-variable exponential polynomial "phase function".
+///
+/// This is a multi-variable extension of [`apply_phase_func()`], whereby
+/// multiple sub-registers inform separate variables in the exponential
+/// polynomial function, and effects a diagonal unitary operator.
+///
+/// - Arguments `coeffs`, `exponents` and `num_terms_per_reg` together specify a
+///   real exponential polynomial `f(r)` of the form
+///
+///   ```latex
+///   f(r_1,\dots, \; r_{\text{numRegs}}) =
+///   \sum\limits_j^{\text{numRegs}}  \sum\limits_{i}^{\text{numTermsPerReg}[j]}
+///     c_{i,j} \; {r_j}^{p_{i,j}},
+///   ```
+///
+///   where both coefficients `c_{i,j}` and exponents `p_{i,j}` can be any real
+///   number, subject to constraints described below.
+///  
+///   While `coeffs` and `exponents` are flat lists, they should be considered
+///   grouped into `num_qubits_per_reg.len()` sublists with lengths given by
+///   `num_qubits_per_reg`.
+///
+///   For example,
+///
+///   ```rust,no_run
+///   let coeffs =            [1., 2., 4., -3.14];
+///   let exponents =         [2., 1., 5., 0.5];
+///   let num_terms_per_reg = [1., 2.,     1.];
+///   ```
+///
+///   constitutes the function: `f(\vec{r}) =  1 * {r_1}^2 + 2 * {r_2} + 4 \,
+///   {r_2}^{5} - 3.14 \, {r_3}^{0.5}`.   This means lists `coeffs` and
+///   `exponents` should both be of length   equal to the sum of
+///   `num_terms_per_reg`.
+///
+///
+/// - Unlike [`apply_phase_func()`], this function places additional constraints
+///   on the   exponents in `f(\vec{r})`, due to the exponentially growing costs
+///   of overriding diverging indices. Namely:
+///
+///   - `exponents` must not contain a negative number, since this would result
+///     in a divergence when that register is zero, which would need to be
+///     overriden for every other register basis state.  If `f(\vec{r})` must
+///     contain a negative exponent, you should instead call
+///     [`apply_phase_func_overrides()`] once for each register/variable, and
+///     override the zero index for the relevant variable. This works, because
+///     `\exp( i \sum_j f_j(r_j) ) = \prod_j \exp(i f_j(r_j) )`.
+///   - `exponents` must not contain a fractional number if `endoding =
+///     TWOS_COMPLEMENT`, because such a term would produce illegal complex
+///     values at negative register indices. Similar to the problem above, each
+///     negative register index would require overriding at every index of the
+///     other registers, and hence require an exponential number of overrides.
+///     Therefore, if `f(\vec{r})` must contain a negative exponent, you should
+///     instead call `apply_phase_func_overrides()` once for each
+///     register/variable, and override every negative index of each register in
+///     turn.
+///
+/// - Lists `qubits` and `num_qubits_per_reg` together describe sub-registers of
+///   `qureg`, which can each contain a different number of qubits. Although
+///   `qubits` is a flat list of unique qubit indices, it should be imagined
+///   grouped into sub-lists, of lengths given by `num_qubits_per_reg`.
+///
+///   Note that the qubits need not be ordered increasing, and
+///   qubits within each sub-register are assumed ordered least to most
+///   significant in that sub-register. List `qubits` should have length equal
+///   to the sum of elements in `num_qubits_per_reg`.
+///
+/// - Each sub-register is associated with a variable `r_j` in phase function
+///   `f(\vec{r})`. For a given computational basis state of `qureg`, the value
+///   of each variable is determined by the binary value in the corresponding
+///   sub-register, when intepreted with [`BitEncoding`] `encoding`.
+///
+/// - The function `f(\vec{r})` specifies the phase change to induce upon
+///   amplitude `alpha` of computational basis state with the nominated
+///   sub-registers encoding values.
+///
+/// - The interpreted phase function can be previewed in the QASM log, as a
+///   comment.
+///
+/// # Parameters
+///
+/// - `qureg`: the state-vector or density matrix to be modified
+/// - `qubits`: a list of all the qubit indices contained in each sub-register
+/// - `num_qubits_per_reg`: a list of the lengths of each sub-list in `qubits`
+/// - `encoding`: [`BitEncoding`] under which to infer the binary value `r_j`
+///   from the bits of a sub-register
+/// - `coeffs`: the coefficients of all terms of the exponential polynomial
+///   phase function `f(\vec{r})`
+/// - `exponents`: the exponents of all terms of the exponential polynomial
+///   phase function `f(\vec{r})`
+/// - `num_terms_per_reg` a list of the number of `coeff` and `exponent` terms
+///   supplied for each variable/sub-register
+////
+/// # Errors
+///
+/// - [`InvalidQuESTInputError`],
+///   - if any qubit in `qubits` has an invalid index (i.e. does not satisfy 0
+///     <= qubit < `qureg.num_qubits_represented()`)
+///   - if the elements of `qubits` are not unique (including if sub-registers
+///     overlap)
+///   - if `num_qubits_per_reg.len() = 0 or > 100` (constrained by
+///     `MAX_NUM_REGS_APPLY_ARBITRARY_PHASE` in QuEST_precision.h)
+///   - if the size of any sub-register is incompatible with `encoding` (e.g.
+///     contains fewer than two qubits if `encoding = TWOS_COMPLEMENT`)
+///   - if any element of `num_terms_per_reg < 1`
+///   - if `exponents` contains a negative number
+///   - if `exponents` contains a fractional number despite `encoding =
+///     TWOS_COMPLEMENT`
+///
 /// # Examples
 ///
 /// ```rust
@@ -4778,6 +4890,10 @@ pub fn apply_phase_func_overrides(
 ///
 /// See [QuEST API] for more information.
 ///
+/// [`apply_phase_func()`]: crate::apply_phase_func()
+/// [`apply_phase_func_overrides()`]: crate::apply_phase_func_overrides()
+/// [`BitEncoding`]: crate::BitEncoding
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::too_many_arguments)]
 #[allow(clippy::needless_pass_by_ref_mut)]
