@@ -148,7 +148,7 @@ pub struct Qureg {
     pub numQubitsRepresented: c_int,
     numQubitsInStateVec:      c_int,
     numAmpsPerChunk:          c_longlong,
-    numAmpsTotal:             c_longlong,
+    pub numAmpsTotal:         c_longlong,
     chunkId:                  c_int,
 
     numChunks: c_int,
