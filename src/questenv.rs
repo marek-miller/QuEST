@@ -3,7 +3,7 @@ use std::ffi::CString;
 use crate::{
     exceptions::catch_quest_exception,
     ffi,
-    QuestError,
+    ErrorKind,
 };
 
 /// Information about the `QuEST` environment.
@@ -79,10 +79,10 @@ impl QuestEnv {
     /// See [QuEST API][quest-api] for more information.
     ///
     /// [quest-api]: https://quest-kit.github.io/QuEST/modules.html
-    pub fn get_environment_string(&self) -> Result<String, QuestError> {
+    pub fn get_environment_string(&self) -> Result<String, ErrorKind> {
         let mut cstr =
             CString::new("CUDA=x OpenMP=x MPI=x threads=xxxxxxx ranks=xxxxxxx")
-                .map_err(QuestError::NulError)?;
+                .map_err(ErrorKind::NulError)?;
         catch_quest_exception(|| {
             unsafe {
                 let cstr_ptr = cstr.into_raw();
@@ -90,7 +90,7 @@ impl QuestEnv {
                 cstr = CString::from_raw(cstr_ptr);
             }
 
-            cstr.into_string().map_err(QuestError::IntoStringError)
+            cstr.into_string().map_err(ErrorKind::IntoStringError)
         })
         .expect("get_environment_string should always succeed")
     }

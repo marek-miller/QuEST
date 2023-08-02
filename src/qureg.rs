@@ -2,7 +2,7 @@ use super::{
     catch_quest_exception,
     ffi,
     QuestEnv,
-    QuestError,
+    Result,
 };
 
 #[derive(Debug)]
@@ -33,7 +33,7 @@ impl<'a> Qureg<'a> {
     pub fn try_new(
         num_qubits: i32,
         env: &'a QuestEnv,
-    ) -> Result<Self, QuestError> {
+    ) -> Result<Self> {
         Ok(Self {
             env,
             reg: catch_quest_exception(|| unsafe {
@@ -63,7 +63,7 @@ impl<'a> Qureg<'a> {
     pub fn try_new_density(
         num_qubits: i32,
         env: &'a QuestEnv,
-    ) -> Result<Self, QuestError> {
+    ) -> Result<Self> {
         Ok(Self {
             env,
             reg: catch_quest_exception(|| unsafe {
@@ -190,7 +190,7 @@ impl<'a> Qureg<'a> {
     ///
     /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
     /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
-    pub fn get_num_amps(&self) -> Result<i64, QuestError> {
+    pub fn get_num_amps(&self) -> Result<i64> {
         catch_quest_exception(|| unsafe { ffi::getNumAmps(self.reg) })
     }
 }

@@ -1,8 +1,10 @@
 use crate::{
     exceptions::catch_quest_exception,
     ffi,
+    Error,
+    ErrorKind,
     Qreal,
-    QuestError,
+    Result,
 };
 
 #[derive(Debug, Clone, Copy)]
@@ -58,7 +60,7 @@ impl ComplexMatrixN {
     /// on failure.  This is an exception thrown by `QuEST`.
     ///
     /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
-    pub fn try_new(num_qubits: i32) -> Result<Self, QuestError> {
+    pub fn try_new(num_qubits: i32) -> Result<Self> {
         catch_quest_exception(|| {
             Self(unsafe { ffi::createComplexMatrixN(num_qubits) })
         })
@@ -322,15 +324,15 @@ pub fn init_complex_matrix_n(
     m: &mut ComplexMatrixN,
     real: &[&[Qreal]],
     imag: &[&[Qreal]],
-) -> Result<(), QuestError> {
+) -> Result<()> {
     let num_elems = 1 << m.0.numQubits;
 
     if real.len() < num_elems || imag.len() < num_elems {
-        return Err(QuestError::ArrayLengthError);
+        return Err(Error::from(Box::new(ErrorKind::ArrayLengthError)));
     }
     for i in 0..num_elems {
         if real[i].len() < num_elems || imag[i].len() < num_elems {
-            return Err(QuestError::ArrayLengthError);
+            return Err(Error::from(Box::new(ErrorKind::ArrayLengthError)));
         }
     }
 

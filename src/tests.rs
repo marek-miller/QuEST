@@ -5,13 +5,12 @@ use num::Zero;
 use super::*;
 
 #[test]
-fn create_qureg_01() -> Result<(), QuestError> {
+fn create_qureg_01() {
     let env = &QuestEnv::new();
-    let _ = Qureg::try_new(1, env)?;
-    let _ = Qureg::try_new(5, env)?;
+    let _ = Qureg::try_new(1, env).unwrap();
+    let _ = Qureg::try_new(5, env).unwrap();
 
     let _ = Qureg::try_new(0, env).unwrap_err();
-    Ok(())
 }
 
 #[test]
@@ -22,15 +21,14 @@ fn create_qureg_negative_num_qubits() {
 }
 
 #[test]
-fn create_density_qureg_01() -> Result<(), QuestError> {
+fn create_density_qureg_01() {
     let env = &QuestEnv::new();
     {
-        let _ = Qureg::try_new_density(1, env)?;
-        let _ = Qureg::try_new_density(5, env)?;
+        let _ = Qureg::try_new_density(1, env).unwrap();
+        let _ = Qureg::try_new_density(5, env).unwrap();
 
         let _ = Qureg::try_new_density(0, env).unwrap_err();
     }
-    Ok(())
 }
 
 #[test]

@@ -6,11 +6,13 @@ use crate::{
         self,
         pauliOpType as PauliOpType,
     },
+    Error,
+    ErrorKind,
     Qcomplex,
     Qreal,
     QuestEnv,
-    QuestError,
     Qureg,
+    Result,
 };
 
 #[derive(Debug)]
@@ -40,7 +42,7 @@ impl PauliHamil {
     pub fn try_new(
         num_qubits: i32,
         num_sum_terms: i32,
-    ) -> Result<Self, QuestError> {
+    ) -> Result<Self> {
         catch_quest_exception(|| {
             Self(unsafe { ffi::createPauliHamil(num_qubits, num_sum_terms) })
         })
@@ -54,8 +56,9 @@ impl PauliHamil {
     /// This function calls its C equivalent which unfortunately behaves
     /// erratically when the file specified is incorrectly formatted or
     /// inaccessible, often leading to seg-faults.  Use at your own risk.
-    pub fn try_new_from_file(fn_: &str) -> Result<Self, QuestError> {
-        let filename = CString::new(fn_).map_err(QuestError::NulError)?;
+    pub fn try_new_from_file(fn_: &str) -> Result<Self> {
+        let filename = CString::new(fn_)
+            .map_err(|e| Error::from(Box::new(ErrorKind::NulError(e))))?;
         catch_quest_exception(|| {
             Self(unsafe { ffi::createPauliHamilFromFile((*filename).as_ptr()) })
         })
@@ -79,7 +82,7 @@ impl<'a> DiagonalOp<'a> {
     pub fn try_new(
         num_qubits: i32,
         env: &'a QuestEnv,
-    ) -> Result<Self, QuestError> {
+    ) -> Result<Self> {
         Ok(Self {
             env,
             op: catch_quest_exception(|| unsafe {
@@ -91,8 +94,9 @@ impl<'a> DiagonalOp<'a> {
     pub fn try_new_from_file(
         fn_: &str,
         env: &'a QuestEnv,
-    ) -> Result<Self, QuestError> {
-        let filename = CString::new(fn_).map_err(QuestError::NulError)?;
+    ) -> Result<Self> {
+        let filename = CString::new(fn_)
+            .map_err(|e| Error::from(Box::new(ErrorKind::NulError(e))))?;
 
         Ok(Self {
             env,
@@ -142,7 +146,7 @@ pub fn init_pauli_hamil(
     hamil: &mut PauliHamil,
     coeffs: &[Qreal],
     codes: &[PauliOpType],
-) -> Result<(), QuestError> {
+) -> Result<()> {
     catch_quest_exception(|| unsafe {
         ffi::initPauliHamil(hamil.0, coeffs.as_ptr(), codes.as_ptr());
     })
@@ -163,7 +167,7 @@ pub fn init_pauli_hamil(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
-pub fn sync_diagonal_op(op: &mut DiagonalOp<'_>) -> Result<(), QuestError> {
+pub fn sync_diagonal_op(op: &mut DiagonalOp<'_>) -> Result<()> {
     catch_quest_exception(|| unsafe {
         ffi::syncDiagonalOp(op.op);
     })
@@ -196,7 +200,7 @@ pub fn init_diagonal_op(
     op: &mut DiagonalOp<'_>,
     real: &[Qreal],
     imag: &[Qreal],
-) -> Result<(), QuestError> {
+) -> Result<()> {
     let len_required = 2usize.pow(op.op.numQubits as u32);
     assert!(real.len() >= len_required);
     assert!(imag.len() >= len_required);
@@ -237,7 +241,7 @@ pub fn init_diagonal_op(
 pub fn init_diagonal_op_from_pauli_hamil(
     op: &mut DiagonalOp<'_>,
     hamil: &PauliHamil,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     catch_quest_exception(|| unsafe {
         ffi::initDiagonalOpFromPauliHamil(op.op, hamil.0);
     })
@@ -279,7 +283,7 @@ pub fn set_diagonal_op_elems(
     real: &[Qreal],
     imag: &[Qreal],
     num_elems: i64,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     assert!(real.len() >= num_elems as usize);
     assert!(imag.len() >= num_elems as usize);
 
@@ -315,7 +319,7 @@ pub fn set_diagonal_op_elems(
 pub fn apply_diagonal_op(
     qureg: &mut Qureg<'_>,
     op: &DiagonalOp<'_>,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     catch_quest_exception(|| unsafe {
         ffi::applyDiagonalOp(qureg.reg, op.op);
     })
@@ -349,7 +353,7 @@ pub fn apply_diagonal_op(
 pub fn calc_expec_diagonal_op(
     qureg: &Qureg<'_>,
     op: &DiagonalOp<'_>,
-) -> Result<Qcomplex, QuestError> {
+) -> Result<Qcomplex> {
     catch_quest_exception(|| unsafe {
         ffi::calcExpecDiagonalOp(qureg.reg, op.op)
     })

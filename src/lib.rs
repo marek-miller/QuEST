@@ -18,7 +18,11 @@ mod qureg;
 #[cfg(test)]
 mod tests;
 
-pub use errors::QuestError;
+pub use errors::{
+    Error,
+    ErrorKind,
+    Result,
+};
 pub use ffi::{
     bitEncoding as BitEncoding,
     pauliOpType as PauliOpType,
@@ -67,7 +71,7 @@ pub fn report_qureg_params(qureg: &Qureg<'_>) {
 }
 
 /// Print the Hamiltonian `hamil` to screen.
-pub fn report_pauli_hamil(hamil: &PauliHamil) -> Result<(), QuestError> {
+pub fn report_pauli_hamil(hamil: &PauliHamil) -> Result<()> {
     catch_quest_exception(|| unsafe {
         ffi::reportPauliHamil(hamil.0);
     })
@@ -246,7 +250,7 @@ pub fn init_plus_state(qureg: &mut Qureg<'_>) {
 pub fn init_classical_state(
     qureg: &mut Qureg<'_>,
     state_ind: i64,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     catch_quest_exception(|| unsafe {
         ffi::initClassicalState(qureg.reg, state_ind);
     })
@@ -275,7 +279,7 @@ pub fn init_classical_state(
 pub fn init_pure_state(
     qureg: &mut Qureg<'_>,
     pure_: &Qureg<'_>,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     catch_quest_exception(|| unsafe {
         ffi::initPureState(qureg.reg, pure_.reg);
     })
@@ -317,7 +321,7 @@ pub fn init_state_from_amps(
     qureg: &mut Qureg<'_>,
     reals: &[Qreal],
     imags: &[Qreal],
-) -> Result<(), QuestError> {
+) -> Result<()> {
     catch_quest_exception(|| unsafe {
         ffi::initStateFromAmps(qureg.reg, reals.as_ptr(), imags.as_ptr());
     })
@@ -362,7 +366,7 @@ pub fn set_amps(
     reals: &[Qreal],
     imags: &[Qreal],
     num_amps: i64,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     catch_quest_exception(|| unsafe {
         ffi::setAmps(
             qureg.reg,
@@ -404,7 +408,7 @@ pub fn set_density_amps(
     reals: &[Qreal],
     imags: &[Qreal],
     num_amps: i64,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     catch_quest_exception(|| unsafe {
         ffi::setDensityAmps(
             qureg.reg,
@@ -437,7 +441,7 @@ pub fn set_density_amps(
 pub fn clone_qureg(
     target_qureg: &mut Qureg<'_>,
     copy_qureg: &Qureg<'_>,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     catch_quest_exception(|| unsafe {
         ffi::cloneQureg(target_qureg.reg, copy_qureg.reg);
     })
@@ -466,7 +470,7 @@ pub fn phase_shift(
     qureg: &mut Qureg<'_>,
     target_quibit: i32,
     angle: Qreal,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     catch_quest_exception(|| unsafe {
         ffi::phaseShift(qureg.reg, target_quibit, angle);
     })
@@ -496,7 +500,7 @@ pub fn controlled_phase_shift(
     id_qubit1: i32,
     id_qubit2: i32,
     angle: Qreal,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     catch_quest_exception(|| unsafe {
         ffi::controlledPhaseShift(qureg.reg, id_qubit1, id_qubit2, angle);
     })
@@ -524,7 +528,7 @@ pub fn multi_controlled_phase_shift(
     qureg: &mut Qureg<'_>,
     control_qubits: &[i32],
     angle: Qreal,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     let num_control_qubits = control_qubits.len() as i32;
     catch_quest_exception(|| unsafe {
         ffi::multiControlledPhaseShift(
@@ -559,7 +563,7 @@ pub fn controlled_phase_flip(
     qureg: &mut Qureg<'_>,
     id_qubit1: i32,
     id_qubit2: i32,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     catch_quest_exception(|| unsafe {
         ffi::controlledPhaseFlip(qureg.reg, id_qubit1, id_qubit2);
     })
@@ -586,7 +590,7 @@ pub fn controlled_phase_flip(
 pub fn multi_controlled_phase_flip(
     qureg: &mut Qureg<'_>,
     control_qubits: &[i32],
-) -> Result<(), QuestError> {
+) -> Result<()> {
     catch_quest_exception(|| unsafe {
         ffi::multiControlledPhaseFlip(
             qureg.reg,
@@ -640,7 +644,7 @@ pub fn multi_controlled_phase_flip(
 pub fn s_gate(
     qureg: &mut Qureg<'_>,
     target_qubit: i32,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     catch_quest_exception(|| unsafe {
         ffi::sGate(qureg.reg, target_qubit);
     })
@@ -691,7 +695,7 @@ pub fn s_gate(
 pub fn t_gate(
     qureg: &mut Qureg<'_>,
     target_qubit: i32,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     catch_quest_exception(|| unsafe {
         ffi::tGate(qureg.reg, target_qubit);
     })
@@ -839,7 +843,7 @@ pub fn copy_substate_to_gpu(
     qureg: &mut Qureg<'_>,
     start_ind: i64,
     num_amps: i64,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     catch_quest_exception(|| unsafe {
         ffi::copySubstateToGPU(qureg.reg, start_ind, num_amps);
     })
@@ -889,7 +893,7 @@ pub fn copy_substate_from_gpu(
     qureg: &mut Qureg<'_>,
     start_ind: i64,
     num_amps: i64,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     catch_quest_exception(|| unsafe {
         ffi::copySubstateToGPU(qureg.reg, start_ind, num_amps);
     })
@@ -928,7 +932,7 @@ pub fn copy_substate_from_gpu(
 pub fn get_amp(
     qureg: &Qureg<'_>,
     index: i64,
-) -> Result<Qcomplex, QuestError> {
+) -> Result<Qcomplex> {
     catch_quest_exception(|| unsafe { ffi::getAmp(qureg.reg, index) })
         .map(Into::into)
 }
@@ -967,7 +971,7 @@ pub fn get_amp(
 pub fn get_real_amp(
     qureg: &Qureg<'_>,
     index: i64,
-) -> Result<Qreal, QuestError> {
+) -> Result<Qreal> {
     catch_quest_exception(|| unsafe { ffi::getRealAmp(qureg.reg, index) })
 }
 
@@ -1005,7 +1009,7 @@ pub fn get_real_amp(
 pub fn get_imag_amp(
     qureg: &Qureg<'_>,
     index: i64,
-) -> Result<Qreal, QuestError> {
+) -> Result<Qreal> {
     catch_quest_exception(|| unsafe { ffi::getImagAmp(qureg.reg, index) })
 }
 
@@ -1042,7 +1046,7 @@ pub fn get_imag_amp(
 pub fn get_prob_amp(
     qureg: &Qureg<'_>,
     index: i64,
-) -> Result<Qreal, QuestError> {
+) -> Result<Qreal> {
     catch_quest_exception(|| unsafe { ffi::getProbAmp(qureg.reg, index) })
 }
 
@@ -1081,7 +1085,7 @@ pub fn get_density_amp(
     qureg: &Qureg<'_>,
     row: i64,
     col: i64,
-) -> Result<Qcomplex, QuestError> {
+) -> Result<Qcomplex> {
     catch_quest_exception(|| unsafe { ffi::getDensityAmp(qureg.reg, row, col) })
         .map(Into::into)
 }
@@ -1169,7 +1173,7 @@ pub fn compact_unitary(
     target_qubit: i32,
     alpha: Qcomplex,
     beta: Qcomplex,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     catch_quest_exception(|| unsafe {
         ffi::compactUnitary(qureg.reg, target_qubit, alpha.into(), beta.into());
     })
@@ -1225,7 +1229,7 @@ pub fn unitary(
     qureg: &mut Qureg<'_>,
     target_qubit: i32,
     u: &ComplexMatrix2,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     catch_quest_exception(|| unsafe {
         ffi::unitary(qureg.reg, target_qubit, u.0);
     })
@@ -1272,7 +1276,7 @@ pub fn rotate_x(
     qureg: &mut Qureg<'_>,
     rot_qubit: i32,
     angle: Qreal,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     catch_quest_exception(|| unsafe {
         ffi::rotateX(qureg.reg, rot_qubit, angle);
     })
@@ -1319,7 +1323,7 @@ pub fn rotate_y(
     qureg: &mut Qureg<'_>,
     rot_qubit: i32,
     angle: Qreal,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     catch_quest_exception(|| unsafe {
         ffi::rotateY(qureg.reg, rot_qubit, angle);
     })
@@ -1366,7 +1370,7 @@ pub fn rotate_z(
     qureg: &mut Qureg<'_>,
     rot_qubit: i32,
     angle: Qreal,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     catch_quest_exception(|| unsafe {
         ffi::rotateZ(qureg.reg, rot_qubit, angle);
     })
@@ -1396,7 +1400,7 @@ pub fn rotate_around_axis(
     rot_qubit: i32,
     angle: Qreal,
     axis: &Vector,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     catch_quest_exception(|| unsafe {
         ffi::rotateAroundAxis(qureg.reg, rot_qubit, angle, axis.0);
     })
@@ -1427,7 +1431,7 @@ pub fn controlled_rotate_x(
     control_qubit: i32,
     target_qubit: i32,
     angle: Qreal,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     catch_quest_exception(|| unsafe {
         ffi::controlledRotateX(qureg.reg, control_qubit, target_qubit, angle);
     })
@@ -1458,7 +1462,7 @@ pub fn controlled_rotate_y(
     control_qubit: i32,
     target_qubit: i32,
     angle: Qreal,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     catch_quest_exception(|| unsafe {
         ffi::controlledRotateY(qureg.reg, control_qubit, target_qubit, angle);
     })
@@ -1489,7 +1493,7 @@ pub fn controlled_rotate_z(
     control_qubit: i32,
     target_qubit: i32,
     angle: Qreal,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     catch_quest_exception(|| unsafe {
         ffi::controlledRotateZ(qureg.reg, control_qubit, target_qubit, angle);
     })
@@ -1528,7 +1532,7 @@ pub fn controlled_rotate_around_axis(
     target_qubit: i32,
     angle: Qreal,
     axis: &Vector,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     catch_quest_exception(|| unsafe {
         ffi::controlledRotateAroundAxis(
             qureg.reg,
@@ -1596,7 +1600,7 @@ pub fn controlled_compact_unitary(
     target_qubit: i32,
     alpha: Qcomplex,
     beta: Qcomplex,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     catch_quest_exception(|| unsafe {
         ffi::controlledCompactUnitary(
             qureg.reg,
@@ -1655,7 +1659,7 @@ pub fn controlled_unitary(
     control_qubit: i32,
     target_qubit: i32,
     u: &ComplexMatrix2,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     catch_quest_exception(|| unsafe {
         ffi::controlledUnitary(qureg.reg, control_qubit, target_qubit, u.0);
     })
@@ -1711,7 +1715,7 @@ pub fn multi_controlled_unitary(
     control_qubits: &[i32],
     target_qubit: i32,
     u: &ComplexMatrix2,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     let num_control_qubits = control_qubits.len() as i32;
     catch_quest_exception(|| unsafe {
         ffi::multiControlledUnitary(
@@ -1760,7 +1764,7 @@ pub fn multi_controlled_unitary(
 pub fn pauli_x(
     qureg: &mut Qureg<'_>,
     target_qubit: i32,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     catch_quest_exception(|| unsafe {
         ffi::pauliX(qureg.reg, target_qubit);
     })
@@ -1802,7 +1806,7 @@ pub fn pauli_x(
 pub fn pauli_y(
     qureg: &mut Qureg<'_>,
     target_qubit: i32,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     catch_quest_exception(|| unsafe {
         ffi::pauliY(qureg.reg, target_qubit);
     })
@@ -1844,7 +1848,7 @@ pub fn pauli_y(
 pub fn pauli_z(
     qureg: &mut Qureg<'_>,
     target_qubit: i32,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     catch_quest_exception(|| unsafe {
         ffi::pauliZ(qureg.reg, target_qubit);
     })
@@ -1894,7 +1898,7 @@ pub fn pauli_z(
 pub fn hadamard(
     qureg: &mut Qureg<'_>,
     target_qubit: i32,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     catch_quest_exception(|| unsafe {
         ffi::hadamard(qureg.reg, target_qubit);
     })
@@ -1953,7 +1957,7 @@ pub fn controlled_not(
     qureg: &mut Qureg<'_>,
     control_qubit: i32,
     target_qubit: i32,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     catch_quest_exception(|| unsafe {
         ffi::controlledNot(qureg.reg, control_qubit, target_qubit);
     })
@@ -2018,7 +2022,7 @@ pub fn multi_controlled_multi_qubit_not(
     qureg: &mut Qureg<'_>,
     ctrls: &[i32],
     targs: &[i32],
-) -> Result<(), QuestError> {
+) -> Result<()> {
     let num_ctrls = ctrls.len() as i32;
     let num_targs = targs.len() as i32;
     catch_quest_exception(|| unsafe {
@@ -2085,7 +2089,7 @@ pub fn multi_controlled_multi_qubit_not(
 pub fn multi_qubit_not(
     qureg: &mut Qureg<'_>,
     targs: &[i32],
-) -> Result<(), QuestError> {
+) -> Result<()> {
     let num_targs = targs.len() as i32;
     catch_quest_exception(|| unsafe {
         let targs_ptr = targs.as_ptr();
@@ -2118,7 +2122,7 @@ pub fn controlled_pauli_y(
     qureg: &mut Qureg<'_>,
     control_qubit: i32,
     target_qubit: i32,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     catch_quest_exception(|| unsafe {
         ffi::controlledPauliY(qureg.reg, control_qubit, target_qubit);
     })
@@ -2147,7 +2151,7 @@ pub fn calc_prob_of_outcome(
     qureg: &Qureg<'_>,
     measure_qubit: i32,
     outcome: i32,
-) -> Result<Qreal, QuestError> {
+) -> Result<Qreal> {
     catch_quest_exception(|| unsafe {
         ffi::calcProbOfOutcome(qureg.reg, measure_qubit, outcome)
     })
@@ -2183,7 +2187,7 @@ pub fn calc_prob_of_all_outcomes(
     outcome_probs: &mut [Qreal],
     qureg: &Qureg<'_>,
     qubits: &[i32],
-) -> Result<(), QuestError> {
+) -> Result<()> {
     let num_qubits = qubits.len() as i32;
     let outcome_probs_ptr = outcome_probs.as_mut_ptr();
     catch_quest_exception(|| unsafe {
@@ -2221,7 +2225,7 @@ pub fn collapse_to_outcome(
     qureg: &mut Qureg<'_>,
     measure_qubit: i32,
     outcome: i32,
-) -> Result<Qreal, QuestError> {
+) -> Result<Qreal> {
     catch_quest_exception(|| unsafe {
         ffi::collapseToOutcome(qureg.reg, measure_qubit, outcome)
     })
@@ -2254,7 +2258,7 @@ pub fn collapse_to_outcome(
 pub fn measure(
     qureg: &mut Qureg<'_>,
     measure_qubit: i32,
-) -> Result<i32, QuestError> {
+) -> Result<i32> {
     catch_quest_exception(|| unsafe { ffi::measure(qureg.reg, measure_qubit) })
 }
 
@@ -2292,7 +2296,7 @@ pub fn measure_with_stats(
     qureg: &mut Qureg<'_>,
     measure_qubit: i32,
     outcome_prob: &mut Qreal,
-) -> Result<i32, QuestError> {
+) -> Result<i32> {
     let outcome_prob_ptr = outcome_prob as *mut _;
     catch_quest_exception(|| unsafe {
         ffi::measureWithStats(qureg.reg, measure_qubit, outcome_prob_ptr)
@@ -2322,7 +2326,7 @@ pub fn measure_with_stats(
 pub fn calc_inner_product(
     bra: &Qureg<'_>,
     ket: &Qureg<'_>,
-) -> Result<Qcomplex, QuestError> {
+) -> Result<Qcomplex> {
     catch_quest_exception(|| unsafe { ffi::calcInnerProduct(bra.reg, ket.reg) })
         .map(Into::into)
 }
@@ -2349,7 +2353,7 @@ pub fn calc_inner_product(
 pub fn calc_density_inner_product(
     rho1: &Qureg<'_>,
     rho2: &Qureg<'_>,
-) -> Result<Qreal, QuestError> {
+) -> Result<Qreal> {
     catch_quest_exception(|| unsafe {
         ffi::calcDensityInnerProduct(rho1.reg, rho2.reg)
     })
@@ -2580,10 +2584,10 @@ pub fn print_recorded_qasm(qureg: &mut Qureg<'_>) {
 pub fn write_recorded_qasm_to_file(
     qureg: &mut Qureg<'_>,
     filename: &str,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     unsafe {
-        let filename_cstr =
-            CString::new(filename).map_err(QuestError::NulError)?;
+        let filename_cstr = CString::new(filename)
+            .map_err(|e| Error::from(Box::new(ErrorKind::NulError(e))))?;
         catch_quest_exception(|| {
             ffi::writeRecordedQASMToFile(qureg.reg, (*filename_cstr).as_ptr());
         })
@@ -2616,7 +2620,7 @@ pub fn mix_dephasing(
     qureg: &mut Qureg<'_>,
     target_qubit: i32,
     prob: Qreal,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     catch_quest_exception(|| unsafe {
         ffi::mixDephasing(qureg.reg, target_qubit, prob);
     })
@@ -2649,7 +2653,7 @@ pub fn mix_two_qubit_dephasing(
     qubit1: i32,
     qubit2: i32,
     prob: Qreal,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     catch_quest_exception(|| unsafe {
         ffi::mixTwoQubitDephasing(qureg.reg, qubit1, qubit2, prob);
     })
@@ -2679,7 +2683,7 @@ pub fn mix_depolarising(
     qureg: &mut Qureg<'_>,
     target_qubit: i32,
     prob: Qreal,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     catch_quest_exception(|| unsafe {
         ffi::mixDepolarising(qureg.reg, target_qubit, prob);
     })
@@ -2709,7 +2713,7 @@ pub fn mix_damping(
     qureg: &mut Qureg<'_>,
     target_qubit: i32,
     prob: Qreal,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     catch_quest_exception(|| unsafe {
         ffi::mixDamping(qureg.reg, target_qubit, prob);
     })
@@ -2743,7 +2747,7 @@ pub fn mix_two_qubit_depolarising(
     qubit1: i32,
     qubit2: i32,
     prob: Qreal,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     catch_quest_exception(|| unsafe {
         ffi::mixTwoQubitDepolarising(qureg.reg, qubit1, qubit2, prob);
     })
@@ -2778,7 +2782,7 @@ pub fn mix_pauli(
     prob_x: Qreal,
     prob_y: Qreal,
     prob_z: Qreal,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     catch_quest_exception(|| unsafe {
         ffi::mixPauli(qureg.reg, target_qubit, prob_x, prob_y, prob_z);
     })
@@ -2810,7 +2814,7 @@ pub fn mix_density_matrix(
     combine_qureg: &mut Qureg<'_>,
     prob: Qreal,
     other_qureg: &Qureg<'_>,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     catch_quest_exception(|| unsafe {
         ffi::mixDensityMatrix(combine_qureg.reg, prob, other_qureg.reg);
     })
@@ -2858,7 +2862,7 @@ pub fn mix_density_matrix(
 ///
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
-pub fn calc_purity(qureg: &Qureg<'_>) -> Result<Qreal, QuestError> {
+pub fn calc_purity(qureg: &Qureg<'_>) -> Result<Qreal> {
     catch_quest_exception(|| unsafe { ffi::calcPurity(qureg.reg) })
 }
 
@@ -2922,7 +2926,7 @@ pub fn calc_purity(qureg: &Qureg<'_>) -> Result<Qreal, QuestError> {
 pub fn calc_fidelity(
     qureg: &Qureg<'_>,
     pure_state: &Qureg<'_>,
-) -> Result<Qreal, QuestError> {
+) -> Result<Qreal> {
     catch_quest_exception(|| unsafe {
         ffi::calcFidelity(qureg.reg, pure_state.reg)
     })
@@ -2982,7 +2986,7 @@ pub fn swap_gate(
     qureg: &mut Qureg<'_>,
     qubit1: i32,
     qubit2: i32,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     catch_quest_exception(|| unsafe {
         ffi::swapGate(qureg.reg, qubit1, qubit2);
     })
@@ -3012,7 +3016,7 @@ pub fn sqrt_swap_gate(
     qureg: &mut Qureg<'_>,
     qb1: i32,
     qb2: i32,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     catch_quest_exception(|| unsafe {
         ffi::sqrtSwapGate(qureg.reg, qb1, qb2);
     })
@@ -3055,7 +3059,7 @@ pub fn multi_state_controlled_unitary(
     control_state: &[i32],
     target_qubit: i32,
     u: &ComplexMatrix2,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     let num_control_qubits = control_qubits.len() as i32;
     catch_quest_exception(|| unsafe {
         ffi::multiStateControlledUnitary(
@@ -3097,7 +3101,7 @@ pub fn multi_rotate_z(
     qureg: &mut Qureg<'_>,
     qubits: &[i32],
     angle: Qreal,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     let num_qubits = qubits.len() as i32;
     catch_quest_exception(|| unsafe {
         ffi::multiRotateZ(qureg.reg, qubits.as_ptr(), num_qubits, angle);
@@ -3135,7 +3139,7 @@ pub fn multi_rotate_pauli(
     target_qubits: &[i32],
     target_paulis: &[PauliOpType],
     angle: Qreal,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     let num_targets = target_qubits.len() as i32;
     catch_quest_exception(|| unsafe {
         ffi::multiRotatePauli(
@@ -3186,7 +3190,7 @@ pub fn multi_controlled_multi_rotate_z(
     control_qubits: &[i32],
     target_qubits: &[i32],
     angle: Qreal,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     let num_controls = control_qubits.len() as i32;
     let num_targets = target_qubits.len() as i32;
     catch_quest_exception(|| unsafe {
@@ -3244,7 +3248,7 @@ pub fn multi_controlled_multi_rotate_pauli(
     target_qubits: &[i32],
     target_paulis: &[PauliOpType],
     angle: Qreal,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     let num_controls = control_qubits.len() as i32;
     let num_targets = target_qubits.len() as i32;
     catch_quest_exception(|| unsafe {
@@ -3291,7 +3295,7 @@ pub fn calc_expec_pauli_prod(
     target_qubits: &[i32],
     pauli_codes: &[PauliOpType],
     workspace: &mut Qureg<'_>,
-) -> Result<Qreal, QuestError> {
+) -> Result<Qreal> {
     let num_targets = target_qubits.len() as i32;
     catch_quest_exception(|| unsafe {
         ffi::calcExpecPauliProd(
@@ -3339,7 +3343,7 @@ pub fn calc_expec_pauli_sum(
     all_pauli_codes: &[PauliOpType],
     term_coeffs: &[Qreal],
     workspace: &mut Qureg<'_>,
-) -> Result<Qreal, QuestError> {
+) -> Result<Qreal> {
     let num_sum_terms = term_coeffs.len() as i32;
     catch_quest_exception(|| unsafe {
         ffi::calcExpecPauliSum(
@@ -3389,7 +3393,7 @@ pub fn calc_expec_pauli_hamil(
     qureg: &Qureg<'_>,
     hamil: &PauliHamil,
     workspace: &mut Qureg<'_>,
-) -> Result<Qreal, QuestError> {
+) -> Result<Qreal> {
     catch_quest_exception(|| unsafe {
         ffi::calcExpecPauliHamil(qureg.reg, hamil.0, workspace.reg)
     })
@@ -3438,7 +3442,7 @@ pub fn two_qubit_unitary(
     target_qubit1: i32,
     target_qubit2: i32,
     u: &ComplexMatrix4,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     catch_quest_exception(|| unsafe {
         ffi::twoQubitUnitary(qureg.reg, target_qubit1, target_qubit2, u.0);
     })
@@ -3496,7 +3500,7 @@ pub fn controlled_two_qubit_unitary(
     target_qubit1: i32,
     target_qubit2: i32,
     u: &ComplexMatrix4,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     catch_quest_exception(|| unsafe {
         ffi::controlledTwoQubitUnitary(
             qureg.reg,
@@ -3561,7 +3565,7 @@ pub fn multi_controlled_two_qubit_unitary(
     target_qubit1: i32,
     target_qubit2: i32,
     u: &ComplexMatrix4,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     let num_control_qubits = control_qubits.len() as i32;
     catch_quest_exception(|| unsafe {
         ffi::multiControlledTwoQubitUnitary(
@@ -3614,7 +3618,7 @@ pub fn multi_qubit_unitary(
     qureg: &mut Qureg<'_>,
     targs: &[i32],
     u: &ComplexMatrixN,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     let num_targs = targs.len() as i32;
     catch_quest_exception(|| unsafe {
         ffi::multiQubitUnitary(qureg.reg, targs.as_ptr(), num_targs, u.0);
@@ -3665,7 +3669,7 @@ pub fn controlled_multi_qubit_unitary(
     ctrl: i32,
     targs: &[i32],
     u: &ComplexMatrixN,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     let num_targs = targs.len() as i32;
     catch_quest_exception(|| unsafe {
         ffi::controlledMultiQubitUnitary(
@@ -3723,7 +3727,7 @@ pub fn multi_controlled_multi_qubit_unitary(
     ctrls: &[i32],
     targs: &[i32],
     u: &ComplexMatrixN,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     let num_ctrls = ctrls.len() as i32;
     let num_targs = targs.len() as i32;
     catch_quest_exception(|| unsafe {
@@ -3767,7 +3771,7 @@ pub fn mix_kraus_map(
     qureg: &mut Qureg<'_>,
     target: i32,
     ops: &[&ComplexMatrix2],
-) -> Result<(), QuestError> {
+) -> Result<()> {
     let num_ops = ops.len() as i32;
     let ops_inner = ops.iter().map(|x| x.0).collect::<Vec<_>>();
     catch_quest_exception(|| unsafe {
@@ -3819,7 +3823,7 @@ pub fn mix_two_qubit_kraus_map(
     target1: i32,
     target2: i32,
     ops: &[&ComplexMatrix4],
-) -> Result<(), QuestError> {
+) -> Result<()> {
     let num_ops = ops.len() as i32;
     let ops_inner = ops.iter().map(|x| x.0).collect::<Vec<_>>();
     catch_quest_exception(|| unsafe {
@@ -3877,7 +3881,7 @@ pub fn mix_multi_qubit_kraus_map(
     qureg: &mut Qureg<'_>,
     targets: &[i32],
     ops: &[&ComplexMatrixN],
-) -> Result<(), QuestError> {
+) -> Result<()> {
     let num_targets = targets.len() as i32;
     let num_ops = ops.len() as i32;
     let ops_inner = ops.iter().map(|x| x.0).collect::<Vec<_>>();
@@ -3922,7 +3926,7 @@ pub fn mix_nontp_kraus_map(
     qureg: &mut Qureg<'_>,
     target: i32,
     ops: &[&ComplexMatrix2],
-) -> Result<(), QuestError> {
+) -> Result<()> {
     let num_ops = ops.len() as i32;
     let ops_inner = ops.iter().map(|x| x.0).collect::<Vec<_>>();
     catch_quest_exception(|| unsafe {
@@ -3975,7 +3979,7 @@ pub fn mix_nontp_two_qubit_kraus_map(
     target1: i32,
     target2: i32,
     ops: &[&ComplexMatrix4],
-) -> Result<(), QuestError> {
+) -> Result<()> {
     let num_ops = ops.len() as i32;
     let ops_inner = ops.iter().map(|x| x.0).collect::<Vec<_>>();
     catch_quest_exception(|| unsafe {
@@ -4034,7 +4038,7 @@ pub fn mix_nontp_multi_qubit_kraus_map(
     qureg: &mut Qureg<'_>,
     targets: &[i32],
     ops: &[&ComplexMatrixN],
-) -> Result<(), QuestError> {
+) -> Result<()> {
     let num_targets = targets.len() as i32;
     let num_ops = ops.len() as i32;
     let ops_inner = ops.iter().map(|x| x.0).collect::<Vec<_>>();
@@ -4071,7 +4075,7 @@ pub fn mix_nontp_multi_qubit_kraus_map(
 pub fn calc_hilbert_schmidt_distance(
     a: &Qureg<'_>,
     b: &Qureg<'_>,
-) -> Result<Qreal, QuestError> {
+) -> Result<Qreal> {
     catch_quest_exception(|| unsafe {
         ffi::calcHilbertSchmidtDistance(a.reg, b.reg)
     })
@@ -4124,7 +4128,7 @@ pub fn set_weighted_qureg(
     qureg2: &Qureg<'_>,
     fac_out: Qcomplex,
     out: &mut Qureg<'_>,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     catch_quest_exception(|| unsafe {
         ffi::setWeightedQureg(
             fac1.into(),
@@ -4176,7 +4180,7 @@ pub fn apply_pauli_sum(
     all_pauli_codes: &[PauliOpType],
     term_coeffs: &[Qreal],
     out_qureg: &mut Qureg<'_>,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     let num_sum_terms = term_coeffs.len() as i32;
     catch_quest_exception(|| unsafe {
         ffi::applyPauliSum(
@@ -4233,7 +4237,7 @@ pub fn apply_pauli_hamil(
     in_qureg: &mut Qureg<'_>,
     hamil: &PauliHamil,
     out_qureg: &mut Qureg<'_>,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     catch_quest_exception(|| unsafe {
         ffi::applyPauliHamil(in_qureg.reg, hamil.0, out_qureg.reg);
     })
@@ -4277,7 +4281,7 @@ pub fn apply_trotter_circuit(
     time: Qreal,
     order: i32,
     reps: i32,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     catch_quest_exception(|| unsafe {
         ffi::applyTrotterCircuit(qureg.reg, hamil.0, time, order, reps);
     })
@@ -4310,7 +4314,7 @@ pub fn apply_matrix2(
     qureg: &mut Qureg<'_>,
     target_qubit: i32,
     u: &ComplexMatrix2,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     catch_quest_exception(|| unsafe {
         ffi::applyMatrix2(qureg.reg, target_qubit, u.0);
     })
@@ -4358,7 +4362,7 @@ pub fn apply_matrix4(
     target_qubit1: i32,
     target_qubit2: i32,
     u: &ComplexMatrix4,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     catch_quest_exception(|| unsafe {
         ffi::applyMatrix4(qureg.reg, target_qubit1, target_qubit2, u.0);
     })
@@ -4410,7 +4414,7 @@ pub fn apply_matrix_n(
     qureg: &mut Qureg<'_>,
     targs: &[i32],
     u: &ComplexMatrixN,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     let num_targs = targs.len() as i32;
     catch_quest_exception(|| unsafe {
         ffi::applyMatrixN(qureg.reg, targs.as_ptr(), num_targs, u.0);
@@ -4460,7 +4464,7 @@ pub fn apply_multi_controlled_matrix_n(
     ctrls: &[i32],
     targs: &[i32],
     u: &ComplexMatrixN,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     let num_ctrls = ctrls.len() as i32;
     let num_targs = targs.len() as i32;
     catch_quest_exception(|| unsafe {
@@ -4604,7 +4608,7 @@ pub fn apply_phase_func(
     encoding: BitEncoding,
     coeffs: &[Qreal],
     exponents: &[Qreal],
-) -> Result<(), QuestError> {
+) -> Result<()> {
     let num_qubits = qubits.len() as i32;
     let num_terms = coeffs.len() as i32;
     catch_quest_exception(|| unsafe {
@@ -4728,7 +4732,7 @@ pub fn apply_phase_func_overrides(
     exponents: &[Qreal],
     override_inds: &[i64],
     override_phases: &[Qreal],
-) -> Result<(), QuestError> {
+) -> Result<()> {
     let num_qubits = qubits.len() as i32;
     let num_terms = coeffs.len() as i32;
     let num_overrides = override_inds.len() as i32;
@@ -4905,7 +4909,7 @@ pub fn apply_multi_var_phase_func(
     coeffs: &[Qreal],
     exponents: &[Qreal],
     num_terms_per_reg: &[i32],
-) -> Result<(), QuestError> {
+) -> Result<()> {
     let num_regs = num_qubits_per_reg.len() as i32;
     catch_quest_exception(|| unsafe {
         ffi::applyMultiVarPhaseFunc(
@@ -4974,7 +4978,7 @@ pub fn apply_multi_var_phase_func_overrides(
     num_terms_per_reg: &[i32],
     override_inds: &[i64],
     override_phases: &[Qreal],
-) -> Result<(), QuestError> {
+) -> Result<()> {
     let num_regs = num_qubits_per_reg.len() as i32;
     let num_overrides = override_phases.len() as i32;
     catch_quest_exception(|| unsafe {
@@ -5032,7 +5036,7 @@ pub fn apply_named_phase_func(
     num_qubits_per_reg: &[i32],
     encoding: BitEncoding,
     function_name_code: PhaseFunc,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     let num_regs = num_qubits_per_reg.len() as i32;
     catch_quest_exception(|| unsafe {
         ffi::applyNamedPhaseFunc(
@@ -5092,7 +5096,7 @@ pub fn apply_named_phase_func_overrides(
     function_name_code: PhaseFunc,
     override_inds: &[i64],
     override_phases: &[Qreal],
-) -> Result<(), QuestError> {
+) -> Result<()> {
     let num_regs = num_qubits_per_reg.len() as i32;
     let num_overrides = override_phases.len() as i32;
     catch_quest_exception(|| unsafe {
@@ -5152,7 +5156,7 @@ pub fn apply_param_named_phase_func(
     encoding: BitEncoding,
     function_name_code: PhaseFunc,
     params: &[Qreal],
-) -> Result<(), QuestError> {
+) -> Result<()> {
     let num_regs = num_qubits_per_reg.len() as i32;
     let num_params = params.len() as i32;
     catch_quest_exception(|| unsafe {
@@ -5218,7 +5222,7 @@ pub fn apply_param_named_phase_func_overrides(
     params: &[Qreal],
     override_inds: &[i64],
     override_phases: &[Qreal],
-) -> Result<(), QuestError> {
+) -> Result<()> {
     let num_regs = num_qubits_per_reg.len() as i32;
     let num_params = params.len() as i32;
     let num_overrides = override_phases.len() as i32;
@@ -5353,7 +5357,7 @@ pub fn apply_full_qft(qureg: &mut Qureg<'_>) {
 pub fn apply_qft(
     qureg: &mut Qureg<'_>,
     qubits: &[i32],
-) -> Result<(), QuestError> {
+) -> Result<()> {
     let num_qubits = qubits.len() as i32;
     catch_quest_exception(|| unsafe {
         ffi::applyQFT(qureg.reg, qubits.as_ptr(), num_qubits);
@@ -5416,7 +5420,7 @@ pub fn apply_projector(
     qureg: &mut Qureg<'_>,
     qubit: i32,
     outcome: i32,
-) -> Result<(), QuestError> {
+) -> Result<()> {
     catch_quest_exception(|| unsafe {
         ffi::applyProjector(qureg.reg, qubit, outcome);
     })

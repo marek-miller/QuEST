@@ -3,8 +3,7 @@
 //!
 //! Implements Grover's algorithm for unstructured search,
 //! using only X, H and multi-controlled Z gates.
-
-use quest_bind::{
+use quest::{
     get_prob_amp,
     hadamard,
     init_plus_state,
@@ -12,10 +11,10 @@ use quest_bind::{
     multi_qubit_not,
     Qreal,
     QuestEnv,
-    QuestError,
     Qureg,
     PI,
 };
+use quest_bind as quest;
 use rand::Rng;
 
 const NUM_QUBITS: i32 = 0x10;
@@ -25,9 +24,9 @@ fn tensor_gate<F>(
     qureg: &mut Qureg<'_>,
     gate: F,
     qubits: &[i32],
-) -> Result<(), QuestError>
+) -> Result<(), quest::Error>
 where
-    F: Fn(&mut Qureg, i32) -> Result<(), QuestError>,
+    F: Fn(&mut Qureg, i32) -> Result<(), quest::Error>,
 {
     qubits.iter().try_for_each(|&q| gate(qureg, q))
 }
@@ -36,7 +35,7 @@ fn apply_oracle(
     qureg: &mut Qureg,
     qubits: &[i32],
     sol_elem: i64,
-) -> Result<(), QuestError> {
+) -> Result<(), quest::Error> {
     let sol_ctrls = &qubits
         .iter()
         .filter_map(|&q| ((sol_elem >> q) & 1 == 0).then_some(q))
@@ -53,7 +52,7 @@ fn apply_oracle(
 fn apply_diffuser(
     qureg: &mut Qureg,
     qubits: &[i32],
-) -> Result<(), QuestError> {
+) -> Result<(), quest::Error> {
     // apply H to transform |+> into |0>
     tensor_gate(qureg, hadamard, qubits)
         // apply X to transform |11..1> into |00..0>
@@ -65,7 +64,7 @@ fn apply_diffuser(
     multi_qubit_not(qureg, qubits).and(tensor_gate(qureg, hadamard, qubits))
 }
 
-fn main() -> Result<(), QuestError> {
+fn main() -> Result<(), quest::Error> {
     let env = &QuestEnv::new();
 
     let num_reps = (PI / 4.0 * (NUM_ELEMS as Qreal).sqrt()).ceil() as usize;

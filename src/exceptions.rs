@@ -20,7 +20,10 @@ use std::{
     },
 };
 
-use super::QuestError;
+use super::{
+    ErrorKind,
+    Result,
+};
 
 /// Report error in a `QuEST` API call.
 ///
@@ -49,20 +52,20 @@ unsafe extern "C" fn invalidQuESTInputError(
     );
     log::error!("QueST Error in function {err_func}: {err_msg}");
 
-    panic::resume_unwind(Box::new(QuestError::InvalidQuESTInputError {
+    panic::resume_unwind(Box::new(ErrorKind::InvalidQuESTInputError {
         err_msg:  err_msg.to_owned(),
         err_func: err_func.to_owned(),
     }));
 }
 
 /// Execute a call to `QuEST` API and catch exceptions.
-pub fn catch_quest_exception<T, F>(f: F) -> Result<T, QuestError>
+pub fn catch_quest_exception<T, F>(f: F) -> Result<T>
 where
     F: FnOnce() -> T + UnwindSafe,
 {
     // Call QuEST API, unwrap the error sent by invalidInputQuestError()
-    panic::catch_unwind(f).map_err(|e| match e.downcast::<QuestError>() {
-        Ok(boxed_err) => *boxed_err,
+    panic::catch_unwind(f).map_err(|e| match e.downcast::<ErrorKind>() {
+        Ok(err_kind) => err_kind.into(),
         Err(e) => panic::resume_unwind(e),
     })
 }

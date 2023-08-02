@@ -1,6 +1,42 @@
+//! Error handling
+
+use std::fmt::Display;
+
+pub type Result<T> = std::result::Result<T, Error>;
+
+#[derive(Debug)]
+pub struct Error {
+    kind: Box<ErrorKind>,
+}
+
+impl Error {
+    pub fn kind(&self) -> &ErrorKind {
+        &self.kind
+    }
+}
+
+impl From<Box<ErrorKind>> for Error {
+    fn from(value: Box<ErrorKind>) -> Self {
+        Self {
+            kind: value
+        }
+    }
+}
+
+impl Display for Error {
+    fn fmt(
+        &self,
+        _f: &mut std::fmt::Formatter<'_>,
+    ) -> std::fmt::Result {
+        todo!()
+    }
+}
+
+impl std::error::Error for Error {}
+
 #[derive(Debug)]
 #[non_exhaustive]
-pub enum QuestError {
+pub enum ErrorKind {
     /// An exception thrown by the C library.  From QuEST documentation:
     ///
     /// > An internal function is called when invalid arguments are passed to a

@@ -5,18 +5,18 @@
 //! Next, we measure both qubits in the computational basis.  Because qubits are
 //! entangled, after the measurement they are both in the same, equally probable
 //! state `0` or `1`.
-use quest_bind::{
+use quest::{
     controlled_not,
     hadamard,
     init_zero_state,
     measure,
     report_qureg_params,
     QuestEnv,
-    QuestError,
     Qureg,
 };
+use quest_bind as quest;
 
-fn main() -> Result<(), QuestError> {
+fn main() -> Result<(), quest::Error> {
     // Initialize QuEST environment and report to screen
     let env = &QuestEnv::new();
     env.report_quest_env();
