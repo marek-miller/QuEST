@@ -33,6 +33,7 @@
   - Function signature change: 
 
     - `set_amps()`: parameter `num_amps` was redundant
+    - `set_density_amps()`: parameter `num_amps` was redundant
 
 ## v0.3.4 (29/07/2023)
 
