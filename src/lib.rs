@@ -2726,7 +2726,31 @@ pub fn write_recorded_qasm_to_file(
     }
 }
 
-///  Mixes a density matrix `qureg` to induce single-qubit dephasing noise.
+///  Mixes a density matrix to induce single-qubit dephasing noise.
+///
+/// With probability `prob`, applies Pauli Z to `target_qubit` in `qureg`.
+///
+/// This transforms `qureg = rho` into the mixed state:
+///
+/// ```text
+/// (1 - prob) * rho  +  prob * Z_q rho Z_q,
+/// ```
+///
+/// where `q = target_qubit`. `prob` cannot exceed `1/2`, which maximally mixes
+/// `target_qubit`.
+///
+/// # Parameters
+///
+/// - `qureg`: a density matrix
+/// - `target_qubit`: qubit upon which to induce dephasing noise
+/// - `prob` the probability of the phase error occurring
+///
+/// # Errors
+///
+/// - [`InvalidQuESTInputError`],
+///   - if `qureg` is not a density matrix
+///   - if `target_qubit` is outside [0, [`qureg.num_qubits_represented()`]).
+///   - if `prob` is not in `[0, 1/2]`
 ///
 /// # Examples
 ///
@@ -2746,6 +2770,8 @@ pub fn write_recorded_qasm_to_file(
 ///
 /// See [QuEST API] for more information.
 ///
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+/// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
 pub fn mix_dephasing(
