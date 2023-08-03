@@ -1,6 +1,6 @@
 # Releases
 
-## v0.3.5 (??/??/????)
+## v0.3.5 (??/??/2023)
 
 - Change git repository name to: `quest_bind`
 - Implement Sync and Send traits for `QuestEnv` and `Qureg`.
