@@ -1510,6 +1510,24 @@ pub fn rotate_z(
 
 /// Rotate a single qubit by a given angle around a given axis.
 ///
+/// The axis of rotation is given by a [`Vector`] on the Bloch-sphere.      
+/// The vector must not be zero (or else an error is thrown), but needn't be
+/// unit magnitude, since the normalization will be computed by by QuEST.
+///
+/// # Parameters
+///
+/// - `qureg`: object representing the set of all qubits
+/// - `rot_qubit`: qubit to rotate
+/// - `angle`: angle by which to rotate in radians
+/// - `axis`: vector around which to rotate (can be non-unit; will be
+///   normalized)
+///
+/// # Errors
+///
+/// - [`InvalidQuESTInputError`]
+///   - if `rot_qubit` is outside [0, qureg.[`num_qubits_represented()`])
+///   - if `axis` is the zero vector
+///
 /// # Examples
 ///
 /// ```rust
@@ -1525,6 +1543,9 @@ pub fn rotate_z(
 ///
 /// See [QuEST API] for more information.
 ///
+/// [`Vector`]: crate::Vector
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+/// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
 pub fn rotate_around_axis(
@@ -1541,6 +1562,22 @@ pub fn rotate_around_axis(
 /// Applies a controlled rotation by a given angle around the X-axis of the
 /// Bloch-sphere.
 ///
+/// The target qubit is rotated in states where the control qubit has value `1`.
+///
+/// # Parameters
+///
+/// - `qureg`: object representing the set of all qubits
+/// - `control_qubit`: qubit which has value `1` in the rotated states
+/// - `target_qubit`: qubit to rotate
+/// - `angle`: angle by which to rotate the target qubit in radians
+///
+/// # Errors
+///
+/// - [`InvalidQuESTInputError`]
+///   - if either `control_qubit` or `target_qubit` are outside [0,
+///     qureg.[`num_qubits_represented()`])
+///   - if `control_qubit` and `target_qubit` are equal
+///
 /// # Examples
 ///
 /// ```rust
@@ -1556,6 +1593,8 @@ pub fn rotate_around_axis(
 ///
 /// See [QuEST API] for more information.
 ///
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+/// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
 pub fn controlled_rotate_x(
@@ -1572,6 +1611,22 @@ pub fn controlled_rotate_x(
 /// Applies a controlled rotation by a given angle around the Y-axis of the
 /// Bloch-sphere.
 ///
+/// The target qubit is rotated in states where the control qubit has value `1`.
+///
+/// # Parameters
+///
+/// - `qureg`: object representing the set of all qubits
+/// - `control_qubit`: qubit which has value `1` in the rotated states
+/// - `target_qubit`: qubit to rotate
+/// - `angle`: angle by which to rotate the target qubit in radians
+///
+/// # Errors
+///
+/// - [`InvalidQuESTInputError`]
+///   - if either `control_qubit` or `target_qubit` are outside [0,
+///     qureg.[`num_qubits_represented()`])
+///   - if `control_qubit` and `target_qubit` are equal
+///
 /// # Examples
 ///
 /// ```rust
@@ -1587,6 +1642,8 @@ pub fn controlled_rotate_x(
 ///
 /// See [QuEST API] for more information.
 ///
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+/// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
 pub fn controlled_rotate_y(
@@ -1603,6 +1660,22 @@ pub fn controlled_rotate_y(
 /// Applies a controlled rotation by a given angle around the Z-axis of the
 /// Bloch-sphere.
 ///
+/// The target qubit is rotated in states where the control qubit has value `1`.
+///
+/// # Parameters
+///
+/// - `qureg`: object representing the set of all qubits
+/// - `control_qubit`: qubit which has value `1` in the rotated states
+/// - `target_qubit`: qubit to rotate
+/// - `angle`: angle by which to rotate the target qubit in radians
+///
+/// # Errors
+///
+/// - [`InvalidQuESTInputError`]
+///   - if either `control_qubit` or `target_qubit` are outside [0,
+///     qureg.[`num_qubits_represented()`])
+///   - if `control_qubit` and `target_qubit` are equal
+///
 /// # Examples
 ///
 /// ```rust
@@ -1618,6 +1691,8 @@ pub fn controlled_rotate_y(
 ///
 /// See [QuEST API] for more information.
 ///
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+/// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
 pub fn controlled_rotate_z(
