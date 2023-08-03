@@ -1708,6 +1708,26 @@ pub fn controlled_rotate_z(
 
 /// Applies a controlled rotation by  around a given vector of the Bloch-sphere.
 ///
+/// The vector must not be zero (else an error is thrown), but needn't be unit
+/// magnitude.
+///
+/// # Parameters
+///
+/// - `qureg`: object representing the set of all qubits
+/// - `control_qubit`: qubit which has value `1` in the rotated states
+/// - `target_qubit`: qubit to rotate
+/// - `angle`: angle by which to rotate in radians
+/// - `axis`: vector around which to rotate (can be non-unit; will be
+///   normalized)
+///
+/// # Errors
+///
+/// - [`InvalidQuESTInputError`]
+///   - if either `control_qubit` or `target_qubit` are outside [0,
+///     qureg.[`num_qubits_represented()`])
+///   - if `control_qubit` and `target_qubit` are equal
+///   - if `axis` is the zero vector
+///
 /// # Examples
 ///
 /// ```rust
@@ -1731,6 +1751,9 @@ pub fn controlled_rotate_z(
 ///
 /// See [QuEST API] for more information.
 ///
+/// [`Vector`]: crate::Vector
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+/// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
 pub fn controlled_rotate_around_axis(
