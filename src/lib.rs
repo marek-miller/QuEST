@@ -56,16 +56,6 @@ pub use operators::{
 pub use questenv::QuestEnv;
 pub use qureg::Qureg;
 
-/// Report information about a set of qubits.
-///
-/// This function reports: number of qubits, number of probability amplitudes.
-pub fn report_qureg_params(qureg: &Qureg<'_>) {
-    catch_quest_exception(|| unsafe {
-        ffi::reportQuregParams(qureg.reg);
-    })
-    .expect("report_qureg_params should never fail");
-}
-
 /// Print the Hamiltonian `hamil` to screen.
 pub fn report_pauli_hamil(hamil: &PauliHamil) -> Result<(), QuestError> {
     catch_quest_exception(|| unsafe {

@@ -206,6 +206,31 @@ impl<'a> Qureg<'a> {
     pub fn get_num_amps_total(&self) -> i64 {
         self.reg.numAmpsTotal
     }
+
+    /// Report information about a set of qubits.
+    ///
+    /// This function prints to stdout: number of qubits, number of probability
+    /// amplitudes.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use quest_bind::*;
+    /// let env = &QuestEnv::new();
+    /// let qureg = &Qureg::try_new(2, env).unwrap();
+    ///
+    /// qureg.report_qureg_params();
+    /// ```
+    ///
+    /// See [QuEST API] for more information.
+    ///
+    /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+    pub fn report_qureg_params(&self) {
+        catch_quest_exception(|| unsafe {
+            ffi::reportQuregParams(self.reg);
+        })
+        .expect("report_qureg_params should never fail");
+    }
 }
 
 impl<'a> Drop for Qureg<'a> {

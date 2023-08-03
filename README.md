@@ -36,7 +36,7 @@ fn main() -> Result<(), QuestError> {
 
     // Create a 2-qubit register and report its parameters
     let qureg = &mut Qureg::try_new(2, env)?;
-    report_qureg_params(qureg);
+    qureg.report_qureg_params();
     // Initialize |00> state and print out the state to screen
     init_zero_state(qureg);
     qureg.report_state_to_screen(0);

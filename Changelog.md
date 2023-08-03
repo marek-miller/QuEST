@@ -23,6 +23,7 @@
     - `get_num_amps()`
     - `report_state()`
     - `report_state_to_screen()` (signature change)
+    - `report_qureg_params()`
 
   - Remove `QuestError` variants not needed anymore:
 
