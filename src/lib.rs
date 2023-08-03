@@ -2726,7 +2726,7 @@ pub fn write_recorded_qasm_to_file(
     }
 }
 
-///  Mixes a density matrix to induce single-qubit dephasing noise.
+/// Mixes a density matrix to induce single-qubit dephasing noise.
 ///
 /// With probability `prob`, applies Pauli Z to `target_qubit` in `qureg`.
 ///
@@ -2743,7 +2743,7 @@ pub fn write_recorded_qasm_to_file(
 ///
 /// - `qureg`: a density matrix
 /// - `target_qubit`: qubit upon which to induce dephasing noise
-/// - `prob` the probability of the phase error occurring
+/// - `prob`: the probability of the phase error occurring
 ///
 /// # Errors
 ///
@@ -2784,7 +2784,38 @@ pub fn mix_dephasing(
     })
 }
 
-///  Mixes a density matrix `qureg` to induce two-qubit dephasing noise.
+/// Mixes a density matrix `qureg` to induce two-qubit dephasing noise.
+///
+/// With probability `prob`, applies Pauli Z to either or both in `qureg`.
+///
+/// This transforms `qureg = rho` into the mixed state:
+///
+/// ```text
+/// (1 - prob) * rho  +  prob * 1/3 * (
+///         Z_a  rho  Z_a +
+///         Z_b  rho  Z_b +
+///         Z_a Z_b rho Z_a Z_b
+///    )
+/// ```
+///
+/// where `a = qubit1`, `b=qubit2`. The coefficient `prob` cannot exceed `3/4`,
+/// at which maximal mixing occurs.
+///
+/// # Parameters
+///
+/// - `qureg`: a density matrix
+/// - `qubit1`: qubit upon which to induce dephasing noise
+/// - `qubit2`: qubit upon which to induce dephasing noise
+/// - `prob`: the probability of the phase error occurring
+///
+/// # Errors
+///
+/// - [`InvalidQuESTInputError`],
+///   - if `qureg` is not a density matrix
+///   - if `qubit1` or `qubit2` are outside [0,
+///     qureg.[`num_qubits_represented()`]).
+///   - if `qubit1 = qubit2`
+///   - if `prob` is not in `[0, 3/4]`
 ///
 /// # Examples
 ///
@@ -2804,6 +2835,8 @@ pub fn mix_dephasing(
 ///
 /// See [QuEST API] for more information.
 ///
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+/// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
 pub fn mix_two_qubit_dephasing(
