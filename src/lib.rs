@@ -2852,6 +2852,34 @@ pub fn mix_two_qubit_dephasing(
 
 /// Mixes a density matrix to induce single-qubit homogeneous
 /// depolarising noise.
+//// This is equivalent to, with probability `prob`, uniformly randomly applying
+/// either Pauli X, Y, or Z to `target_qubit`.
+///
+/// This transforms `qureg = rho` into the mixed state:
+///
+/// ```text
+/// (1 - prob) * rho  +  prob * 1/3 * (
+///      X_q rho X_q +
+///      Y_q rho Y_q +
+///      Z_q rho Z_q
+/// )
+/// ```
+///
+/// where `q = target_qubit`. The coefficient `prob` cannot exceed `3/4`, at
+/// which maximal mixing occurs.
+///
+/// # Parameters
+///
+/// - `qureg`: a density matrix
+/// - `target_qubit`: qubit upon which to induce depolarizing noise
+/// - `prob`: the probability of the depolarizing error occurring
+///
+/// # Errors
+///
+/// - [`InvalidQuESTInputError`],
+///   - if `qureg` is not a density matrix
+///   - if `target_qubit` is outside [0, qureg.[`num_qubits_represented()`]).
+///   - if `prob` is not in `[0, 3/4]`
 ///
 /// # Examples
 ///
@@ -2868,6 +2896,8 @@ pub fn mix_two_qubit_dephasing(
 ///
 /// See [QuEST API] for more information.
 ///
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+/// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
 pub fn mix_depolarising(
@@ -2881,6 +2911,39 @@ pub fn mix_depolarising(
 }
 
 ///  Mixes a density matrix to induce single-qubit amplitude damping.
+///
+/// With probability `prob`, applies damping (transition from `1` to `0` state).
+/// This transforms `qureg = rho` into the mixed state:
+///
+/// ```text
+///  K_0 rho K_0^\dagger + K_1 rho K_1^\dagger
+/// ```
+///
+/// where `q = target_qubit` and `K_0` and `$K_1` are Kraus operators:
+///
+/// ```text
+///      K_0 =  [ 1       0       ]   K_1 = [ 0  sqrt(prob) ]
+///             [ 0  sqrt(1-prob) ]         [ 0      0      ]
+/// ```
+///
+/// The coefficient `prob` cannot exceed 1, at which total damping/decay occurs.
+///
+/// Note that unlike [`mix_dephasing()`] and [`mix_depolarising()`], this
+/// function can increase the purity of a mixed state (by, as `prob` becomes
+/// `1`, gaining certainty that the qubit is in the 0 state).
+///
+/// # Parameters
+///
+/// - `qureg`: a density matrix
+/// - `target_qubit`: qubit upon which to induce amplitude damping
+/// - `prob`: the probability of the damping
+///
+/// # Errors
+///
+/// - [`InvalidQuESTInputError`],
+///   - if `qureg` is not a density matrix
+///   - if `target_qubit` is outside [0, qureg.[`num_qubits_represented()`]).
+///   - if `prob` is not in `[0, 1]`
 ///
 /// # Examples
 ///
@@ -2898,6 +2961,10 @@ pub fn mix_depolarising(
 ///
 /// See [QuEST API] for more information.
 ///
+/// [`mix_dephasing()`]: crate::mix_dephasing()
+/// [`mix_depolarising()`]: crate::mix_depolarising()
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+/// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
 pub fn mix_damping(
