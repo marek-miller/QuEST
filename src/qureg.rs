@@ -128,7 +128,7 @@ impl<'a> Qureg<'a> {
         report_rank: i32,
     ) {
         catch_quest_exception(|| unsafe {
-            ffi::reportStateToScreen(self.reg, self.env.0, report_rank)
+            ffi::reportStateToScreen(self.reg, self.env.0, report_rank);
         })
         .expect("report_state_to screen should never fail");
     }
@@ -203,6 +203,7 @@ impl<'a> Qureg<'a> {
     ///
     /// [`get_num_qubits()`]: crate::Qureg::get_num_qubits()
     /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+    #[must_use]
     pub fn get_num_amps_total(&self) -> i64 {
         self.reg.numAmpsTotal
     }
