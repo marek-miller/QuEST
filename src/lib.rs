@@ -336,7 +336,7 @@ pub fn init_debug_state(qureg: &mut Qureg<'_>) {
 /// - [`ArrayLengthError`],
 ///   - if either `reals` or `imags` have fewer than
 ///     [`qureg.get_num_amps_total()`] elements
-////
+///
 /// # Examples
 ///
 /// ```rust
@@ -415,7 +415,7 @@ pub fn init_state_from_amps(
 ///   - if `qureg` is not a state-vector (i.e. is a density matrix)
 ///   - if `start_ind` is outside [0, [`qureg.get_num_amps_total()`]]
 ///   - if `reals.len()` is outside [0, `qureg.get_num_amps_total()`]
-///   - if `reals.len()` + start_ind >= `qureg.get_num_amps_total()`
+///   - if `reals.len()` + `start_ind` >= `qureg.get_num_amps_total()`
 ///
 /// # Examples
 ///
@@ -662,7 +662,7 @@ pub fn multi_controlled_phase_shift(
     })
 }
 
-/// Apply the (two-qubit) controlled phase flip gate
+/// Apply the (two-qubit) controlled phase flip gate.
 ///
 /// Also known as the controlled pauliZ gate.
 ///
@@ -1502,7 +1502,7 @@ pub fn rotate_z(
 ///
 /// The axis of rotation is given by a [`Vector`] on the Bloch-sphere.      
 /// The vector must not be zero (or else an error is thrown), but needn't be
-/// unit magnitude, since the normalization will be computed by by QuEST.
+/// unit magnitude, since the normalization will be computed by by `QuEST`.
 ///
 /// # Parameters
 ///
@@ -2581,8 +2581,19 @@ pub fn calc_density_inner_product(
 
 /// Seed the random number generator.
 ///
-/// Seeds the random number generator with the (master node) current time and
-/// process ID.
+/// The seed is based on (master node) current time and process ID.
+///
+/// This is the default seeding used internally by [`QuestEnv::new()`], and
+/// determines the outcomes in functions like [`measure()`] and
+/// [`measure_with_stats()`]. In distributed mode, every node agrees on the seed
+/// (nominated by the master node) such that every node generates the same
+/// sequence of pseudorandom numbers.
+///
+/// `QuEST` uses the [Mersenne Twister] for random number generation.
+///
+/// # Parameters
+///
+/// - `env`: a mutable reference to the [`QuestEnv`] runtime environment
 ///
 /// # Examples
 ///
@@ -2595,6 +2606,11 @@ pub fn calc_density_inner_product(
 ///
 /// See [QuEST API] for more information.
 ///
+/// [`QuestEnv::new()`]: crate::QuestEnv::new()
+/// [`measure()`]: crate::measure()
+/// [`measure_with_stats()`]: crate::measure_with_stats()
+/// [Mersenne Twister]: http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/MT2002/emt19937ar.html
+/// [`QuestEnv`]: crate::QuestEnv
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
 pub fn seed_quest_default(env: &mut QuestEnv) {
@@ -2607,6 +2623,23 @@ pub fn seed_quest_default(env: &mut QuestEnv) {
 
 /// Seeds the random number generator with a custom array of key(s).
 ///
+/// This overrides the default keys, and determines the outcomes in functions
+/// like [`measure()`] and [`measure_with_stats()`]. In distributed mode, every
+/// node agrees on the seed (nominated by the master node) such that every node
+/// generates the same sequence of pseudorandom numbers.
+///
+/// `QuEST` uses the [Mersenne Twister] for random number generation.
+///
+/// The values of `seed_array` are copied and stored internally. This function
+/// allows the PRNG to be initialized with more than a 32-bit integer, if
+/// required.
+///
+/// # Parameters
+///
+/// - `env`: a mutable reference to the [`QuestEnv`] runtime environment
+/// - `seed_array`: array of integers to use as seed
+///
+///
 /// # Examples
 ///
 /// ```rust
@@ -2618,6 +2651,11 @@ pub fn seed_quest_default(env: &mut QuestEnv) {
 ///
 /// See [QuEST API] for more information.
 ///
+/// [`QuestEnv::new()`]: crate::QuestEnv::new()
+/// [`measure()`]: crate::measure()
+/// [`measure_with_stats()`]: crate::measure_with_stats()
+/// [Mersenne Twister]: http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/MT2002/emt19937ar.html
+/// [`QuestEnv`]: crate::QuestEnv
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn seed_quest(
     env: &mut QuestEnv,
@@ -2634,18 +2672,45 @@ pub fn seed_quest(
 
 /// Obtain the seeds presently used in random number generation.
 ///
+/// This function returns a reference to the internal array of keys
+/// which have seeded `QuEST`'s PRNG. These are the seeds which inform the
+/// outcomes of random functions like [`measure()`] and
+/// [`measure_with_stats()`], and are set using [`seed_quest()`] and
+/// [`seed_quest_default()`].
+///
+/// Obtaining `QuEST`'s seeds is useful for seeding your own random number
+/// generators, so that a simulation (with random `QuEST` measurements, and your
+/// own random decisions) can be precisely repeated later, just by calling
+/// [`seed_quest()`].
+///
+/// One should not rely, however, upon the reference returned to be
+/// automatically updated after a subsequent call to [`seed_quest()`] or
+/// [`seed_quest_default()`]. Instead, the present function should be recalled.
+///
+/// # Parameters
+///
+/// - `env`: the [`QuestEnv`] runtime environment
+///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
-/// let env = &QuestEnv::new();
-/// let seeds = get_quest_seeds(env);
+/// let mut env = QuestEnv::new();
+/// let seeds = &[1, 2, 3];
+/// seed_quest(&mut env, seeds);
 ///
-/// assert!(seeds.len() > 0);
+/// let check_seeds = get_quest_seeds(&env);
+/// assert_eq!(seeds, check_seeds);
 /// ```
 ///
 /// See [QuEST API] for more information.
 ///
+/// [`QuestEnv::new()`]: crate::QuestEnv::new()
+/// [`measure()`]: crate::measure()
+/// [`measure_with_stats()`]: crate::measure_with_stats()
+/// [`seed_quest_default()`]: crate::seed_quest()
+/// [`seed_quest_default()`]: crate::seed_quest_default()
+/// [`QuestEnv`]: crate::QuestEnv
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::cast_sign_loss)]
 #[must_use]
@@ -2654,6 +2719,9 @@ pub fn get_quest_seeds<'a: 'b, 'b>(env: &'a QuestEnv) -> &'b [u64] {
         let seeds_ptr = &mut std::ptr::null_mut();
         let num_seeds = &mut 0_i32;
         ffi::getQuESTSeeds(env.0, seeds_ptr, num_seeds);
+
+        // SAFETY: The lifetime bound assures that seed_ptr points
+        // to the correct address as long as env is in scope.
         std::slice::from_raw_parts(*seeds_ptr, *num_seeds as usize)
     })
     .expect("get_quest_seeds should always succeed")
@@ -2940,7 +3008,7 @@ pub fn mix_two_qubit_dephasing(
 
 /// Mixes a density matrix to induce single-qubit homogeneous
 /// depolarising noise.
-//// This is equivalent to, with probability `prob`, uniformly randomly applying
+/// This is equivalent to, with probability `prob`, uniformly randomly applying
 /// either Pauli X, Y, or Z to `target_qubit`.
 ///
 /// This transforms `qureg = rho` into the mixed state:
@@ -5193,7 +5261,7 @@ pub fn apply_phase_func_overrides(
 ///   phase function `f(\vec{r})`
 /// - `num_terms_per_reg` a list of the number of `coeff` and `exponent` terms
 ///   supplied for each variable/sub-register
-////
+///
 /// # Errors
 ///
 /// - [`InvalidQuESTInputError`],
@@ -5202,7 +5270,7 @@ pub fn apply_phase_func_overrides(
 ///   - if the elements of `qubits` are not unique (including if sub-registers
 ///     overlap)
 ///   - if `num_qubits_per_reg.len() = 0 or > 100` (constrained by
-///     `MAX_NUM_REGS_APPLY_ARBITRARY_PHASE` in QuEST_precision.h)
+///     `MAX_NUM_REGS_APPLY_ARBITRARY_PHASE` in `QuEST_precision.h`)
 ///   - if the size of any sub-register is incompatible with `encoding` (e.g.
 ///     contains fewer than two qubits if `encoding = TWOS_COMPLEMENT`)
 ///   - if any element of `num_terms_per_reg < 1`
