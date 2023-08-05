@@ -106,10 +106,6 @@ impl<'a> Qureg<'a> {
     ///
     /// so that files are easier to combine.
     ///
-    /// # Parameters
-    ///
-    /// - `qureg` a state-vector or density matrix
-    ///
     /// See [QuEST API] for more information.
     ///
     /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
@@ -132,16 +128,12 @@ impl<'a> Qureg<'a> {
         report_rank: i32,
     ) {
         catch_quest_exception(|| unsafe {
-            ffi::reportStateToScreen(self.reg, self.env.0, report_rank)
+            ffi::reportStateToScreen(self.reg, self.env.0, report_rank);
         })
         .expect("report_state_to screen should never fail");
     }
 
     /// Returns the number of qubits represented.
-    ///
-    /// # Parameters
-    ///
-    /// - `qureg` a state-vector or density matrix
     ///
     /// # Examples
     ///
@@ -168,13 +160,10 @@ impl<'a> Qureg<'a> {
     /// full representation of `qureg`, and so may be larger than the number
     /// stored on each node.
     ///
-    /// # Parameters
-    ///
-    /// - `qureg` a state-vector or density matrix
     ///
     /// # Errors
     ///
-    /// - [`InvalidQuESTInputError`], if `qureg` is a density matrix
+    /// - [`InvalidQuESTInputError`], if `Qureg` is a density matrix
     ///
     /// # Examples
     ///
@@ -192,6 +181,56 @@ impl<'a> Qureg<'a> {
     /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
     pub fn get_num_amps(&self) -> Result<i64, QuestError> {
         catch_quest_exception(|| unsafe { ffi::getNumAmps(self.reg) })
+    }
+
+    /// Return the total number of amplitudes in the register.
+    ///
+    /// - If `Qureg` is a state-vector, this is equal to: `2^N`, where `N` is
+    ///   the number of qubits in the register [`get_num_qubits()`]
+    /// - If `Qureg` is a density matrix, this is equal to `2^(2N)`
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use quest_bind::*;
+    /// let env = &QuestEnv::new();
+    /// let qureg = &Qureg::try_new_density(3, env).unwrap();
+    ///
+    /// assert_eq!(qureg.get_num_amps_total(), 64);
+    /// ```
+    ///
+    /// See [QuEST API] for more information.
+    ///
+    /// [`get_num_qubits()`]: crate::Qureg::get_num_qubits()
+    /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+    #[must_use]
+    pub fn get_num_amps_total(&self) -> i64 {
+        self.reg.numAmpsTotal
+    }
+
+    /// Report information about a set of qubits.
+    ///
+    /// This function prints to stdout: number of qubits, number of probability
+    /// amplitudes.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use quest_bind::*;
+    /// let env = &QuestEnv::new();
+    /// let qureg = &Qureg::try_new(2, env).unwrap();
+    ///
+    /// qureg.report_qureg_params();
+    /// ```
+    ///
+    /// See [QuEST API] for more information.
+    ///
+    /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+    pub fn report_qureg_params(&self) {
+        catch_quest_exception(|| unsafe {
+            ffi::reportQuregParams(self.reg);
+        })
+        .expect("report_qureg_params should never fail");
     }
 }
 

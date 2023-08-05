@@ -210,19 +210,35 @@ fn set_amps_01() {
     let env = &QuestEnv::new();
     let mut qureg = Qureg::try_new(3, env).unwrap();
 
-    let num_amps = 4;
     let re = [1., 2., 3., 4.];
     let im = [1., 2., 3., 4.];
 
-    set_amps(&mut qureg, 0, &re, &im, num_amps).unwrap();
-
+    set_amps(&mut qureg, 0, &re, &im).unwrap();
     assert!((get_real_amp(&qureg, 0).unwrap() - 1.).abs() < EPSILON);
 
-    set_amps(&mut qureg, 9, &re, &im, 4).unwrap_err();
-    set_amps(&mut qureg, 7, &re, &im, 4).unwrap_err();
-    set_amps(&mut qureg, 3, &re, &im, 9).unwrap_err();
-    set_amps(&mut qureg, -1, &re, &im, 9).unwrap_err();
-    set_amps(&mut qureg, 1, &re, &im, -9).unwrap_err();
+    set_amps(&mut qureg, 3, &re, &im).unwrap();
+
+    set_amps(&mut qureg, 9, &re, &im).unwrap_err();
+    set_amps(&mut qureg, 7, &re, &im).unwrap_err();
+    set_amps(&mut qureg, -1, &re, &im).unwrap_err();
+}
+
+#[test]
+fn set_amps_02() {
+    let env = &QuestEnv::new();
+    let mut qureg = Qureg::try_new(2, env).unwrap();
+
+    let re = [1.];
+    let im = [1., 2.];
+
+    let res = set_amps(&mut qureg, 0, &re, &im).unwrap_err();
+    assert_eq!(res, QuestError::ArrayLengthError);
+
+    let re = [1., 2.];
+    let im = [1.];
+
+    let res = set_amps(&mut qureg, 0, &re, &im).unwrap_err();
+    assert_eq!(res, QuestError::ArrayLengthError);
 }
 
 #[test]
@@ -233,15 +249,34 @@ fn set_density_amps_01() {
     let re = &[1., 2., 3., 4.];
     let im = &[1., 2., 3., 4.];
 
-    set_density_amps(qureg, 0, 0, re, im, 4).unwrap();
+    set_density_amps(qureg, 0, 0, re, im).unwrap();
     assert!((get_density_amp(qureg, 0, 0).unwrap().re - 1.).abs() < EPSILON);
 
-    set_amps(qureg, 0, re, im, 4).unwrap_err();
+    set_density_amps(qureg, 1, 3, re, im).unwrap();
 
-    set_density_amps(qureg, 0, 9, re, im, 4).unwrap_err();
-    set_density_amps(qureg, 8, 7, re, im, 4).unwrap_err();
-    set_density_amps(qureg, 0, -1, re, im, 9).unwrap_err();
-    set_density_amps(qureg, 0, 1, re, im, -9).unwrap_err();
+    set_amps(qureg, 0, re, im).unwrap_err();
+
+    set_density_amps(qureg, 0, 9, re, im).unwrap_err();
+    set_density_amps(qureg, 8, 7, re, im).unwrap_err();
+    set_density_amps(qureg, 0, -1, re, im).unwrap_err();
+}
+
+#[test]
+fn set_density_amps_02() {
+    let env = &QuestEnv::new();
+    let mut qureg = Qureg::try_new_density(2, env).unwrap();
+
+    let re = [1.];
+    let im = [1., 2.];
+
+    let res = set_density_amps(&mut qureg, 0, 0, &re, &im).unwrap_err();
+    assert_eq!(res, QuestError::ArrayLengthError);
+
+    let re = [1., 2.];
+    let im = [1.];
+
+    let res = set_density_amps(&mut qureg, 0, 0, &re, &im).unwrap_err();
+    assert_eq!(res, QuestError::ArrayLengthError);
 }
 
 #[test]
@@ -895,10 +930,21 @@ fn calc_prob_of_all_outcomes_01() {
     calc_prob_of_all_outcomes(outcome_probs, qureg, &[0, 1]).unwrap();
     calc_prob_of_all_outcomes(outcome_probs, qureg, &[0, 2]).unwrap();
 
-    calc_prob_of_all_outcomes(outcome_probs, qureg, &[1, 2, 3]).unwrap_err();
+    calc_prob_of_all_outcomes(outcome_probs, qureg, &[1, 3]).unwrap_err();
     calc_prob_of_all_outcomes(outcome_probs, qureg, &[0, 0]).unwrap_err();
     calc_prob_of_all_outcomes(outcome_probs, qureg, &[4, 0]).unwrap_err();
     calc_prob_of_all_outcomes(outcome_probs, qureg, &[0, -1]).unwrap_err();
+}
+
+#[test]
+fn calc_prob_of_all_outcomes_02() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
+    init_zero_state(qureg);
+
+    let outcome_probs = &mut vec![0.; 3];
+
+    calc_prob_of_all_outcomes(outcome_probs, qureg, &[1, 2]).unwrap_err();
 }
 
 #[test]
@@ -3496,4 +3542,26 @@ fn multi_controlled_multi_rotate_pauli_01() {
         .unwrap_err();
     multi_controlled_multi_rotate_pauli(qureg, &[0, 3], &[2, 3], tar_paul, 0.)
         .unwrap_err();
+}
+
+#[test]
+fn check_array_length_init_state_from_amps() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+
+    let reals = [0.; 4];
+    let imags = [0.; 4];
+    init_state_from_amps(qureg, &reals, &imags).unwrap();
+
+    let reals = [0.; 3];
+    let imags = [0.; 4];
+    init_state_from_amps(qureg, &reals, &imags).unwrap_err();
+
+    let reals = [0.; 4];
+    let imags = [0.; 3];
+    init_state_from_amps(qureg, &reals, &imags).unwrap_err();
+
+    let reals = [0.; 5];
+    let imags = [0.; 5];
+    init_state_from_amps(qureg, &reals, &imags).unwrap();
 }

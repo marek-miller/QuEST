@@ -1,7 +1,7 @@
 # quest_bind
 
-[![Test](https://github.com/marek-miller/quest-bind/actions/workflows/test.yml/badge.svg)](https://github.com/marek-miller/quest-bind/actions/workflows/test.yml)
-[![Docs](https://github.com/marek-miller/quest-bind/actions/workflows/docs.yml/badge.svg)](https://github.com/marek-miller/quest-bind/actions/workflows/docs.yml)
+[![Test](https://github.com/marek-miller/quest_bind/actions/workflows/test.yml/badge.svg)](https://github.com/marek-miller/quest_bind/actions/workflows/test.yml)
+[![Docs](https://github.com/marek-miller/quest_bind/actions/workflows/docs.yml/badge.svg)](https://github.com/marek-miller/quest_bind/actions/workflows/docs.yml)
 
 A wrapper around [QuEST](https://github.com/QuEST-Kit/QuEST/) v3.5.0.
 
@@ -36,7 +36,7 @@ fn main() -> Result<(), QuestError> {
 
     // Create a 2-qubit register and report its parameters
     let qureg = &mut Qureg::try_new(2, env)?;
-    report_qureg_params(qureg);
+    qureg.report_qureg_params();
     // Initialize |00> state and print out the state to screen
     init_zero_state(qureg);
     qureg.report_state_to_screen(0);
@@ -135,8 +135,8 @@ To run unit tests for this library, first clone the repository together with
 QuEST source code as submodule:
 
 ```sh
-git clone --recurse-submodules https://github.com/marek-miller/quest-bind.git
-cd quest-bind
+git clone --recurse-submodules https://github.com/marek-miller/quest_bind.git
+cd quest_bind
 ```
 
 Then run:

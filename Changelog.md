@@ -2,10 +2,15 @@
 
 ## v0.3.5 (??/??/????)
 
+- Change git repository name to: `quest_bind`
 - Implement Sync and Send traits for `QuestEnv` and `Qureg`.
 - Rewrite exception handling using `panic` mechanism. No more global API locks!
   Our wrapper is now fully concurrent and much faster.
 - Remove spurious checks that existed due to imperfect error catching.
+- Fix bug: `calc_prob_of_all_outcomes()` didn't check properly for the length of
+  slice passed
+
+- Add method: `Qureg::get_num_amps_total()`
 
 - API breaking changes:
 
@@ -20,12 +25,18 @@
     - `get_num_amps()`
     - `report_state()`
     - `report_state_to_screen()` (signature change)
+    - `report_qureg_params()`
 
   - Remove `QuestError` variants not needed anymore:
 
     - `QubitIndexError`
     - `NotDensityMatrix`
     - `NegativeProbability`
+
+  - Function signature change:
+
+    - `set_amps()`: parameter `num_amps` was redundant
+    - `set_density_amps()`: parameter `num_amps` was redundant
 
 ## v0.3.4 (29/07/2023)
 

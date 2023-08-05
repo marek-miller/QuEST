@@ -105,6 +105,6 @@ impl Default for QuestEnv {
 impl Drop for QuestEnv {
     fn drop(&mut self) {
         catch_quest_exception(|| unsafe { ffi::destroyQuESTEnv(self.0) })
-            .expect("dropping QuestEnv should always succeed")
+            .expect("dropping QuestEnv should always succeed");
     }
 }

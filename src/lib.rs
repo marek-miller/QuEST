@@ -56,16 +56,6 @@ pub use operators::{
 pub use questenv::QuestEnv;
 pub use qureg::Qureg;
 
-/// Report information about a set of qubits.
-///
-/// This function reports: number of qubits, number of probability amplitudes.
-pub fn report_qureg_params(qureg: &Qureg<'_>) {
-    catch_quest_exception(|| unsafe {
-        ffi::reportQuregParams(qureg.reg);
-    })
-    .expect("report_qureg_params should never fail");
-}
-
 /// Print the Hamiltonian `hamil` to screen.
 pub fn report_pauli_hamil(hamil: &PauliHamil) -> Result<(), QuestError> {
     catch_quest_exception(|| unsafe {
@@ -220,7 +210,7 @@ pub fn init_plus_state(qureg: &mut Qureg<'_>) {
 /// # Errors
 ///
 /// - [`InvalidQuESTInputError`],
-///   - if `state_ind` is outside [0, [`qureg.num_qubits_represented()`]).
+///   - if `state_ind` is outside [0, qureg.[`num_qubits_represented()`]).
 ///
 /// # Examples
 ///
@@ -239,7 +229,7 @@ pub fn init_plus_state(qureg: &mut Qureg<'_>) {
 /// See [QuEST API] for more information.
 ///
 /// [api-get-prob-amp]: crate::get_prob_amp()
-/// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
@@ -253,6 +243,22 @@ pub fn init_classical_state(
 }
 
 /// Initialize `qureg` into a pure state.
+///
+/// - If `qureg` is a state-vector, this merely clones `pure` into `qureg`.
+/// - If `qureg` is a density matrix, this makes `qureg` 100% likely to be in
+///   the `pure` state.
+///
+/// # Parameters
+///
+/// - `qureg`: the register to modify
+/// - `pure`: a state-vector containing the pure state into which to initialize
+///   `qureg`
+///
+/// # Errors
+///
+/// - [`InvalidQuESTInputError`],
+///   - if `qureg` and `pure` have mismatching dimensions
+///   - if `pure` is a density matrix
 ///
 /// # Examples
 ///
@@ -270,6 +276,7 @@ pub fn init_classical_state(
 ///
 /// See [QuEST API] for more information.
 ///
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
 pub fn init_pure_state(
@@ -281,7 +288,16 @@ pub fn init_pure_state(
     })
 }
 
-/// Initializes `qureg` to be in the debug state.
+/// Initialize `qureg` to be in a debug state.
+///
+/// Set `qureg` to be in the un-normalized, non-physical state with
+/// with `n`th complex amplitude given by:
+///
+/// ```text
+///   2n/10 + i*(2n+1)/10.
+/// ```
+///
+/// This is used internally for debugging and testing.
 ///
 /// See [QuEST API] for more information.
 ///
@@ -291,10 +307,35 @@ pub fn init_debug_state(qureg: &mut Qureg<'_>) {
     catch_quest_exception(|| unsafe {
         ffi::initDebugState(qureg.reg);
     })
-    .expect("init_debug_state should always succeed");
+    .expect("init_debug_state() should always succeed");
 }
 
 /// Initialize `qureg` by specifying all amplitudes.
+///
+/// For density matrices, it is assumed the amplitudes have been flattened
+/// column-wise into the given arrays.
+///
+/// The real and imaginary components of the amplitudes are passed in separate
+/// arrays, `reals` and `imags`, each of which must have length
+/// [`qureg.get_num_amps_total()`]. There is no automatic checking that the
+/// passed arrays are L2 normalized, so this can be used to prepare `qureg` in a
+/// non-physical state.
+///
+/// In distributed mode, this would require the complete state to fit in
+/// every node. To manually prepare a state for which all amplitudes cannot fit
+/// into a single node, use [`set_amps()`]
+///
+/// # Parameters
+///
+/// - `qureg`: the register to overwrite
+/// - `reals`: array of the real components of the new amplitudes
+/// - `imags`: array of the imaginary components of the new amplitudes
+///
+/// # Errors
+///
+/// - [`ArrayLengthError`],
+///   - if either `reals` or `imags` have fewer than
+///     [`qureg.get_num_amps_total()`] elements
 ///
 /// # Examples
 ///
@@ -311,6 +352,9 @@ pub fn init_debug_state(qureg: &mut Qureg<'_>) {
 ///
 /// See [QuEST API] for more information.
 ///
+/// [`qureg.get_num_amps_total()`]: crate::Qureg::get_num_amps_total()
+/// [`set_amps()`]: crate::set_amps()
+/// [`ArrayLengthError`]: crate::QuestError::ArrayLengthError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
 pub fn init_state_from_amps(
@@ -318,20 +362,25 @@ pub fn init_state_from_amps(
     reals: &[Qreal],
     imags: &[Qreal],
 ) -> Result<(), QuestError> {
+    let num_amps_total = qureg.get_num_amps_total() as usize;
+    if reals.len() < num_amps_total || imags.len() < num_amps_total {
+        return Err(QuestError::ArrayLengthError);
+    }
     catch_quest_exception(|| unsafe {
         ffi::initStateFromAmps(qureg.reg, reals.as_ptr(), imags.as_ptr());
     })
 }
 
-/// Overwrites a contiguous subset of the amplitudes in state-vector `qureg`.
+/// Overwrites a contiguous subset of the amplitudes in a state-vector.
+///
+/// Only amplitudes with indices in `[start_ind,  start_ind + reals.len()]` will
+/// be changed. The resulting `qureg` may not necessarily be in an L2 normalized
+/// state.
 ///
 /// In distributed mode, this function assumes the subset `reals` and `imags`
 /// exist (at least) on the node containing the ultimately updated elements.
-///
-/// # Examples
-///
-/// Below is the correct way to modify the full 8 elements of `qureg`when split
-/// between 2 nodes.
+/// For example, below is the correct way to modify the full 8 elements of
+/// `qureg` when split between 2 nodes:
 ///
 /// ```rust
 /// # use quest_bind::*;
@@ -340,20 +389,55 @@ pub fn init_state_from_amps(
 ///
 /// let re = &mut [1., 2., 3., 4.];
 /// let im = &mut [1., 2., 3., 4.];
-/// let num_amps = 4;
-///
-/// set_amps(qureg, 0, re, im, num_amps);
+/// set_amps(qureg, 0, re, im);
 ///
 /// // modify re and im to the next set of elements
 /// for i in 0..4 {
 ///     re[i] += 4.;
 ///     im[i] += 4.;
 /// }
-/// set_amps(qureg, 4, re, im, num_amps);
+/// set_amps(qureg, 4, re, im);
+/// ```
+///
+/// # Parameters
+///
+/// - `qureg`: the state-vector to modify
+/// - `start_ind`: the index of the first amplitude in `qureg` to modify
+/// - `reals`: array of the real components of the new amplitudes
+/// - `imags`: array of the imaginary components of the new amplitudes
+///
+/// # Errors
+///
+/// - [`ArrayLengthError`]
+///   - if `reals.len()` and `imags.len()` are different
+///
+/// - [`InvalidQuESTInputError`]
+///   - if `qureg` is not a state-vector (i.e. is a density matrix)
+///   - if `start_ind` is outside [0, [`qureg.get_num_amps_total()`]]
+///   - if `reals.len()` is outside [0, `qureg.get_num_amps_total()`]
+///   - if `reals.len()` + `start_ind` >= `qureg.get_num_amps_total()`
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// let env = &QuestEnv::new();
+/// let qureg = &mut Qureg::try_new(2, env).unwrap();
+///
+/// let re = &[1., 2., 3.];
+/// let im = &[4., 5., 6.];
+/// let start_ind = 1;
+/// set_amps(qureg, start_ind, re, im);
+///
+/// let amp = get_real_amp(qureg, 3).unwrap();
+/// assert!((amp - 3.).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API] for more information.
 ///
+/// [`qureg.get_num_amps_total()`]: crate::Qureg::get_num_amps_total()
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+/// [`ArrayLengthError`]: crate::QuestError::ArrayLengthError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
 pub fn set_amps(
@@ -361,8 +445,11 @@ pub fn set_amps(
     start_ind: i64,
     reals: &[Qreal],
     imags: &[Qreal],
-    num_amps: i64,
 ) -> Result<(), QuestError> {
+    if reals.len() != imags.len() {
+        return Err(QuestError::ArrayLengthError);
+    }
+    let num_amps = reals.len() as i64;
     catch_quest_exception(|| unsafe {
         ffi::setAmps(
             qureg.reg,
@@ -374,27 +461,63 @@ pub fn set_amps(
     })
 }
 
-/// Overwrites a contiguous subset of the amplitudes in density-matrix `qureg`.
+/// Overwrites a contiguous subset of the amplitudes in a density-matrix.
+///
+/// Only the first `reals.len()` amplitudes starting from row-column index
+/// `(start_row, start_col)`, and proceeding down the column (wrapping around
+/// between rows) will be modified. The resulting `qureg` may not
+/// necessarily be in an L2 normalized state.
 ///
 /// In distributed mode, this function assumes the subset `reals` and `imags`
 /// exist (at least) on the node containing the ultimately updated elements.
+/// See also [`set_amps()`] for more details.
+///
+/// # Parameters
+///
+/// - `qureg`: the state-vector to modify
+/// - `start_row`: the row-index of the first amplitude in `qureg` to modify
+/// - `start_col`: the column-index of the first amplitude in `qureg` to modify
+/// - `reals`: array of the real components of the new amplitudes
+/// - `imags`: array of the imaginary components of the new amplitudes
+///
+/// # Errors
+///
+/// - [`ArrayLengthError`]
+///   - if `reals.len()` and `imags.len()` are different
+///
+/// - [`InvalidQuESTInputError`]
+///   - if `qureg` is not a density-matrix (i.e. is a state vector)
+///   - if `start_row` is outside [0, 1 << [`qureg.num_qubits_represented()`]]
+///   - if `start_col` is outside [0, 1 << [`qureg.num_qubits_represented()`]]
+///   - if `reals.len()` is outside [0, `qureg.get_num_amps_total()`]
+///   - if `reals.len()` is larger than the remaining number of amplitudes from
+///     (`start_row`, `start_col`), column-wise
 ///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
 /// let env = &QuestEnv::new();
-/// let qureg = &mut Qureg::try_new_density(3, env).unwrap();
+/// let qureg = &mut Qureg::try_new_density(2, env).unwrap();
 ///
-/// let mut re = &[1., 2., 3., 4.];
-/// let mut im = &[1., 2., 3., 4.];
-/// let num_amps = 4;
+/// let re = &[1., 2., 3.];
+/// let im = &[4., 5., 6.];
+/// let start_row = 1;
+/// let start_col = 1;
+/// set_density_amps(qureg, start_row, start_col, re, im);
 ///
-/// set_density_amps(qureg, 0, 0, re, im, num_amps);
+/// let amp = get_density_amp(qureg, 2, 1).unwrap();
+///
+/// assert!((amp.re - 2.).abs() < EPSILON);
+/// assert!((amp.im - 5.).abs() < EPSILON);
 /// ```
 ///
 /// See [QuEST API] for more information.
 ///
+/// [`set_amps()`]: crate::set_amps()
+/// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+/// [`ArrayLengthError`]: crate::QuestError::ArrayLengthError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
 pub fn set_density_amps(
@@ -403,8 +526,11 @@ pub fn set_density_amps(
     start_col: i64,
     reals: &[Qreal],
     imags: &[Qreal],
-    num_amps: i64,
 ) -> Result<(), QuestError> {
+    if reals.len() != imags.len() {
+        return Err(QuestError::ArrayLengthError);
+    }
+    let num_amps = reals.len() as i64;
     catch_quest_exception(|| unsafe {
         ffi::setDensityAmps(
             qureg.reg,
@@ -536,7 +662,7 @@ pub fn multi_controlled_phase_shift(
     })
 }
 
-/// Apply the (two-qubit) controlled phase flip gate
+/// Apply the (two-qubit) controlled phase flip gate.
 ///
 /// Also known as the controlled pauliZ gate.
 ///
@@ -614,7 +740,7 @@ pub fn multi_controlled_phase_flip(
 /// # Errors
 ///
 /// - [`InvalidQuESTInputError`],
-///   - if `target_qubit` is outside [0, [`qureg.num_qubits_represented()`]).
+///   - if `target_qubit` is outside [0, qureg.[`num_qubits_represented()`]).
 ///
 /// # Examples
 ///
@@ -633,7 +759,7 @@ pub fn multi_controlled_phase_flip(
 ///
 /// See [QuEST API] for more information.
 ///
-/// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
@@ -664,7 +790,7 @@ pub fn s_gate(
 /// # Errors
 ///
 /// - [`InvalidQuESTInputError`],
-///   - if `target_qubit` is outside [0, [`qureg.num_qubits_represented()`]).
+///   - if `target_qubit` is outside [0, qureg.[`num_qubits_represented()`]).
 ///
 ///
 /// # Examples
@@ -684,7 +810,7 @@ pub fn s_gate(
 ///
 /// See [QuEST API] for more information.
 ///
-/// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
@@ -906,7 +1032,7 @@ pub fn copy_substate_from_gpu(
 ///
 /// - [`InvalidQuESTInputError`],
 ///   - if `qureg` is a density matrix
-///   - if `index` is outside [0, [`qureg.num_qubits_represented()`]).
+///   - if `index` is outside [0, qureg.[`num_qubits_represented()`]).
 ///
 /// # Examples
 ///
@@ -923,7 +1049,7 @@ pub fn copy_substate_from_gpu(
 /// See [QuEST API] for more information.
 ///
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
-/// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn get_amp(
     qureg: &Qureg<'_>,
@@ -945,7 +1071,7 @@ pub fn get_amp(
 ///
 /// - [`InvalidQuESTInputError`],
 ///   - if `qureg` is a density matrix
-///   - if `index` is outside [0, [`qureg.num_qubits_represented()`]).
+///   - if `index` is outside [0, qureg.[`num_qubits_represented()`]).
 ///
 /// # Examples
 ///
@@ -962,7 +1088,7 @@ pub fn get_amp(
 /// See [QuEST API] for more information.
 ///
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
-/// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn get_real_amp(
     qureg: &Qureg<'_>,
@@ -983,7 +1109,7 @@ pub fn get_real_amp(
 ///
 /// - [`InvalidQuESTInputError`],
 ///   - if `qureg` is a density matrix
-///   - if `index` is outside [0, [`qureg.num_qubits_represented()`]).
+///   - if `index` is outside [0, qureg.[`num_qubits_represented()`]).
 ///
 /// # Examples
 ///
@@ -1000,7 +1126,7 @@ pub fn get_real_amp(
 /// See [QuEST API] for more information.
 ///
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
-/// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn get_imag_amp(
     qureg: &Qureg<'_>,
@@ -1020,7 +1146,7 @@ pub fn get_imag_amp(
 ///
 /// - [`InvalidQuESTInputError`],
 ///   - if `qureg` is a density matrix
-///   - if `index` is outside [0, [`qureg.num_qubits_represented()`]).
+///   - if `index` is outside [0, qureg.[`num_qubits_represented()`]).
 ///
 /// # Examples
 ///
@@ -1037,7 +1163,7 @@ pub fn get_imag_amp(
 /// See [QuEST API] for more information.
 ///
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
-/// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn get_prob_amp(
     qureg: &Qureg<'_>,
@@ -1058,7 +1184,7 @@ pub fn get_prob_amp(
 ///
 /// - [`InvalidQuESTInputError`],
 ///   - if `qureg` is a state vector
-///   - if `row` or `col` are outside [0, [`qureg.num_qubits_represented()`]).
+///   - if `row` or `col` are outside [0, qureg.[`num_qubits_represented()`]).
 ///
 /// # Examples
 ///
@@ -1075,7 +1201,7 @@ pub fn get_prob_amp(
 /// See [QuEST API] for more information.
 ///
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
-/// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn get_density_amp(
     qureg: &Qureg<'_>,
@@ -1134,7 +1260,7 @@ pub fn calc_total_prob(qureg: &Qureg<'_>) -> Qreal {
 /// # Errors
 ///
 /// - [`InvalidQuESTInputError`],
-///   - if `target_qubit` is outside [0, [`qureg.num_qubits_represented()`]).
+///   - if `target_qubit` is outside [0, qureg.[`num_qubits_represented()`]).
 ///   - if  `alpha`, `beta` don't satisfy: `|alpha|^2 + |beta|^2 = 1`.
 ///
 /// # Examples
@@ -1160,7 +1286,7 @@ pub fn calc_total_prob(qureg: &Qureg<'_>) -> Qreal {
 ///
 /// See [QuEST API] for more information.
 ///
-/// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
@@ -1189,7 +1315,7 @@ pub fn compact_unitary(
 /// # Errors
 ///
 /// - [`InvalidQuESTInputError`],
-///   - if `target_qubit` is outside [0, [`qureg.num_qubits_represented()`]).
+///   - if `target_qubit` is outside [0, qureg.[`num_qubits_represented()`]).
 ///   - if `u` is not unitary
 ///
 /// # Examples
@@ -1217,7 +1343,7 @@ pub fn compact_unitary(
 ///
 /// See [QuEST API] for more information.
 ///
-/// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
@@ -1249,7 +1375,7 @@ pub fn unitary(
 /// # Errors
 ///
 /// - [`InvalidQuESTInputError`],
-///   - if `rot_qubit` is outside [0, [`qureg.num_qubits_represented()`]).
+///   - if `rot_qubit` is outside [0, qureg.[`num_qubits_represented()`]).
 ///
 /// # Examples
 ///
@@ -1264,7 +1390,7 @@ pub fn unitary(
 ///
 /// See [QuEST API] for more information.
 ///
-/// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
@@ -1296,7 +1422,7 @@ pub fn rotate_x(
 /// # Errors
 ///
 /// - [`InvalidQuESTInputError`],
-///   - if `rot_qubit` is outside [0, [`qureg.num_qubits_represented()`]).
+///   - if `rot_qubit` is outside [0, qureg.[`num_qubits_represented()`]).
 ///
 /// # Examples
 ///
@@ -1311,7 +1437,7 @@ pub fn rotate_x(
 ///
 /// See [QuEST API] for more information.
 ///
-/// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
@@ -1343,7 +1469,7 @@ pub fn rotate_y(
 /// # Errors
 ///
 /// - [`InvalidQuESTInputError`],
-///   - if `rot_qubit` is outside [0, [`qureg.num_qubits_represented()`]).
+///   - if `rot_qubit` is outside [0, qureg.[`num_qubits_represented()`]).
 ///
 /// # Examples
 ///
@@ -1358,7 +1484,7 @@ pub fn rotate_y(
 ///
 /// See [QuEST API] for more information.
 ///
-/// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
@@ -1373,6 +1499,24 @@ pub fn rotate_z(
 }
 
 /// Rotate a single qubit by a given angle around a given axis.
+///
+/// The axis of rotation is given by a [`Vector`] on the Bloch-sphere.      
+/// The vector must not be zero (or else an error is thrown), but needn't be
+/// unit magnitude, since the normalization will be computed by by `QuEST`.
+///
+/// # Parameters
+///
+/// - `qureg`: object representing the set of all qubits
+/// - `rot_qubit`: qubit to rotate
+/// - `angle`: angle by which to rotate in radians
+/// - `axis`: vector around which to rotate (can be non-unit; will be
+///   normalized)
+///
+/// # Errors
+///
+/// - [`InvalidQuESTInputError`]
+///   - if `rot_qubit` is outside [0, qureg.[`num_qubits_represented()`])
+///   - if `axis` is the zero vector
 ///
 /// # Examples
 ///
@@ -1389,6 +1533,9 @@ pub fn rotate_z(
 ///
 /// See [QuEST API] for more information.
 ///
+/// [`Vector`]: crate::Vector
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+/// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
 pub fn rotate_around_axis(
@@ -1405,6 +1552,22 @@ pub fn rotate_around_axis(
 /// Applies a controlled rotation by a given angle around the X-axis of the
 /// Bloch-sphere.
 ///
+/// The target qubit is rotated in states where the control qubit has value `1`.
+///
+/// # Parameters
+///
+/// - `qureg`: object representing the set of all qubits
+/// - `control_qubit`: qubit which has value `1` in the rotated states
+/// - `target_qubit`: qubit to rotate
+/// - `angle`: angle by which to rotate the target qubit in radians
+///
+/// # Errors
+///
+/// - [`InvalidQuESTInputError`]
+///   - if either `control_qubit` or `target_qubit` are outside [0,
+///     qureg.[`num_qubits_represented()`])
+///   - if `control_qubit` and `target_qubit` are equal
+///
 /// # Examples
 ///
 /// ```rust
@@ -1420,6 +1583,8 @@ pub fn rotate_around_axis(
 ///
 /// See [QuEST API] for more information.
 ///
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+/// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
 pub fn controlled_rotate_x(
@@ -1436,6 +1601,22 @@ pub fn controlled_rotate_x(
 /// Applies a controlled rotation by a given angle around the Y-axis of the
 /// Bloch-sphere.
 ///
+/// The target qubit is rotated in states where the control qubit has value `1`.
+///
+/// # Parameters
+///
+/// - `qureg`: object representing the set of all qubits
+/// - `control_qubit`: qubit which has value `1` in the rotated states
+/// - `target_qubit`: qubit to rotate
+/// - `angle`: angle by which to rotate the target qubit in radians
+///
+/// # Errors
+///
+/// - [`InvalidQuESTInputError`]
+///   - if either `control_qubit` or `target_qubit` are outside [0,
+///     qureg.[`num_qubits_represented()`])
+///   - if `control_qubit` and `target_qubit` are equal
+///
 /// # Examples
 ///
 /// ```rust
@@ -1451,6 +1632,8 @@ pub fn controlled_rotate_x(
 ///
 /// See [QuEST API] for more information.
 ///
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+/// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
 pub fn controlled_rotate_y(
@@ -1467,6 +1650,22 @@ pub fn controlled_rotate_y(
 /// Applies a controlled rotation by a given angle around the Z-axis of the
 /// Bloch-sphere.
 ///
+/// The target qubit is rotated in states where the control qubit has value `1`.
+///
+/// # Parameters
+///
+/// - `qureg`: object representing the set of all qubits
+/// - `control_qubit`: qubit which has value `1` in the rotated states
+/// - `target_qubit`: qubit to rotate
+/// - `angle`: angle by which to rotate the target qubit in radians
+///
+/// # Errors
+///
+/// - [`InvalidQuESTInputError`]
+///   - if either `control_qubit` or `target_qubit` are outside [0,
+///     qureg.[`num_qubits_represented()`])
+///   - if `control_qubit` and `target_qubit` are equal
+///
 /// # Examples
 ///
 /// ```rust
@@ -1482,6 +1681,8 @@ pub fn controlled_rotate_y(
 ///
 /// See [QuEST API] for more information.
 ///
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+/// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
 pub fn controlled_rotate_z(
@@ -1496,6 +1697,26 @@ pub fn controlled_rotate_z(
 }
 
 /// Applies a controlled rotation by  around a given vector of the Bloch-sphere.
+///
+/// The vector must not be zero (else an error is thrown), but needn't be unit
+/// magnitude.
+///
+/// # Parameters
+///
+/// - `qureg`: object representing the set of all qubits
+/// - `control_qubit`: qubit which has value `1` in the rotated states
+/// - `target_qubit`: qubit to rotate
+/// - `angle`: angle by which to rotate in radians
+/// - `axis`: vector around which to rotate (can be non-unit; will be
+///   normalized)
+///
+/// # Errors
+///
+/// - [`InvalidQuESTInputError`]
+///   - if either `control_qubit` or `target_qubit` are outside [0,
+///     qureg.[`num_qubits_represented()`])
+///   - if `control_qubit` and `target_qubit` are equal
+///   - if `axis` is the zero vector
 ///
 /// # Examples
 ///
@@ -1520,6 +1741,9 @@ pub fn controlled_rotate_z(
 ///
 /// See [QuEST API] for more information.
 ///
+/// [`Vector`]: crate::Vector
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+/// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
 pub fn controlled_rotate_around_axis(
@@ -1586,7 +1810,7 @@ pub fn controlled_rotate_around_axis(
 ///
 /// See [QuEST API] for more information.
 ///
-/// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
@@ -1646,7 +1870,7 @@ pub fn controlled_compact_unitary(
 ///
 /// See [QuEST API] for more information.
 ///
-/// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
@@ -1702,7 +1926,7 @@ pub fn controlled_unitary(
 ///
 /// See [QuEST API] for more information.
 ///
-/// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
@@ -1754,7 +1978,7 @@ pub fn multi_controlled_unitary(
 /// See [QuEST API] for more information.
 ///
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
-/// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
 pub fn pauli_x(
@@ -1796,7 +2020,7 @@ pub fn pauli_x(
 /// See [QuEST API] for more information.
 ///
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
-/// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
 pub fn pauli_y(
@@ -1838,7 +2062,7 @@ pub fn pauli_y(
 /// See [QuEST API] for more information.
 ///
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
-/// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
 pub fn pauli_z(
@@ -1888,7 +2112,7 @@ pub fn pauli_z(
 /// See [QuEST API] for more information.
 ///
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
-/// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
 pub fn hadamard(
@@ -1907,10 +2131,10 @@ pub fn hadamard(
 /// This effects the two-qubit unitary:
 ///
 /// ```text
-///  [ 1 0 0 0 ]
-///  [ 0 1 0 0 ]
-///  [ 0 0 0 1 ]
-///  [ 0 0 1 0 ]
+///  [ 1  0  0  0 ]
+///  [ 0  1  0  0 ]
+///  [ 0  0  0  1 ]
+///  [ 0  0  1  0 ]
 /// ```
 ///
 /// on the control and target qubits.
@@ -1918,14 +2142,14 @@ pub fn hadamard(
 /// # Parameters
 ///
 /// - `qureg`: the state-vector or density matrix to modify
-/// - `control_qubit`: "nots" the target if this qubit is 1
+/// - `control_qubit`: "nots" the target if this qubit is `1`
 /// - `target_qubit`: qubit to "not"
 ///
 /// # Errors
 ///
 /// - [`InvalidQuESTInputError`],
 ///   - if either `control_qubit` or `target_qubit` is outside [0,
-///     [`qureg.num_qubits_represented()`])
+///     qureg.[`num_qubits_represented()`])
 ///   - if `control_qubit` and `target_qubit` are equal
 ///
 /// # Examples
@@ -1945,7 +2169,7 @@ pub fn hadamard(
 ///
 /// See [QuEST API] for more information.
 ///
-/// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
@@ -2010,7 +2234,7 @@ pub fn controlled_not(
 /// See [QuEST API] for more information.
 ///
 /// [api-pauli-x]: crate::pauli_x()
-/// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
@@ -2078,7 +2302,7 @@ pub fn multi_controlled_multi_qubit_not(
 /// See [QuEST API] for more information.
 ///
 /// [api-pauli-x]: crate::pauli_x()
-/// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
@@ -2093,7 +2317,33 @@ pub fn multi_qubit_not(
     })
 }
 
-/// Apply the controlled pauliY (single control, single target) gate.
+/// Apply the controlled pauli Y (single control, single target) gate.
+///
+/// The gate is also known as the c-Y and c-sigma-Y gate.
+/// This applies pauli Y to the target qubit, if the control qubit has value 1.
+/// This effects the two-qubit unitary:
+///
+/// ```text
+///  [ 1  0  0   0 ]
+///  [ 0  1  0   0 ]
+///  [ 0  0  0  -i ]
+///  [ 0  0  i   0 ]
+/// ```
+///
+/// on the control and target qubits.
+///
+/// # Parameters
+///
+/// - `qureg`: the state-vector or density matrix to modify
+/// - `control_qubit`: applies pauli Y the target if this qubit is `1`
+/// - `target_qubit`: qubit to modify
+///
+/// # Errors
+///
+/// - [`InvalidQuESTInputError`],
+///   - if either `control_qubit` or `target_qubit` is outside [0,
+///     qureg.[`num_qubits_represented()`])
+///   - if `control_qubit` and `target_qubit` are equal
 ///
 /// # Examples
 ///
@@ -2112,6 +2362,8 @@ pub fn multi_qubit_not(
 ///
 /// See [QuEST API] for more information.
 ///
+/// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
 pub fn controlled_pauli_y(
@@ -2125,6 +2377,37 @@ pub fn controlled_pauli_y(
 }
 
 /// Gives the probability of a qubit being measured in the given outcome.
+///
+/// This performs no actual measurement and does not change the state of the
+/// qubits.
+///
+/// - For state-vectors, this function works by summing the
+///   absolute-value-squared of every amplitude in the state-vector for which
+///   `measure_qubit = 0`. If `outcome = 1`, it returns `1` minus this value.
+///   Hence for unnormalized state-vectors, this result will differ from the
+///   absolute-value-squared of every amplitude where `measure_qubit = outcome`.
+///
+/// - For density matrices, this function sums the diagonal values (should be
+///   real) corresponding to `measure_qubit = 0` (returning 1 minus this if
+///   `outcome = 1`).
+///
+/// # Parameters
+///
+/// - `qureg`: object representing the set of all qubits
+/// - `measure_qubit`: qubit to study
+/// - `outcome`: for which to find the probability of the qubit being measured
+///   in
+///
+/// # Return
+///
+/// Returns probability of qubit `measure_qubit` being measured in the given
+/// outcome.
+///
+/// # Errors
+///
+/// - [`InvalidQuESTInputError`],
+///   - if `measure_qubit` is outside [0, qureg.[`num_qubits_represented()`])
+///   - if `outcome` is not in {0, 1}
 ///
 /// # Examples
 ///
@@ -2142,6 +2425,8 @@ pub fn controlled_pauli_y(
 ///
 /// See [QuEST API] for more information.
 ///
+/// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn calc_prob_of_outcome(
     qureg: &Qureg<'_>,
@@ -2154,6 +2439,41 @@ pub fn calc_prob_of_outcome(
 }
 
 /// Calculate probabilities of every outcome of the sub-register.
+///
+/// This function populates `outcome_probs` with the probabilities of every
+/// outcome of the sub-register contained in `qubits`.
+///
+/// This performs no actual measurement and does not modify `qureg`.
+///
+/// - `outcome_probs` must be a pre-allocated array of length `2^qubits.len()`.
+///   In distributed mode, every node receives the full list of outcome
+///   probabilities.
+///
+/// - Note that the indices in `qubits` need not be adjacent nor ordered. The
+///   order of `qubits` determines the order of `outcome_probs`, whereby
+///   `qubits` are treated as *increasing* significance.
+///
+/// - Since all probability amplitudes of a state-vector are ultimately involved
+///   in the output probabilities, this function works as expected for
+///   unnormalized states. This is similarly true for density matrices, where
+///   all  diagonal elements are involved, although only the real values of the
+///   diagonal elements will be consulted.
+///
+/// # Parameters
+///
+/// - `outcome_probs`: a pre-allocated array of length `1 << n`, where `n =
+///   qubits.len()`  which will be modified to contain all outcome probabilities
+/// - `qureg`: a state-vector or density matrix to study
+/// - `qubits`: a list of qubits to study
+///
+/// # Errors
+///
+/// - [`InvalidQuESTInputError`],
+///   - if any index in `qubits` is invalid, i.e. outside [0,
+///     qureg.[`num_qubits_represented()`])
+///   - if `qubits` contains any repetitions
+/// - [`ArrayLengthError`],
+///   - if `outcome_probs.len() < 1 << qubits.len()`
 ///
 /// # Examples
 ///
@@ -2171,11 +2491,9 @@ pub fn calc_prob_of_outcome(
 ///
 /// See [QuEST API] for more information.
 ///
-/// # Panics
-///
-/// This function will panic if
-/// `outcome_probs.len() < num_qubits as usize`
-///
+/// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+/// [`ArrayLengthError`]: crate::QuestError::ArrayLengthError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::cast_sign_loss)]
 #[allow(clippy::needless_pass_by_ref_mut)]
@@ -2184,6 +2502,9 @@ pub fn calc_prob_of_all_outcomes(
     qureg: &Qureg<'_>,
     qubits: &[i32],
 ) -> Result<(), QuestError> {
+    if outcome_probs.len() < 1 << qubits.len() {
+        return Err(QuestError::ArrayLengthError);
+    }
     let num_qubits = qubits.len() as i32;
     let outcome_probs_ptr = outcome_probs.as_mut_ptr();
     catch_quest_exception(|| unsafe {
@@ -2357,8 +2678,19 @@ pub fn calc_density_inner_product(
 
 /// Seed the random number generator.
 ///
-/// Seeds the random number generator with the (master node) current time and
-/// process ID.
+/// The seed is based on (master node) current time and process ID.
+///
+/// This is the default seeding used internally by [`QuestEnv::new()`], and
+/// determines the outcomes in functions like [`measure()`] and
+/// [`measure_with_stats()`]. In distributed mode, every node agrees on the seed
+/// (nominated by the master node) such that every node generates the same
+/// sequence of pseudorandom numbers.
+///
+/// `QuEST` uses the [Mersenne Twister] for random number generation.
+///
+/// # Parameters
+///
+/// - `env`: a mutable reference to the [`QuestEnv`] runtime environment
 ///
 /// # Examples
 ///
@@ -2371,6 +2703,11 @@ pub fn calc_density_inner_product(
 ///
 /// See [QuEST API] for more information.
 ///
+/// [`QuestEnv::new()`]: crate::QuestEnv::new()
+/// [`measure()`]: crate::measure()
+/// [`measure_with_stats()`]: crate::measure_with_stats()
+/// [Mersenne Twister]: http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/MT2002/emt19937ar.html
+/// [`QuestEnv`]: crate::QuestEnv
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
 pub fn seed_quest_default(env: &mut QuestEnv) {
@@ -2383,6 +2720,23 @@ pub fn seed_quest_default(env: &mut QuestEnv) {
 
 /// Seeds the random number generator with a custom array of key(s).
 ///
+/// This overrides the default keys, and determines the outcomes in functions
+/// like [`measure()`] and [`measure_with_stats()`]. In distributed mode, every
+/// node agrees on the seed (nominated by the master node) such that every node
+/// generates the same sequence of pseudorandom numbers.
+///
+/// `QuEST` uses the [Mersenne Twister] for random number generation.
+///
+/// The values of `seed_array` are copied and stored internally. This function
+/// allows the PRNG to be initialized with more than a 32-bit integer, if
+/// required.
+///
+/// # Parameters
+///
+/// - `env`: a mutable reference to the [`QuestEnv`] runtime environment
+/// - `seed_array`: array of integers to use as seed
+///
+///
 /// # Examples
 ///
 /// ```rust
@@ -2394,6 +2748,11 @@ pub fn seed_quest_default(env: &mut QuestEnv) {
 ///
 /// See [QuEST API] for more information.
 ///
+/// [`QuestEnv::new()`]: crate::QuestEnv::new()
+/// [`measure()`]: crate::measure()
+/// [`measure_with_stats()`]: crate::measure_with_stats()
+/// [Mersenne Twister]: http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/MT2002/emt19937ar.html
+/// [`QuestEnv`]: crate::QuestEnv
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn seed_quest(
     env: &mut QuestEnv,
@@ -2410,18 +2769,45 @@ pub fn seed_quest(
 
 /// Obtain the seeds presently used in random number generation.
 ///
+/// This function returns a reference to the internal array of keys
+/// which have seeded `QuEST`'s PRNG. These are the seeds which inform the
+/// outcomes of random functions like [`measure()`] and
+/// [`measure_with_stats()`], and are set using [`seed_quest()`] and
+/// [`seed_quest_default()`].
+///
+/// Obtaining `QuEST`'s seeds is useful for seeding your own random number
+/// generators, so that a simulation (with random `QuEST` measurements, and your
+/// own random decisions) can be precisely repeated later, just by calling
+/// [`seed_quest()`].
+///
+/// One should not rely, however, upon the reference returned to be
+/// automatically updated after a subsequent call to [`seed_quest()`] or
+/// [`seed_quest_default()`]. Instead, the present function should be recalled.
+///
+/// # Parameters
+///
+/// - `env`: the [`QuestEnv`] runtime environment
+///
 /// # Examples
 ///
 /// ```rust
 /// # use quest_bind::*;
-/// let env = &QuestEnv::new();
-/// let seeds = get_quest_seeds(env);
+/// let mut env = QuestEnv::new();
+/// let seeds = &[1, 2, 3];
+/// seed_quest(&mut env, seeds);
 ///
-/// assert!(seeds.len() > 0);
+/// let check_seeds = get_quest_seeds(&env);
+/// assert_eq!(seeds, check_seeds);
 /// ```
 ///
 /// See [QuEST API] for more information.
 ///
+/// [`QuestEnv::new()`]: crate::QuestEnv::new()
+/// [`measure()`]: crate::measure()
+/// [`measure_with_stats()`]: crate::measure_with_stats()
+/// [`seed_quest_default()`]: crate::seed_quest()
+/// [`seed_quest_default()`]: crate::seed_quest_default()
+/// [`QuestEnv`]: crate::QuestEnv
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::cast_sign_loss)]
 #[must_use]
@@ -2430,6 +2816,9 @@ pub fn get_quest_seeds<'a: 'b, 'b>(env: &'a QuestEnv) -> &'b [u64] {
         let seeds_ptr = &mut std::ptr::null_mut();
         let num_seeds = &mut 0_i32;
         ffi::getQuESTSeeds(env.0, seeds_ptr, num_seeds);
+
+        // SAFETY: The lifetime bound assures that seed_ptr points
+        // to the correct address as long as env is in scope.
         std::slice::from_raw_parts(*seeds_ptr, *num_seeds as usize)
     })
     .expect("get_quest_seeds should always succeed")
@@ -2590,7 +2979,31 @@ pub fn write_recorded_qasm_to_file(
     }
 }
 
-///  Mixes a density matrix `qureg` to induce single-qubit dephasing noise.
+/// Mixes a density matrix to induce single-qubit dephasing noise.
+///
+/// With probability `prob`, applies Pauli Z to `target_qubit` in `qureg`.
+///
+/// This transforms `qureg = rho` into the mixed state:
+///
+/// ```text
+/// (1 - prob) * rho  +  prob * Z_q rho Z_q,
+/// ```
+///
+/// where `q = target_qubit`. The coefficient `prob` cannot exceed `1/2`, which
+/// maximally mixes `target_qubit`.
+///
+/// # Parameters
+///
+/// - `qureg`: a density matrix
+/// - `target_qubit`: qubit upon which to induce dephasing noise
+/// - `prob`: the probability of the phase error occurring
+///
+/// # Errors
+///
+/// - [`InvalidQuESTInputError`],
+///   - if `qureg` is not a density matrix
+///   - if `target_qubit` is outside [0, qureg.[`num_qubits_represented()`]).
+///   - if `prob` is not in `[0, 1/2]`
 ///
 /// # Examples
 ///
@@ -2610,6 +3023,8 @@ pub fn write_recorded_qasm_to_file(
 ///
 /// See [QuEST API] for more information.
 ///
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+/// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
 pub fn mix_dephasing(
@@ -2622,7 +3037,38 @@ pub fn mix_dephasing(
     })
 }
 
-///  Mixes a density matrix `qureg` to induce two-qubit dephasing noise.
+/// Mixes a density matrix `qureg` to induce two-qubit dephasing noise.
+///
+/// With probability `prob`, applies Pauli Z to either or both in `qureg`.
+///
+/// This transforms `qureg = rho` into the mixed state:
+///
+/// ```text
+/// (1 - prob) * rho  +  prob * 1/3 * (
+///         Z_a  rho  Z_a +
+///         Z_b  rho  Z_b +
+///         Z_a Z_b rho Z_a Z_b
+///    )
+/// ```
+///
+/// where `a = qubit1`, `b=qubit2`. The coefficient `prob` cannot exceed `3/4`,
+/// at which maximal mixing occurs.
+///
+/// # Parameters
+///
+/// - `qureg`: a density matrix
+/// - `qubit1`: qubit upon which to induce dephasing noise
+/// - `qubit2`: qubit upon which to induce dephasing noise
+/// - `prob`: the probability of the phase error occurring
+///
+/// # Errors
+///
+/// - [`InvalidQuESTInputError`],
+///   - if `qureg` is not a density matrix
+///   - if `qubit1` or `qubit2` are outside [0,
+///     qureg.[`num_qubits_represented()`]).
+///   - if `qubit1 = qubit2`
+///   - if `prob` is not in `[0, 3/4]`
 ///
 /// # Examples
 ///
@@ -2642,6 +3088,8 @@ pub fn mix_dephasing(
 ///
 /// See [QuEST API] for more information.
 ///
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+/// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
 pub fn mix_two_qubit_dephasing(
@@ -2657,6 +3105,34 @@ pub fn mix_two_qubit_dephasing(
 
 /// Mixes a density matrix to induce single-qubit homogeneous
 /// depolarising noise.
+/// This is equivalent to, with probability `prob`, uniformly randomly applying
+/// either Pauli X, Y, or Z to `target_qubit`.
+///
+/// This transforms `qureg = rho` into the mixed state:
+///
+/// ```text
+/// (1 - prob) * rho  +  prob * 1/3 * (
+///      X_q rho X_q +
+///      Y_q rho Y_q +
+///      Z_q rho Z_q
+/// )
+/// ```
+///
+/// where `q = target_qubit`. The coefficient `prob` cannot exceed `3/4`, at
+/// which maximal mixing occurs.
+///
+/// # Parameters
+///
+/// - `qureg`: a density matrix
+/// - `target_qubit`: qubit upon which to induce depolarizing noise
+/// - `prob`: the probability of the depolarizing error occurring
+///
+/// # Errors
+///
+/// - [`InvalidQuESTInputError`],
+///   - if `qureg` is not a density matrix
+///   - if `target_qubit` is outside [0, qureg.[`num_qubits_represented()`]).
+///   - if `prob` is not in `[0, 3/4]`
 ///
 /// # Examples
 ///
@@ -2673,6 +3149,8 @@ pub fn mix_two_qubit_dephasing(
 ///
 /// See [QuEST API] for more information.
 ///
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+/// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
 pub fn mix_depolarising(
@@ -2686,6 +3164,39 @@ pub fn mix_depolarising(
 }
 
 ///  Mixes a density matrix to induce single-qubit amplitude damping.
+///
+/// With probability `prob`, applies damping (transition from `1` to `0` state).
+/// This transforms `qureg = rho` into the mixed state:
+///
+/// ```text
+///  K_0 rho K_0^\dagger + K_1 rho K_1^\dagger
+/// ```
+///
+/// where `q = target_qubit` and `K_0` and `$K_1` are Kraus operators:
+///
+/// ```text
+///      K_0 =  [ 1       0       ]   K_1 = [ 0  sqrt(prob) ]
+///             [ 0  sqrt(1-prob) ]         [ 0      0      ]
+/// ```
+///
+/// The coefficient `prob` cannot exceed 1, at which total damping/decay occurs.
+///
+/// Note that unlike [`mix_dephasing()`] and [`mix_depolarising()`], this
+/// function can increase the purity of a mixed state (by, as `prob` becomes
+/// `1`, gaining certainty that the qubit is in the 0 state).
+///
+/// # Parameters
+///
+/// - `qureg`: a density matrix
+/// - `target_qubit`: qubit upon which to induce amplitude damping
+/// - `prob`: the probability of the damping
+///
+/// # Errors
+///
+/// - [`InvalidQuESTInputError`],
+///   - if `qureg` is not a density matrix
+///   - if `target_qubit` is outside [0, qureg.[`num_qubits_represented()`]).
+///   - if `prob` is not in `[0, 1]`
 ///
 /// # Examples
 ///
@@ -2703,6 +3214,10 @@ pub fn mix_depolarising(
 ///
 /// See [QuEST API] for more information.
 ///
+/// [`mix_dephasing()`]: crate::mix_dephasing()
+/// [`mix_depolarising()`]: crate::mix_depolarising()
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+/// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
 pub fn mix_damping(
@@ -2975,7 +3490,7 @@ pub fn calc_fidelity(
 /// See [QuEST API] for more information.
 ///
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
-/// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
 pub fn swap_gate(
@@ -4594,7 +5109,7 @@ pub fn apply_multi_controlled_matrix_n(
 /// [`BitEncoding::TWOS_COMPLEMENT`]: crate::BitEncoding::TWOS_COMPLEMENT
 /// [`BitEncoding`]: crate::BitEncoding
 /// [`apply_phase_func_overrides()`]: crate::apply_phase_func_overrides()
-/// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
@@ -4843,7 +5358,7 @@ pub fn apply_phase_func_overrides(
 ///   phase function `f(\vec{r})`
 /// - `num_terms_per_reg` a list of the number of `coeff` and `exponent` terms
 ///   supplied for each variable/sub-register
-////
+///
 /// # Errors
 ///
 /// - [`InvalidQuESTInputError`],
@@ -4852,7 +5367,7 @@ pub fn apply_phase_func_overrides(
 ///   - if the elements of `qubits` are not unique (including if sub-registers
 ///     overlap)
 ///   - if `num_qubits_per_reg.len() = 0 or > 100` (constrained by
-///     `MAX_NUM_REGS_APPLY_ARBITRARY_PHASE` in QuEST_precision.h)
+///     `MAX_NUM_REGS_APPLY_ARBITRARY_PHASE` in `QuEST_precision.h`)
 ///   - if the size of any sub-register is incompatible with `encoding` (e.g.
 ///     contains fewer than two qubits if `encoding = TWOS_COMPLEMENT`)
 ///   - if any element of `num_terms_per_reg < 1`
@@ -4923,7 +5438,7 @@ pub fn apply_multi_var_phase_func(
 
 /// Apply a multi-variable exponential polynomial with overrides.
 ///
-/// Induces a phase change upon each amplitude of \p qureg, determined by a
+/// Induces a phase change upon each amplitude of `qureg`, determined by a
 /// phase function, and an explicit set of 'overriding' values at specific
 /// state indices.
 ///
@@ -5327,7 +5842,7 @@ pub fn apply_full_qft(qureg: &mut Qureg<'_>) {
 /// - [`InvalidQuESTInputError`],
 ///   - if the length of `qubits` is less than
 ///     [`qureg.num_qubits_represented()`]
-///   - if any of `qubits` is outside [0, [`qureg.num_qubits_represented()`]).
+///   - if any of `qubits` is outside [0, qureg.[`num_qubits_represented()`]).
 ///   - if `qubits` contains any repetitions
 ///
 ///
@@ -5347,7 +5862,7 @@ pub fn apply_full_qft(qureg: &mut Qureg<'_>) {
 /// [`apply_full_qft()`]: crate::apply_full_qft()
 /// [`apply_named_phase_func()`]: crate::apply_named_phase_func()
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
-/// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
 pub fn apply_qft(
@@ -5386,7 +5901,7 @@ pub fn apply_qft(
 /// # Errors
 ///
 /// - [`InvalidQuESTInputError`],
-///   - if `qubit` is outside [0, [`qureg.num_qubits_represented()`]).
+///   - if `qubit` is outside [0, qureg.[`num_qubits_represented()`]).
 ///   - if `outcome` is not in {0,1}
 ///
 /// # Examples
@@ -5408,7 +5923,7 @@ pub fn apply_qft(
 /// [`collapse_to_outcome()`]: crate::collapse_to_outcome()
 /// [`init_blank_state()`]: crate::init_blank_state()
 /// [`QubitIndexError`]: crate::QuestError::QubitIndexError
-/// [`qureg.num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
