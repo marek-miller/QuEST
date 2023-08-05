@@ -41,3 +41,6 @@ jobs:
       - name: Run tests (release)
         run: |
           cargo test --verbose --release --features=${{ matrix.precision }}
+          
+      - name: Coveralls
+        uses: coverallsapp/github-action@v2
