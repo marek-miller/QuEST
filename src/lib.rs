@@ -4728,6 +4728,10 @@ pub fn set_weighted_qureg(
 ///
 /// # Errors
 ///
+/// - [`ArrayLengthError`]
+///   - if `all_pauli_codes.len()` is not equal to `term_coeffs.len() *
+///     in_qureg.`[`num_qubits_represented()`]
+///
 /// - [`InvalidQuESTInputError`]
 ///   - if `in_qureg` is not of the same type and dimensions as `out_qureg`
 ///
@@ -4757,7 +4761,7 @@ pub fn set_weighted_qureg(
 ///
 /// See [QuEST API] for more information.
 ///
-/// [`qureg.get_num_amps_total()`]: crate::Qureg::get_num_amps_total()
+/// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [`ArrayLengthError`]: crate::QuestError::ArrayLengthError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
@@ -4769,6 +4773,11 @@ pub fn apply_pauli_sum(
     out_qureg: &mut Qureg<'_>,
 ) -> Result<(), QuestError> {
     let num_sum_terms = term_coeffs.len() as i32;
+    if all_pauli_codes.len() as i32
+        != num_sum_terms * in_qureg.num_qubits_represented()
+    {
+        return Err(QuestError::ArrayLengthError);
+    }
     catch_quest_exception(|| unsafe {
         ffi::applyPauliSum(
             in_qureg.reg,

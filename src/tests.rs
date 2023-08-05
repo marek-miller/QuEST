@@ -3336,7 +3336,8 @@ fn apply_pauli_sum_03() {
     let all_pauli_codes = &[PAULI_I, PAULI_X, PAULI_X];
     let term_coeffs = &[SQRT_2.recip(), SQRT_2.recip()];
 
-    apply_pauli_sum(in_qureg, all_pauli_codes, term_coeffs, out_qureg).unwrap();
+    apply_pauli_sum(in_qureg, all_pauli_codes, term_coeffs, out_qureg)
+        .unwrap_err();
 }
 
 #[test]
