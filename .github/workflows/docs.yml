@@ -1,10 +1,8 @@
 name: Docs
 
 on:
-  push:
-    branches: ["main"]
   pull_request:
-    branches: ["main", "dev"]
+    branches: ["main"]
 
 env:
   CARGO_TERM_COLOR: always
@@ -28,10 +26,9 @@ jobs:
         run:
           rustup update ${{ matrix.toolchain }} && rustup default ${{
           matrix.toolchain }}
-      - name: Update Git Sumbodule
+      - name: Update Git Submodules
         run: |
-          git submodule update --init --recursive
-          git submodule update --remote --recursive
+          git submodule update --init --remote --recursive
       - name: Build documentation
         run: |
           cargo doc --features=${{ matrix.precision }}

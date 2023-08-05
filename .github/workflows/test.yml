@@ -1,10 +1,8 @@
 name: Test
 
 on:
-  push:
-    branches: ["main"]
   pull_request:
-    branches: ["main", "dev"]
+    branches: ["main"]
 
 env:
   CARGO_TERM_COLOR: always
@@ -28,19 +26,18 @@ jobs:
         run:
           rustup update ${{ matrix.toolchain }} && rustup default ${{
           matrix.toolchain }}
-      - name: Update Git Sumbodule
+      - name: Update Git Submodules
         run: |
-          git submodule update --init --recursive
-          git submodule update --remote --recursive
-      - name: Build with build script
+          git submodule update --init --remote --recursive
+      - name: Build with build.rs
         run: |
           cargo build --verbose --features=${{ matrix.precision }}
-      - name: Run unit tests
+      - name: Run tests
         run: |
           cargo test --verbose --features=${{ matrix.precision }}
-      - name: Build with build script (release)
+      - name: Build with build.rs (release)
         run: |
           cargo build --verbose --release --features=${{ matrix.precision }}
-      - name: Run unit tests (release)
+      - name: Run tests (release)
         run: |
           cargo test --verbose --release --features=${{ matrix.precision }}
