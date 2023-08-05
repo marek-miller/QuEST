@@ -3104,7 +3104,8 @@ pub fn mix_two_qubit_dephasing(
 }
 
 /// Mixes a density matrix to induce single-qubit homogeneous
-/// depolarising noise.
+/// depolarizing noise.
+///
 /// This is equivalent to, with probability `prob`, uniformly randomly applying
 /// either Pauli X, Y, or Z to `target_qubit`.
 ///
@@ -4654,9 +4655,81 @@ pub fn set_weighted_qureg(
 
 /// Apply the weighted sum of Pauli products.
 ///
-/// In theory, `in_qureg` is unchanged though its state is temporarily modified
-/// and is reverted by re-applying Paulis (XX=YY=ZZ=I), so may see a change by
-/// small numerical errors. The initial state in `out_qureg` is not used.
+/// Modifies `out_qureg` to be the result of applying the weighted sum of Pauli
+/// products (a Hermitian but not necessarily unitary operator) to `in_qureg`.
+/// Note that afterward, `out_qureg` may no longer be normalised and ergo not a
+/// state-vector or density matrix. Users must therefore be careful passing
+/// `out_qureg` to other QuEST functions which assume normalisation in order to
+/// function correctly.
+///
+/// Letting
+///
+/// ```latex
+/// \alpha = \sum_i c_i \otimes_j^{N} \hat{\sigma}_{i,j}
+/// ```
+///
+/// be the operators indicated by `all_pauli_codes` (where `c_i` is in
+/// `term_coeffs` and `N = qureg.num_qubits_represented()`, this function
+/// effects: `\alpha | \psi \rangle` on state-vector `|\psi\rangle` and `\alpha
+/// \rho` (left matrix multiplication) on density matrix `\rho`.
+///
+/// The argument `all_pauli_codes` is an array of length `term_coeffs.len() *
+/// in_qureg.num_qubits_represented()`, which specifies which Pauli operators to
+/// apply.
+///
+/// For each sum term, a Pauli operator must be specified for EVERY qubit in
+/// `in_qureg`; each set of operators will be grouped into a product.
+/// `term_coeffs` is an arrray containing the term coefficients.  For example,
+/// on a 3-qubit state-vector,
+///
+/// ```rust
+/// # use quest_bind::*;
+/// # use PauliOpType::{PAULI_I, PAULI_X, PAULI_Y, PAULI_Z};
+/// # let env = &QuestEnv::new();
+/// let in_qureg = &mut Qureg::try_new(3, env).unwrap();
+/// # let out_qureg = &mut Qureg::try_new(3, env).unwrap();
+/// let all_pauli_codes =
+///     &[PAULI_X, PAULI_I, PAULI_I, PAULI_X, PAULI_Y, PAULI_Z];
+/// let term_coeffs = &[1.5, -3.6];
+/// apply_pauli_sum(in_qureg, all_pauli_codes, term_coeffs, out_qureg).unwrap();
+/// ```
+///
+/// will apply Hermitian operation `(1.5 X I I - 3.6 X Y Z)` (where in this
+/// notation, the left-most operator applies to the least-significant qubit,
+/// i.e. that with index `0`).
+///
+/// In theory, `in_qureg` is unchanged though its state is temporarily
+/// modified and is reverted by re-applying Paulis (`XX=YY=ZZ=I`), so may see a
+/// change by small numerical errors. The initial state in `out_qureg` is not
+/// used.
+///
+/// `in_qureg` and `out_qureg` must both be state-vectors, or both density
+/// matrices, of equal dimensions. `in_qureg` cannot be `out_qureg`.
+///
+/// This function works by applying each Pauli product to `in_qureg` in turn,
+/// and adding the resulting state (weighted by a coefficient in `term_coeffs`)
+/// to the initially-blanked `out_qureg`. Ergo it should scale with the total
+/// number of Pauli operators specified (excluding identities), and the qureg
+/// dimension.
+///
+/// # Parameters
+///
+/// - `in_qureg`: the register containing the state which `out_qureg` will be
+///   set to, under the action of the Hermitiain operator specified by the Pauli
+///   codes. `in_qureg` should be  unchanged, though may vary slightly due to
+///   numerical error.
+/// - `all_pauli_codes`: a list of the Pauli codes of all Paulis involved in the
+///   products of terms. A Pauli must be specified for each qubit in the
+///   register, in every term of the sum.
+/// - `term_coeffs`: The coefficients of each term in the sum of Pauli products
+/// - `numSumTerms`: The total number of Pauli products specified
+/// - `out_qureg`: the qureg to modify to be the result of applyling the
+///   weighted Pauli sum operator to the state in `in_qureg`
+///
+/// # Errors
+///
+/// - [`InvalidQuESTInputError`]
+///   - if `in_qureg` is not of the same type and dimensions as `out_qureg`
 ///
 /// # Examples
 ///
@@ -4684,6 +4757,9 @@ pub fn set_weighted_qureg(
 ///
 /// See [QuEST API] for more information.
 ///
+/// [`qureg.get_num_amps_total()`]: crate::Qureg::get_num_amps_total()
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+/// [`ArrayLengthError`]: crate::QuestError::ArrayLengthError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
 pub fn apply_pauli_sum(
