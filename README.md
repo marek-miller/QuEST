@@ -14,8 +14,8 @@ distributed under MIT License.
 Initialize a new binary crate:
 
 ```sh
-cargo new testme
-cd testme/
+cargo new tryme
+cd tryme/
 ```
 
 Add `quest_bind` to your project's dependencies:
@@ -108,7 +108,7 @@ crate:
 
 ```toml
 [package]
-name = "testme"
+name = "tryme"
 version = "0.1.0"
 edition = "2021"
 
@@ -198,8 +198,7 @@ We opt for catching all exceptions early by reimplementing
 `invalidQuESTInputError()` to unwind the stack using Rust's
 [`panic`](https://doc.rust-lang.org/std/panic/index.html) mechanism.
 
-Current implementation returns inside `Result<_, QuestError>` the first
-exception caught. Additionally, all error messages reported by QuEST are logged
+Additionally, all error messages reported by QuEST are logged
 as errors. To be able to see them, add a logger as a dependency to your crate,
 e.g.:
 
