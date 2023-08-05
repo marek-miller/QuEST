@@ -7,6 +7,8 @@
 - Rewrite exception handling using `panic` mechanism. No more global API locks!
   Our wrapper is now fully concurrent and much faster.
 - Remove spurious checks that existed due to imperfect error catching.
+- Fix bug: `calc_prob_of_all_outcomes()` didn't check properly for the length of
+  slice passed
 
 - Add method: `Qureg::get_num_amps_total()`
 
@@ -30,8 +32,8 @@
     - `QubitIndexError`
     - `NotDensityMatrix`
     - `NegativeProbability`
-  
-  - Function signature change: 
+
+  - Function signature change:
 
     - `set_amps()`: parameter `num_amps` was redundant
     - `set_density_amps()`: parameter `num_amps` was redundant

@@ -2378,6 +2378,37 @@ pub fn controlled_pauli_y(
 
 /// Gives the probability of a qubit being measured in the given outcome.
 ///
+/// This performs no actual measurement and does not change the state of the
+/// qubits.
+///
+/// - For state-vectors, this function works by summing the
+///   absolute-value-squared of every amplitude in the state-vector for which
+///   `measure_qubit = 0`. If `outcome = 1`, it returns `1` minus this value.
+///   Hence for unnormalized state-vectors, this result will differ from the
+///   absolute-value-squared of every amplitude where `measure_qubit = outcome`.
+///
+/// - For density matrices, this function sums the diagonal values (should be
+///   real) corresponding to `measure_qubit = 0` (returning 1 minus this if
+///   `outcome = 1`).
+///
+/// # Parameters
+///
+/// - `qureg`: object representing the set of all qubits
+/// - `measure_qubit`: qubit to study
+/// - `outcome`: for which to find the probability of the qubit being measured
+///   in
+///
+/// # Return
+///
+/// Returns probability of qubit `measure_qubit` being measured in the given
+/// outcome.
+///
+/// # Errors
+///
+/// - [`InvalidQuESTInputError`],
+///   - if `measure_qubit` is outside [0, qureg.[`num_qubits_represented()`])
+///   - if `outcome` is not in {0, 1}
+///
 /// # Examples
 ///
 /// ```rust
@@ -2394,6 +2425,8 @@ pub fn controlled_pauli_y(
 ///
 /// See [QuEST API] for more information.
 ///
+/// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn calc_prob_of_outcome(
     qureg: &Qureg<'_>,
@@ -2406,6 +2439,41 @@ pub fn calc_prob_of_outcome(
 }
 
 /// Calculate probabilities of every outcome of the sub-register.
+///
+/// This function populates `outcome_probs` with the probabilities of every
+/// outcome of the sub-register contained in `qubits`.
+///
+/// This performs no actual measurement and does not modify `qureg`.
+///
+/// - `outcome_probs` must be a pre-allocated array of length `2^qubits.len()`.
+///   In distributed mode, every node receives the full list of outcome
+///   probabilities.
+///
+/// - Note that the indices in `qubits` need not be adjacent nor ordered. The
+///   order of `qubits` determines the order of `outcome_probs`, whereby
+///   `qubits` are treated as *increasing* significance.
+///
+/// - Since all probability amplitudes of a state-vector are ultimately involved
+///   in the output probabilities, this function works as expected for
+///   unnormalized states. This is similarly true for density matrices, where
+///   all  diagonal elements are involved, although only the real values of the
+///   diagonal elements will be consulted.
+///
+/// # Parameters
+///
+/// - `outcome_probs`: a pre-allocated array of length `1 << n`, where `n =
+///   qubits.len()`  which will be modified to contain all outcome probabilities
+/// - `qureg`: a state-vector or density matrix to study
+/// - `qubits`: a list of qubits to study
+///
+/// # Errors
+///
+/// - [`InvalidQuESTInputError`],
+///   - if any index in `qubits` is invalid, i.e. outside [0,
+///     qureg.[`num_qubits_represented()`])
+///   - if `qubits` contains any repetitions
+/// - [`ArrayLengthError`],
+///   - if `outcome_probs.len() < 1 << qubits.len()`
 ///
 /// # Examples
 ///
@@ -2423,11 +2491,9 @@ pub fn calc_prob_of_outcome(
 ///
 /// See [QuEST API] for more information.
 ///
-/// # Panics
-///
-/// This function will panic if
-/// `outcome_probs.len() < num_qubits as usize`
-///
+/// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+/// [`ArrayLengthError`]: crate::QuestError::ArrayLengthError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::cast_sign_loss)]
 #[allow(clippy::needless_pass_by_ref_mut)]
@@ -2436,6 +2502,9 @@ pub fn calc_prob_of_all_outcomes(
     qureg: &Qureg<'_>,
     qubits: &[i32],
 ) -> Result<(), QuestError> {
+    if outcome_probs.len() < 1 << qubits.len() {
+        return Err(QuestError::ArrayLengthError);
+    }
     let num_qubits = qubits.len() as i32;
     let outcome_probs_ptr = outcome_probs.as_mut_ptr();
     catch_quest_exception(|| unsafe {
@@ -5369,7 +5438,7 @@ pub fn apply_multi_var_phase_func(
 
 /// Apply a multi-variable exponential polynomial with overrides.
 ///
-/// Induces a phase change upon each amplitude of \p qureg, determined by a
+/// Induces a phase change upon each amplitude of `qureg`, determined by a
 /// phase function, and an explicit set of 'overriding' values at specific
 /// state indices.
 ///

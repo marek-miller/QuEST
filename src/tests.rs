@@ -930,10 +930,21 @@ fn calc_prob_of_all_outcomes_01() {
     calc_prob_of_all_outcomes(outcome_probs, qureg, &[0, 1]).unwrap();
     calc_prob_of_all_outcomes(outcome_probs, qureg, &[0, 2]).unwrap();
 
-    calc_prob_of_all_outcomes(outcome_probs, qureg, &[1, 2, 3]).unwrap_err();
+    calc_prob_of_all_outcomes(outcome_probs, qureg, &[1, 3]).unwrap_err();
     calc_prob_of_all_outcomes(outcome_probs, qureg, &[0, 0]).unwrap_err();
     calc_prob_of_all_outcomes(outcome_probs, qureg, &[4, 0]).unwrap_err();
     calc_prob_of_all_outcomes(outcome_probs, qureg, &[0, -1]).unwrap_err();
+}
+
+#[test]
+fn calc_prob_of_all_outcomes_02() {
+    let env = &QuestEnv::new();
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
+    init_zero_state(qureg);
+
+    let outcome_probs = &mut vec![0.; 3];
+
+    calc_prob_of_all_outcomes(outcome_probs, qureg, &[1, 2]).unwrap_err();
 }
 
 #[test]
