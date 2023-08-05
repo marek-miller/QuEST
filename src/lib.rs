@@ -2131,10 +2131,10 @@ pub fn hadamard(
 /// This effects the two-qubit unitary:
 ///
 /// ```text
-///  [ 1 0 0 0 ]
-///  [ 0 1 0 0 ]
-///  [ 0 0 0 1 ]
-///  [ 0 0 1 0 ]
+///  [ 1  0  0  0 ]
+///  [ 0  1  0  0 ]
+///  [ 0  0  0  1 ]
+///  [ 0  0  1  0 ]
 /// ```
 ///
 /// on the control and target qubits.
@@ -2142,14 +2142,14 @@ pub fn hadamard(
 /// # Parameters
 ///
 /// - `qureg`: the state-vector or density matrix to modify
-/// - `control_qubit`: "nots" the target if this qubit is 1
+/// - `control_qubit`: "nots" the target if this qubit is `1`
 /// - `target_qubit`: qubit to "not"
 ///
 /// # Errors
 ///
 /// - [`InvalidQuESTInputError`],
 ///   - if either `control_qubit` or `target_qubit` is outside [0,
-///     [`qureg.num_qubits_represented()`])
+///     qureg.[`num_qubits_represented()`])
 ///   - if `control_qubit` and `target_qubit` are equal
 ///
 /// # Examples
@@ -2317,7 +2317,33 @@ pub fn multi_qubit_not(
     })
 }
 
-/// Apply the controlled pauliY (single control, single target) gate.
+/// Apply the controlled pauli Y (single control, single target) gate.
+///
+/// The gate is also known as the c-Y and c-sigma-Y gate.
+/// This applies pauli Y to the target qubit, if the control qubit has value 1.
+/// This effects the two-qubit unitary:
+///
+/// ```text
+///  [ 1  0  0   0 ]
+///  [ 0  1  0   0 ]
+///  [ 0  0  0  -i ]
+///  [ 0  0  i   0 ]
+/// ```
+///
+/// on the control and target qubits.
+///
+/// # Parameters
+///
+/// - `qureg`: the state-vector or density matrix to modify
+/// - `control_qubit`: applies pauli Y the target if this qubit is `1`
+/// - `target_qubit`: qubit to modify
+///
+/// # Errors
+///
+/// - [`InvalidQuESTInputError`],
+///   - if either `control_qubit` or `target_qubit` is outside [0,
+///     qureg.[`num_qubits_represented()`])
+///   - if `control_qubit` and `target_qubit` are equal
 ///
 /// # Examples
 ///
@@ -2336,6 +2362,8 @@ pub fn multi_qubit_not(
 ///
 /// See [QuEST API] for more information.
 ///
+/// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
 pub fn controlled_pauli_y(
