@@ -1,5 +1,25 @@
 # Releases
 
+## Next release
+
+- New features/improvements:
+
+  -
+  -
+  -
+
+- Bug fixes:
+
+  -
+  -
+  -
+
+- API breaking changes:
+
+  -
+  -
+  -
+
 ## v0.3.5 (05/08/2023)
 
 - Change git repository name to: `quest_bind`.
