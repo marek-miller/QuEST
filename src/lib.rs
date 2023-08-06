@@ -4699,9 +4699,9 @@ pub fn set_weighted_qureg(
 /// i.e. that with index `0`).
 ///
 /// In theory, `in_qureg` is unchanged though its state is temporarily
-/// modified and is reverted by re-applying Paulis (`XX=YY=ZZ=I`), so may see a
-/// change by small numerical errors. The initial state in `out_qureg` is not
-/// used.
+/// modified and is reverted by re-applying Paulis (`XX = YY = ZZ = I`), so may
+/// see a change by small numerical errors. The initial state in `out_qureg` is
+/// not used.
 ///
 /// `in_qureg` and `out_qureg` must both be state-vectors, or both density
 /// matrices, of equal dimensions. `in_qureg` cannot be `out_qureg`.
@@ -4794,9 +4794,50 @@ pub fn apply_pauli_sum(
 /// Modifies `out_qureg` to be the result of applying `PauliHamil` (a Hermitian
 /// but not necessarily unitary operator) to `in_qureg`.
 ///
+/// Note that afterward, `out_qureg` may no longer be normalised and ergo not a
+/// state-vector or density matrix. Users must therefore be careful passing
+/// `out_qureg` to other QuEST functions which assume normalisation in order to
+/// function correctly.
+///
+/// This is merely an encapsulation of [`apply_pauli_sum()`], which can refer to
+/// for elaborated doc. Letting `hamil` be expressed as
+///
+/// ```latex
+/// \alpha = \sum_i c_i \otimes_j^{N} \hat{\sigma}_{i,j}
+/// ```
+///
+/// (where `c_i` is in `hamil.term_coeffs()` and `N =  hamil.num_qubits()`,
+/// this function effects `\alpha |\psi \rangle` on state-vector `|\psi\rangle`
+/// and `\alpha \rho` (left matrix multiplication) on density matrix `\rho`.
+///
 /// In theory, `in_qureg` is unchanged though its state is temporarily modified
-/// and is reverted by re-applying Paulis (XX=YY=ZZ=I), so may see a change by
-/// small numerical errors. The initial state in `out_qureg` is not used.
+/// and is reverted by re-applying Paulis (`XX = YY = ZZ = I`), so may see a
+/// change by small numerical errors. The initial state in `out_qureg` is not
+/// used.
+///
+/// Note that `in_qureg` and `out_qureg` must both be state-vectors, or both
+/// density  matrices, of equal dimensions to `hamil`, `in_qureg` cannot be
+/// `out_qureg`.
+///
+/// This function works by applying each Pauli product in `hamil` to `in_qureg`
+/// in turn, and adding the resulting state (weighted by a coefficient in
+/// `hamil.term_coeffs()`) to the initially-blanked `out_qureg`. Ergo it should
+/// scale with the total number of Pauli operators specified (excluding
+/// identities), and the `Qureg` dimension.
+///
+/// # Parameters
+///
+/// - `in_qureg`: the register containing the state which `out_qureg` will be
+///   set to, under the action of `hamil`. `in_qureg` should be  unchanged,
+///   though may vary slightly due to numerical error.
+/// - `hamil`: a weighted sum of products of pauli operators
+/// - `out_qureg`: the qureg to modify to be the result of applyling `hamil` to
+///   the state in `in_qureg`
+///
+/// # Errors
+///
+/// - [`InvalidQuESTInputError`]
+///   - if `in_qureg` is not of the same type and dimensions as `out_qureg`
 ///
 /// # Examples
 ///
@@ -4827,6 +4868,9 @@ pub fn apply_pauli_sum(
 ///
 /// See [QuEST API] for more information.
 ///
+/// [`apply_pauli_sum()`]: crate::apply_pauli_sum()
+/// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
 pub fn apply_pauli_hamil(
