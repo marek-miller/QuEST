@@ -60,6 +60,16 @@ impl PauliHamil {
             Self(unsafe { ffi::createPauliHamilFromFile((*filename).as_ptr()) })
         })
     }
+
+    /// Get the number of qubits in Hamiltonian
+    pub fn num_qubits(&self) -> i32 {
+        self.0.numQubits
+    }
+
+    /// Get the number of terms in Hamiltonian as a sum of Pauli operators
+    pub fn num_sum_terms(&self) -> i32 {
+        self.0.numSumTerms
+    }
 }
 
 impl Drop for PauliHamil {
