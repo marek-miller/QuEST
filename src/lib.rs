@@ -545,6 +545,25 @@ pub fn set_density_amps(
 
 /// Overwrite the amplitudes of `target_qureg` with those from `copy_qureg`.
 ///
+/// Registers must either both be state-vectors, or both be density matrices,
+/// and of equal dimensions.
+///
+/// Only the quantum state is cloned, while auxilary info (like recorded QASM)
+/// is unchanged. `copy_qureg` is unaffected.
+///
+/// # Parameters
+///
+/// - `target_qureg`: the qureg to have its quantum state overwritten
+/// - `copy_qureg`: the qureg to have its quantum state cloned into
+///   `target_qureg`
+///
+/// # Errors
+///
+/// - [`InvalidQuESTInputError`],
+///   - if `target_qureg` is a state-vector while `copy_qureg` is a density
+///     matrix (and vice versa)
+///   - if `target_qureg` and `copy_qureg` have different dimensions
+///
 /// # Examples
 ///
 /// ```rust
@@ -558,6 +577,7 @@ pub fn set_density_amps(
 ///
 /// See [QuEST API] for more information.
 ///
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
 pub fn clone_qureg(
@@ -570,6 +590,25 @@ pub fn clone_qureg(
 }
 
 /// Shift the phase of a single qubit by a given angle.
+///
+/// This is equivalent to a Z-axis rotation of the Bloch-sphere up to a global
+/// phase factor. For angle `theta`, this effects single-qubit unitary
+///
+/// ```text
+///   [ 1       0       ]
+///   [ 0  exp(i theta) ]
+/// ```
+///
+/// # Parameters
+///
+/// - `qureg`: object representing the set of all qubits
+/// - `target_qubit`: qubit to undergo a phase shift
+/// - `angle`:  amount by which to shift the phase in radians
+///
+/// # Errors
+///
+/// - [`InvalidQuESTInputError`],
+///   - if `target_qubit` is outside [0, qureg.[`num_qubits_represented()`]).
 ///
 /// # Examples
 ///
@@ -586,6 +625,8 @@ pub fn clone_qureg(
 ///
 /// See [QuEST API] for more information.
 ///
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+/// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
 pub fn phase_shift(
@@ -599,6 +640,30 @@ pub fn phase_shift(
 }
 
 /// Introduce a phase factor on state of qubits.
+///
+/// For angle `theta`, this effects single-qubit unitary
+///
+/// ```text
+///   [ 1  0  0       0       ]
+///   [ 0  1  0       0       ]
+///   [ 0  0  1       0       ]
+///   [ 0  0  0  exp(i theta) ]
+/// ```
+///
+/// # Parameters
+///
+/// - `qureg`: object representing the set of all qubits
+/// - `id_qubit1`: first qubit in the state to phase shift
+/// - `id_qubit2`: second qubit in the state to phase shift
+/// - `angle`:  amount by which to shift the phase in radians
+///
+/// # Errors
+///
+/// - [`InvalidQuESTInputError`],
+///   - if `id_qubit1` or `id_qubit2` are outside [0,
+///     qureg.[`num_qubits_represented()`]).
+///   - if `id_qubit1` and `id_qubit2` are equal
+///
 ///
 /// # Examples
 ///
@@ -615,6 +680,8 @@ pub fn phase_shift(
 ///
 /// See [QuEST API] for more information.
 ///
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+/// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
 pub fn controlled_phase_shift(
@@ -630,6 +697,21 @@ pub fn controlled_phase_shift(
 
 /// Introduce a phase factor of the passed qubits.
 ///
+/// # Parameters
+///
+/// - `qureg`: object representing the set of all qubits
+/// - `control_qubits`: array of qubits to phase shift
+/// - `angle`:  amount by which to shift the phase in radians
+///
+/// # Errors
+///
+/// - [`InvalidQuESTInputError`],
+///   - if `control_qubits.len()` is outside [1,
+///     qureg.[`num_qubits_represented()`])
+///   - if any qubit in `control_qubits` is outside [0,
+///     qureg.[`num_qubits_represented()`]).
+///   - if the qubits in `control_qubits` are not unique
+///
 /// # Examples
 ///
 /// ```rust
@@ -644,6 +726,8 @@ pub fn controlled_phase_shift(
 ///
 /// See [QuEST API] for more information.
 ///
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+/// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
 pub fn multi_controlled_phase_shift(
@@ -2805,7 +2889,7 @@ pub fn seed_quest(
 /// [`QuestEnv::new()`]: crate::QuestEnv::new()
 /// [`measure()`]: crate::measure()
 /// [`measure_with_stats()`]: crate::measure_with_stats()
-/// [`seed_quest_default()`]: crate::seed_quest()
+/// [`seed_quest()`]: crate::seed_quest()
 /// [`seed_quest_default()`]: crate::seed_quest_default()
 /// [`QuestEnv`]: crate::QuestEnv
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
@@ -4659,8 +4743,8 @@ pub fn set_weighted_qureg(
 /// products (a Hermitian but not necessarily unitary operator) to `in_qureg`.
 /// Note that afterward, `out_qureg` may no longer be normalised and ergo not a
 /// state-vector or density matrix. Users must therefore be careful passing
-/// `out_qureg` to other QuEST functions which assume normalisation in order to
-/// function correctly.
+/// `out_qureg` to other `QuEST` functions which assume normalisation in order
+/// to function correctly.
 ///
 /// Letting
 ///
@@ -4796,8 +4880,8 @@ pub fn apply_pauli_sum(
 ///
 /// Note that afterward, `out_qureg` may no longer be normalised and ergo not a
 /// state-vector or density matrix. Users must therefore be careful passing
-/// `out_qureg` to other QuEST functions which assume normalisation in order to
-/// function correctly.
+/// `out_qureg` to other `QuEST` functions which assume normalisation in order
+/// to function correctly.
 ///
 /// This is merely an encapsulation of [`apply_pauli_sum()`], which can refer to
 /// for elaborated doc. Letting `hamil` be expressed as

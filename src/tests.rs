@@ -300,6 +300,8 @@ fn controlled_phase_shift_01() {
     controlled_phase_shift(qureg, 0, 1, 0.5).unwrap();
     controlled_phase_shift(qureg, 0, 2, 0.5).unwrap();
 
+    controlled_phase_shift(qureg, 0, 0, 0.5).unwrap_err();
+
     controlled_phase_shift(qureg, 0, 3, 0.5).unwrap_err();
     controlled_phase_shift(qureg, -1, 1, 0.5).unwrap_err();
 }
@@ -3565,4 +3567,37 @@ fn check_array_length_init_state_from_amps() {
     let reals = [0.; 5];
     let imags = [0.; 5];
     init_state_from_amps(qureg, &reals, &imags).unwrap();
+}
+
+#[test]
+fn clone_qureg_01() {
+    let env = &QuestEnv::new();
+
+    // registers have mismatched dimensions
+    let target_qureg = &mut Qureg::try_new(1, env).unwrap();
+    let copy_qureg = &Qureg::try_new(2, env).unwrap();
+
+    clone_qureg(target_qureg, copy_qureg).unwrap_err();
+
+    let target_qureg = &mut Qureg::try_new_density(1, env).unwrap();
+    let copy_qureg = &Qureg::try_new_density(2, env).unwrap();
+
+    clone_qureg(target_qureg, copy_qureg).unwrap_err();
+}
+
+#[test]
+fn clone_qureg_02() {
+    let env = &QuestEnv::new();
+
+    // registers are of different type (state-vector vs. density matrix)
+    let target_qureg = &mut Qureg::try_new(2, env).unwrap();
+    let copy_qureg = &Qureg::try_new_density(2, env).unwrap();
+
+    clone_qureg(target_qureg, copy_qureg).unwrap_err();
+
+    // registers are of different type (state-vector vs. density matrix)
+    let target_qureg = &mut Qureg::try_new_density(2, env).unwrap();
+    let copy_qureg = &Qureg::try_new(2, env).unwrap();
+
+    clone_qureg(target_qureg, copy_qureg).unwrap_err();
 }
