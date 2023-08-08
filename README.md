@@ -35,7 +35,7 @@ fn main() -> Result<(), QuestError> {
     env.report_quest_env();
 
     // Create a 2-qubit register and report its parameters
-    let qureg = &mut create_qureg::<2>(env);
+    let mut qureg = create_qureg::<2>(env);
     qureg.report_qureg_params();
     // Initialize |00> state and print out the state to screen
     qureg.init_zero_state();
@@ -198,9 +198,8 @@ We opt for catching all exceptions early by reimplementing
 `invalidQuESTInputError()` to unwind the stack using Rust's
 [`panic`](https://doc.rust-lang.org/std/panic/index.html) mechanism.
 
-Additionally, all error messages reported by QuEST are logged
-as errors. To be able to see them, add a logger as a dependency to your crate,
-e.g.:
+Additionally, all error messages reported by QuEST are logged as errors. To be
+able to see them, add a logger as a dependency to your crate, e.g.:
 
 ```sh
 cargo add env_logger
