@@ -20,7 +20,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = &QuestEnv::new();
-    /// let qureg = Qureg::try_new(2, env).unwrap();
+    /// let qureg = create_qureg::<2>(env);
     /// ```
     ///
     /// See [QuEST API][1] for more information.
@@ -137,7 +137,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = &QuestEnv::new();
-    /// let qureg = &Qureg::try_new(3, env).unwrap();
+    /// let qureg = &create_qureg::<3>(env);
     ///
     /// assert_eq!(qureg.get_num_qubits(), 3);
     /// ```
@@ -167,7 +167,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = &QuestEnv::new();
-    /// let qureg = &Qureg::try_new(3, env).unwrap();
+    /// let qureg = &create_qureg::<3>(env);
     ///
     /// assert_eq!(qureg.get_num_amps().unwrap(), 8);
     /// ```
@@ -215,7 +215,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = &QuestEnv::new();
-    /// let qureg = &Qureg::try_new(2, env).unwrap();
+    /// let qureg = &create_qureg::<2>(env);
     ///
     /// qureg.report_qureg_params();
     /// ```
@@ -242,7 +242,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = &QuestEnv::new();
-    /// let qureg = &mut Qureg::try_new(2, env).unwrap();
+    /// let qureg = &mut create_qureg::<2>(env);
     ///
     /// init_blank_state(qureg);
     ///
@@ -282,7 +282,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = &QuestEnv::new();
-    /// let qureg = &mut Qureg::try_new(2, env).unwrap();
+    /// let qureg = &mut create_qureg::<2>(env);
     ///
     /// init_zero_state(qureg);
     ///
@@ -323,7 +323,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = &QuestEnv::new();
-    /// let qureg = &mut Qureg::try_new(2, env).unwrap();
+    /// let qureg = &mut create_qureg::<2>(env);
     ///
     /// init_plus_state(qureg);
     ///
@@ -382,7 +382,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = &QuestEnv::new();
-    /// let qureg = &mut Qureg::try_new(3, env).unwrap();
+    /// let qureg = &mut create_qureg::<3>(env);
     ///
     /// init_classical_state(qureg, 8);
     /// let prob = get_prob_amp(qureg, 0).unwrap();
@@ -431,7 +431,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// # use quest_bind::*;
     /// let env = &QuestEnv::new();
     /// let qureg = &mut Qureg::try_new_density(3, env).unwrap();
-    /// let pure_state = &mut Qureg::try_new(3, env).unwrap();
+    /// let pure_state = &mut create_qureg::<3>(env);
     ///
     /// init_zero_state(pure_state);
     /// init_pure_state(qureg, pure_state).unwrap();
@@ -507,7 +507,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = &QuestEnv::new();
-    /// let qureg = &mut Qureg::try_new(2, env).unwrap();
+    /// let qureg = &mut create_qureg::<2>(env);
     ///
     /// init_state_from_amps(qureg, &[1., 0., 0., 0.], &[0., 0., 0., 0.]);
     /// let prob = get_prob_amp(qureg, 0).unwrap();

@@ -4,7 +4,7 @@
 
 - New features/improvements:
 
-  -
+  - Add methods `create_qureg()`, `create_density_qureg()`
   -
   -
 
