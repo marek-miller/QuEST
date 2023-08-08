@@ -284,12 +284,12 @@ fn phase_shift_01() {
     let env = &QuestEnv::new();
     let qureg = &mut create_qureg::<3>(env);
 
-    phase_shift(qureg, 0, 0.0).unwrap();
-    phase_shift(qureg, 1, 0.5).unwrap();
-    phase_shift(qureg, 2, 1.0).unwrap();
+    qureg.phase_shift(0, 0.0).unwrap();
+    qureg.phase_shift(1, 0.5).unwrap();
+    qureg.phase_shift(2, 1.0).unwrap();
 
-    phase_shift(qureg, 3, 0.0).unwrap_err();
-    phase_shift(qureg, -11, 0.0).unwrap_err();
+    qureg.phase_shift(3, 0.0).unwrap_err();
+    qureg.phase_shift(-11, 0.0).unwrap_err();
 }
 
 #[test]
@@ -297,24 +297,30 @@ fn controlled_phase_shift_01() {
     let env = &QuestEnv::new();
     let qureg = &mut create_qureg::<3>(env);
 
-    controlled_phase_shift(qureg, 0, 1, 0.5).unwrap();
-    controlled_phase_shift(qureg, 0, 2, 0.5).unwrap();
+    qureg.controlled_phase_shift(0, 1, 0.5).unwrap();
+    qureg.controlled_phase_shift(0, 2, 0.5).unwrap();
 
-    controlled_phase_shift(qureg, 0, 3, 0.5).unwrap_err();
-    controlled_phase_shift(qureg, -1, 1, 0.5).unwrap_err();
+    qureg.controlled_phase_shift(0, 3, 0.5).unwrap_err();
+    qureg.controlled_phase_shift(-1, 1, 0.5).unwrap_err();
 }
 
 #[test]
 fn multi_controlled_phase_shift_01() {
     let env = &QuestEnv::new();
     let qureg = &mut create_qureg::<3>(env);
-    multi_controlled_phase_shift(qureg, &[0, 1, 2], 0.5).unwrap();
-    multi_controlled_phase_shift(qureg, &[2, 1, 0], 0.5).unwrap();
+    qureg.multi_controlled_phase_shift(&[0, 1, 2], 0.5).unwrap();
+    qureg.multi_controlled_phase_shift(&[2, 1, 0], 0.5).unwrap();
 
-    multi_controlled_phase_shift(qureg, &[0, 1, 0], 0.5).unwrap_err();
-    multi_controlled_phase_shift(qureg, &[0, 1, 1], 0.5).unwrap_err();
+    qureg
+        .multi_controlled_phase_shift(&[0, 1, 0], 0.5)
+        .unwrap_err();
+    qureg
+        .multi_controlled_phase_shift(&[0, 1, 1], 0.5)
+        .unwrap_err();
 
-    multi_controlled_phase_shift(qureg, &[0, 4, 3, 4], 0.5).unwrap_err();
+    qureg
+        .multi_controlled_phase_shift(&[0, 4, 3, 4], 0.5)
+        .unwrap_err();
 }
 
 #[test]
