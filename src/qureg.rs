@@ -414,7 +414,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// See [QuEST API] for more information.
     ///
-    /// [api-get-prob-amp]: crate::get_prob_amp()
+    /// [api-get-prob-amp]: crate::Qureg::get_prob_amp()
     /// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
     /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
     /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
@@ -538,7 +538,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// See [QuEST API] for more information.
     ///
     /// [`qureg.get_num_amps_total()`]: crate::Qureg::get_num_amps_total()
-    /// [`set_amps()`]: crate::set_amps()
+    /// [`set_amps()`]: crate::Qureg::set_amps()
     /// [`ArrayLengthError`]: crate::QuestError::ArrayLengthError
     /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
     #[allow(clippy::needless_pass_by_ref_mut)]
@@ -702,7 +702,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// See [QuEST API] for more information.
     ///
-    /// [`set_amps()`]: crate::set_amps()
+    /// [`set_amps()`]: crate::Qureg::set_amps()
     /// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
     /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
     /// [`ArrayLengthError`]: crate::QuestError::ArrayLengthError
@@ -1069,8 +1069,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// See [QuEST API] for more information.
     ///
-    /// [api-copy-state-from-gpu]: crate::copy_state_from_gpu()
-    /// [api-set-amps]: crate::set_amps()
+    /// [api-copy-state-from-gpu]: crate::Qureg::copy_state_from_gpu()
+    /// [api-set-amps]: crate::Qureg::set_amps()
     /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
     #[allow(clippy::needless_pass_by_ref_mut)]
     pub fn copy_state_to_gpu(&mut self) {
@@ -1108,8 +1108,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// See [QuEST API] for more information.
     ///
-    /// [api-copy-state-to-gpu]: crate::copy_state_to_gpu()
-    /// [api-set-amps]: crate::set_amps()
+    /// [api-copy-state-to-gpu]: crate::Qureg::copy_state_to_gpu()
+    /// [api-set-amps]: crate::Qureg::set_amps()
     /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
     #[allow(clippy::needless_pass_by_ref_mut)]
     pub fn copy_state_from_gpu(&mut self) {
@@ -1150,9 +1150,9 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// See [QuEST API] for more information.
     ///
-    /// [api-copy-substate-from-gpu]: crate::copy_substate_from_gpu()
-    /// [api-copy-state-to-gpu]: crate::copy_state_to_gpu()
-    /// [api-set-amps]: crate::set_amps()
+    /// [api-copy-substate-from-gpu]: crate::Qureg::copy_substate_from_gpu()
+    /// [api-copy-state-to-gpu]: crate::Qureg::copy_state_to_gpu()
+    /// [api-set-amps]: crate::Qureg::set_amps()
     /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
     /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
     #[allow(clippy::needless_pass_by_ref_mut)]
@@ -1200,9 +1200,9 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// See [QuEST API] for more information.
     ///
-    /// [api-copy-substate-to-gpu]: crate::copy_substate_to_gpu()
-    /// [api-copy-state-from-gpu]: crate::copy_state_from_gpu()
-    /// [api-set-amps]: crate::set_amps()
+    /// [api-copy-substate-to-gpu]: crate::Qureg::copy_substate_to_gpu()
+    /// [api-copy-state-from-gpu]: crate::Qureg::copy_state_from_gpu()
+    /// [api-set-amps]: crate::Qureg::set_amps()
     /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
     /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
     #[allow(clippy::needless_pass_by_ref_mut)]
@@ -2104,7 +2104,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// See [`QuEST` `other_qureg.API`]nformation.
     ///
     /// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
-    /// [`InvalidQuESTqureg.InputError`]: crate::QuestError::InvalidQuESTInputError
+    /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
     /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
     #[allow(clippy::needless_pass_by_ref_mut)]
     pub fn controlled_unitary(
@@ -2159,7 +2159,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// See [QuEST API] `fother_qureg.or` ation.
     ///
     /// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
-    /// [`InvalidQuESTInputqureg.Error`]: crate::QuestError::InvalidQuESTInputError
+    /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
     /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
     #[allow(clippy::needless_pass_by_ref_mut)]
     pub fn multi_controlled_unitary(
@@ -2461,7 +2461,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// See [QuEST API] for more information.
     ///
-    /// [api-pauli-x]: crate::pauli_x()
+    /// [api-pauli-x]: crate::Qureg::pauli_x()
     /// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
     /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
     /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
@@ -2528,7 +2528,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// See [QuEST API] for more information.
     ///
-    /// [api-pauli-x]: crate::pauli_x()
+    /// [api-pauli-x]: crate::Qureg::pauli_x()
     /// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
     /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
     /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
@@ -3248,8 +3248,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// See [QuEST API] for more information.
     ///
-    /// [`mix_dephasing()`]: crate::mix_dephasing()
-    /// [`mix_depolarising()`]: crate::mix_depolarising()
+    /// [`mix_dephasing()`]: crate::Qureg::mix_dephasing()
+    /// [`mix_depolarising()`]: crate::Qureg::mix_depolarising()
     /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
     /// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
     /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
@@ -4960,7 +4960,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// [`BitEncoding::TWOS_COMPLEMENT`]: crate::BitEncoding::TWOS_COMPLEMENT
     /// [`BitEncoding`]: crate::BitEncoding
-    /// [`apply_phase_func_overrides()`]: crate::apply_phase_func_overrides()
+    /// [`apply_phase_func_overrides()`]: crate::Qureg::apply_phase_func_overrides()
     /// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
     /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
     /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
@@ -5084,7 +5084,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// See [QuEST API] for more information.
     ///
-    /// [`apply_phase_func()`]: crate::apply_phase_func()
+    /// [`apply_phase_func()`]: crate::Qureg::apply_phase_func()
     /// [`BitEncoding`]: crate::BitEncoding
     /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
     /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
@@ -5131,10 +5131,10 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///   specify a real exponential polynomial `f(r)` of the form
     ///
     ///   ```latex
-    ///   f(r_1,\dots, \; r_{\text{numRegs}}) =
-    ///   \sum\limits_j^{\text{numRegs}}
-    /// \sum\limits_{i}^{\text{numTermsPerReg}[j]}     c_{i,j} \;
-    /// {r_j}^{p_{i,j}},   ```
+    ///    f(r_1,\dots, \; r_{\text{numRegs}}) =
+    ///    \sum\limits_j^{\text{numRegs}}
+    ///   \sum\limits_{i}^{\text{numTermsPerReg}[j]} c_{i,j} \; {r_j}^{p_{i,j}},
+    ///   ```
     ///
     ///   where both coefficients `c_{i,j}` and exponents `p_{i,j}` can be any
     /// real   number, subject to constraints described below.
@@ -5265,8 +5265,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// See [QuEST API] for more information.
     ///
-    /// [`apply_phase_func()`]: crate::apply_phase_func()
-    /// [`apply_phase_func_overrides()`]: crate::apply_phase_func_overrides()
+    /// [`apply_phase_func()`]: crate::Qureg::apply_phase_func()
+    /// [`apply_phase_func_overrides()`]: crate::Qureg::apply_phase_func_overrides()
     /// [`BitEncoding`]: crate::BitEncoding
     /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
     /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
@@ -5650,8 +5650,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```
     /// See [QuEST API] for more information.
     ///
-    /// [api-apply-named-phase-func]: crate::apply_named_phase_func()
-    /// [api-apply-qft]: crate::apply_qft()
+    /// [api-apply-named-phase-func]: crate::Qureg::apply_named_phase_func()
+    /// [api-apply-qft]: crate::Qureg::apply_qft()
     /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
     #[allow(clippy::needless_pass_by_ref_mut)]
     pub fn apply_full_qft(&mut self) {
@@ -5688,7 +5688,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// amplitudes of `qureg`.
     ///
     /// See [`apply_full_qft()`] to apply the QFT to he entirety
-    /// of `qureg`.
+    /// of `Qureg`.
     ///
     /// # Parameters
     ///
@@ -5717,8 +5717,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// See [QuEST API] for more information.
     ///
-    /// [`apply_full_qft()`]: crate::apply_full_qft()
-    /// [`apply_named_phase_func()`]: crate::apply_named_phase_func()
+    /// [`apply_full_qft()`]: crate::Qureg::apply_full_qft()
+    /// [`apply_named_phase_func()`]: crate::Qureg::apply_named_phase_func()
     /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
     /// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
     /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
@@ -5748,7 +5748,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// like that produced by [`init_blank_state()`].
     ///
     /// See [`collapse_to_outcome()`] for a norm-preserving equivalent, like a
-    /// forced   measurement
+    /// forced measurement
     ///
     /// # Parameters
     ///
@@ -5777,7 +5777,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// See [QuEST API] for more information.
     ///
-    /// [`collapse_to_outcome()`]: crate::collapse_to_outcome()
+    /// [`collapse_to_outcome()`]: crate::Qureg::collapse_to_outcome()
     /// [`init_blank_state()`]: crate::Qureg::init_blank_state()
     /// [`QubitIndexError`]: crate::QuestError::QubitIndexError
     /// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
