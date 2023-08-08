@@ -7,12 +7,12 @@ use super::{
 use crate::Qreal;
 
 #[derive(Debug)]
-pub struct Qureg<'a, const N: usize> {
+pub struct Qureg<'a, const N: u16> {
     pub(crate) env: &'a QuestEnv,
     pub(crate) reg: ffi::Qureg,
 }
 
-impl<'a, const N: usize> Qureg<'a, N> {
+impl<'a, const N: u16> Qureg<'a, N> {
     /// Creates a state-vector Qureg object.
     ///
     /// # Examples
@@ -537,7 +537,7 @@ impl<'a, const N: usize> Qureg<'a, N> {
     }
 }
 
-impl<'a, const N: usize> Drop for Qureg<'a, N> {
+impl<'a, const N: u16> Drop for Qureg<'a, N> {
     fn drop(&mut self) {
         catch_quest_exception(|| {
             unsafe { ffi::destroyQureg(self.reg, self.env.0) };

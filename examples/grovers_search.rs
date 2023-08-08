@@ -20,7 +20,7 @@ use rand::Rng;
 const NUM_QUBITS: i32 = 0x10;
 const NUM_ELEMS: i64 = 1 << NUM_QUBITS;
 
-fn tensor_gate<F, const N: usize>(
+fn tensor_gate<F, const N: u16>(
     qureg: &mut Qureg<'_, N>,
     gate: F,
     qubits: &[i32],
@@ -31,7 +31,7 @@ where
     qubits.iter().try_for_each(|&q| gate(qureg, q))
 }
 
-fn apply_oracle<const N: usize>(
+fn apply_oracle<const N: u16>(
     qureg: &mut Qureg<'_, N>,
     qubits: &[i32],
     sol_elem: i64,
@@ -49,7 +49,7 @@ fn apply_oracle<const N: usize>(
         .and(multi_qubit_not(qureg, sol_ctrls))
 }
 
-fn apply_diffuser<const N: usize>(
+fn apply_diffuser<const N: u16>(
     qureg: &mut Qureg<'_, N>,
     qubits: &[i32],
 ) -> Result<(), QuestError> {
@@ -77,7 +77,7 @@ fn main() -> Result<(), QuestError> {
     let sol_elem = rng.gen_range(0..NUM_ELEMS);
 
     // FIXME
-    const N: usize = NUM_QUBITS as usize;
+    const N: u16 = NUM_QUBITS as u16;
     // prepare |+>
     let mut qureg = Qureg::<'_, N>::try_new(env)?;
     qureg.init_plus_state();
