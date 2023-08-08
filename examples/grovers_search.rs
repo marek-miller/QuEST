@@ -7,7 +7,6 @@
 use quest_bind::{
     get_prob_amp,
     hadamard,
-    multi_controlled_phase_flip,
     multi_qubit_not,
     Qreal,
     QuestEnv,
@@ -44,7 +43,7 @@ fn apply_oracle<const N: u16>(
     // apply X to transform |solElem> into |111>
     multi_qubit_not(qureg, sol_ctrls)
         // effect |111> -> -|111>
-        .and(multi_controlled_phase_flip(qureg, qubits))
+        .and(qureg.multi_controlled_phase_flip(qubits))
         // apply X to transform |111> into |solElem>
         .and(multi_qubit_not(qureg, sol_ctrls))
 }
@@ -59,7 +58,7 @@ fn apply_diffuser<const N: u16>(
         .and(multi_qubit_not(qureg, qubits))?;
 
     // effect |11..1> -> -|11..1>
-    multi_controlled_phase_flip(qureg, qubits)?;
+    qureg.multi_controlled_phase_flip(qubits)?;
 
     multi_qubit_not(qureg, qubits).and(tensor_gate(qureg, hadamard, qubits))
 }

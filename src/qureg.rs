@@ -32,7 +32,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// [1]: https://quest-kit.github.io/QuEST/modules.html
     pub fn try_new(env: &'a QuestEnv) -> Result<Self, QuestError> {
-        let num_qubits = N as i32;
+        let num_qubits = i32::from(N);
         Ok(Self {
             env,
             reg: catch_quest_exception(|| unsafe {
@@ -60,7 +60,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// [1]: https://quest-kit.github.io/QuEST/modules.html
     pub fn try_new_density(env: &'a QuestEnv) -> Result<Self, QuestError> {
-        let num_qubits = N as i32;
+        let num_qubits = i32::from(N);
         Ok(Self {
             env,
             reg: catch_quest_exception(|| unsafe {
@@ -803,6 +803,169 @@ impl<'a, const N: u16> Qureg<'a, N> {
             );
         })
     }
+
+    /// Apply the (two-qubit) controlled phase flip gate.
+    ///
+    /// Also known as the controlled pauliZ gate.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use quest_bind::*;
+    /// let env = &QuestEnv::new();
+    /// let qureg = &mut create_qureg::<2>(env);
+    /// init_zero_state(qureg);
+    ///
+    /// controlled_phase_flip(qureg, 0, 1);
+    /// ```
+    ///
+    /// See [QuEST API] for more information.
+    ///
+    /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+    #[allow(clippy::needless_pass_by_ref_mut)]
+    pub fn controlled_phase_flip(
+        &mut self,
+        id_qubit1: i32,
+        id_qubit2: i32,
+    ) -> Result<(), QuestError> {
+        catch_quest_exception(|| unsafe {
+            ffi::controlledPhaseFlip(self.reg, id_qubit1, id_qubit2);
+        })
+    }
+
+    /// Apply the (multiple-qubit) controlled phase flip gate.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use quest_bind::*;
+    /// let env = &QuestEnv::new();
+    /// let qureg = &mut create_qureg::<4>(env);
+    /// init_zero_state(qureg);
+    ///
+    /// let control_qubits = &[0, 1, 3];
+    /// multi_controlled_phase_flip(qureg, control_qubits);
+    /// ```
+    ///
+    /// See [QuEST API] for more information.
+    ///
+    /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+    #[allow(clippy::needless_pass_by_ref_mut)]
+    pub fn multi_controlled_phase_flip(
+        &mut self,
+        control_qubits: &[i32],
+    ) -> Result<(), QuestError> {
+        catch_quest_exception(|| unsafe {
+            ffi::multiControlledPhaseFlip(
+                self.reg,
+                control_qubits.as_ptr(),
+                control_qubits.len() as i32,
+            );
+        })
+    }
+
+    /// Apply the single-qubit S gate.
+    ///
+    /// This is a rotation of `PI/2` around the Z-axis on the Bloch sphere, or
+    /// the unitary:
+    ///
+    /// ```text
+    ///   [ 1  0 ]
+    ///   [ 0  i ]
+    /// ```
+    ///
+    /// # Parameters
+    ///
+    /// - `qureg`: object representing the set of all qubits
+    /// - `target_qubit`: qubit to operate upon
+    ///
+    /// # Errors
+    ///
+    /// - [`InvalidQuESTInputError`],
+    ///   - if `target_qubit` is outside [0,
+    ///     qureg.[`num_qubits_represented()`]).
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use quest_bind::*;
+    /// let env = &QuestEnv::new();
+    /// let qureg = &mut create_qureg::<2>(env);
+    /// init_zero_state(qureg);
+    /// pauli_x(qureg, 0).unwrap();
+    ///
+    /// s_gate(qureg, 0).unwrap();
+    ///
+    /// let amp = get_imag_amp(qureg, 1).unwrap();
+    /// assert!((amp - 1.).abs() < EPSILON);
+    /// ```
+    ///
+    /// See [QuEST API] for more information.
+    ///
+    /// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+    /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+    /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+    #[allow(clippy::needless_pass_by_ref_mut)]
+    pub fn s_gate(
+        &mut self,
+        target_qubit: i32,
+    ) -> Result<(), QuestError> {
+        catch_quest_exception(|| unsafe {
+            ffi::sGate(self.reg, target_qubit);
+        })
+    }
+
+    /// Apply the single-qubit T gate.
+    ///
+    /// This is a rotation of `PI/4` around the Z-axis on the Bloch sphere, or
+    /// the unitary:
+    ///
+    /// ```text
+    ///   [ 1       0       ]
+    ///   [ 0  e^(i PI / 4) ]
+    /// ```
+    ///
+    /// # Parameters
+    ///
+    /// - `qureg`: object representing the set of all qubits
+    /// - `target_qubit`: qubit to operate upon
+    ///
+    /// # Errors
+    ///
+    /// - [`InvalidQuESTInputError`],
+    ///   - if `target_qubit` is outside [0,
+    ///     qureg.[`num_qubits_represented()`]).
+    ///
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use quest_bind::*;
+    /// let env = &QuestEnv::new();
+    /// let qureg = &mut create_qureg::<2>(env);
+    /// init_zero_state(qureg);
+    /// pauli_x(qureg, 0).unwrap();
+    ///
+    /// t_gate(qureg, 0).unwrap();
+    ///
+    /// let amp = get_imag_amp(qureg, 1).unwrap();
+    /// assert!((amp - SQRT_2 / 2.).abs() < EPSILON);
+    /// ```
+    ///
+    /// See [QuEST API] for more information.
+    ///
+    /// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+    /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+    /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+    #[allow(clippy::needless_pass_by_ref_mut)]
+    pub fn t_gate(
+        &mut self,
+        target_qubit: i32,
+    ) -> Result<(), QuestError> {
+        catch_quest_exception(|| unsafe {
+            ffi::tGate(self.reg, target_qubit);
+        })
+    }
 } // Qureg
 
 impl<'a, const N: u16> Drop for Qureg<'a, N> {
@@ -814,10 +977,12 @@ impl<'a, const N: u16> Drop for Qureg<'a, N> {
     }
 }
 
+#[must_use]
 pub fn create_qureg<const N: u16>(env: &QuestEnv) -> Qureg<'_, N> {
-    Qureg::try_new(env).expect("cannot allocate new Qureg")
+    Qureg::try_new(env).expect("cannot allocate new state-vector Qureg")
 }
 
+#[must_use]
 pub fn create_density_qureg<const N: u16>(env: &QuestEnv) -> Qureg<'_, N> {
-    Qureg::try_new_density(env).expect("cannot allocate new Qureg")
+    Qureg::try_new_density(env).expect("cannot allocate new density Qureg")
 }

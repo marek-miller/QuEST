@@ -328,22 +328,24 @@ fn controlled_phase_flip_01() {
     let env = &QuestEnv::new();
     let qureg = &mut create_qureg::<3>(env);
 
-    controlled_phase_flip(qureg, 0, 1).unwrap();
-    controlled_phase_flip(qureg, 0, 2).unwrap();
+    qureg.controlled_phase_flip(0, 1).unwrap();
+    qureg.controlled_phase_flip(0, 2).unwrap();
 
-    controlled_phase_flip(qureg, 0, 3).unwrap_err();
-    controlled_phase_flip(qureg, -1, 1).unwrap_err();
+    qureg.controlled_phase_flip(0, 3).unwrap_err();
+    qureg.controlled_phase_flip(-1, 1).unwrap_err();
 }
 
 #[test]
 fn multi_controlled_phase_flip_01() {
     let env = &QuestEnv::new();
     let qureg = &mut Qureg::<'_, 4>::try_new(env).unwrap();
-    multi_controlled_phase_flip(qureg, &[0, 1, 3]).unwrap();
-    multi_controlled_phase_flip(qureg, &[0, 1, 3]).unwrap();
+    qureg.multi_controlled_phase_flip(&[0, 1, 3]).unwrap();
+    qureg.multi_controlled_phase_flip(&[0, 1, 3]).unwrap();
 
-    multi_controlled_phase_flip(qureg, &[0, 4, 3, 4]).unwrap_err();
-    multi_controlled_phase_flip(qureg, &[0, 7, -1]).unwrap_err();
+    qureg
+        .multi_controlled_phase_flip(&[0, 4, 3, 4])
+        .unwrap_err();
+    qureg.multi_controlled_phase_flip(&[0, 7, -1]).unwrap_err();
 }
 
 #[test]
@@ -352,17 +354,17 @@ fn s_gate_01() {
     let qureg = &mut create_qureg::<2>(env);
     qureg.init_zero_state();
 
-    s_gate(qureg, 0).unwrap();
+    qureg.s_gate(0).unwrap();
     assert!((get_imag_amp(qureg, 0).unwrap()).abs() < EPSILON);
 
     pauli_x(qureg, 0).unwrap();
-    s_gate(qureg, 0).unwrap();
+    qureg.s_gate(0).unwrap();
 
     let amp = get_imag_amp(qureg, 1).unwrap();
     assert!((amp - 1.).abs() < EPSILON);
 
-    s_gate(qureg, -1).unwrap_err();
-    s_gate(qureg, 3).unwrap_err();
+    qureg.s_gate(-1).unwrap_err();
+    qureg.s_gate(3).unwrap_err();
 }
 
 #[test]
@@ -371,9 +373,9 @@ fn t_gate_01() {
     let qureg = &mut create_qureg::<2>(env);
     qureg.init_zero_state();
 
-    t_gate(qureg, 0).unwrap();
-    t_gate(qureg, -1).unwrap_err();
-    t_gate(qureg, 3).unwrap_err();
+    qureg.t_gate(0).unwrap();
+    qureg.t_gate(-1).unwrap_err();
+    qureg.t_gate(3).unwrap_err();
 }
 
 #[test]
