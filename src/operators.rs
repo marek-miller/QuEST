@@ -312,8 +312,8 @@ pub fn set_diagonal_op_elems(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
-pub fn apply_diagonal_op(
-    qureg: &mut Qureg<'_>,
+pub fn apply_diagonal_op<const N: usize>(
+    qureg: &mut Qureg<'_, N>,
     op: &DiagonalOp<'_>,
 ) -> Result<(), QuestError> {
     catch_quest_exception(|| unsafe {
@@ -346,8 +346,8 @@ pub fn apply_diagonal_op(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
-pub fn calc_expec_diagonal_op(
-    qureg: &Qureg<'_>,
+pub fn calc_expec_diagonal_op<const N: usize>(
+    qureg: &Qureg<'_, N>,
     op: &DiagonalOp<'_>,
 ) -> Result<Qcomplex, QuestError> {
     catch_quest_exception(|| unsafe {

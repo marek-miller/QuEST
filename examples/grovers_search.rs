@@ -21,19 +21,19 @@ use rand::Rng;
 const NUM_QUBITS: i32 = 0x10;
 const NUM_ELEMS: i64 = 1 << NUM_QUBITS;
 
-fn tensor_gate<F>(
-    qureg: &mut Qureg<'_>,
+fn tensor_gate<F, const N: usize>(
+    qureg: &mut Qureg<'_, N>,
     gate: F,
     qubits: &[i32],
 ) -> Result<(), QuestError>
 where
-    F: Fn(&mut Qureg, i32) -> Result<(), QuestError>,
+    F: Fn(&mut Qureg<'_, N>, i32) -> Result<(), QuestError>,
 {
     qubits.iter().try_for_each(|&q| gate(qureg, q))
 }
 
-fn apply_oracle(
-    qureg: &mut Qureg,
+fn apply_oracle<const N: usize>(
+    qureg: &mut Qureg<'_, N>,
     qubits: &[i32],
     sol_elem: i64,
 ) -> Result<(), QuestError> {
@@ -50,8 +50,8 @@ fn apply_oracle(
         .and(multi_qubit_not(qureg, sol_ctrls))
 }
 
-fn apply_diffuser(
-    qureg: &mut Qureg,
+fn apply_diffuser<const N: usize>(
+    qureg: &mut Qureg<'_, N>,
     qubits: &[i32],
 ) -> Result<(), QuestError> {
     // apply H to transform |+> into |0>
@@ -77,8 +77,10 @@ fn main() -> Result<(), QuestError> {
     let mut rng = rand::thread_rng();
     let sol_elem = rng.gen_range(0..NUM_ELEMS);
 
+    // FIXME
+    const N: usize = NUM_QUBITS as usize;
     // prepare |+>
-    let qureg = &mut Qureg::try_new(NUM_QUBITS, env)?;
+    let qureg = &mut Qureg::<'_, N>::try_new(env)?;
     init_plus_state(qureg);
     // use all qubits in the register
     let qubits = &(0..NUM_QUBITS).collect::<Vec<_>>();

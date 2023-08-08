@@ -6,12 +6,12 @@ use super::{
 };
 
 #[derive(Debug)]
-pub struct Qureg<'a> {
+pub struct Qureg<'a, const N: usize> {
     pub(crate) env: &'a QuestEnv,
     pub(crate) reg: ffi::Qureg,
 }
 
-impl<'a> Qureg<'a> {
+impl<'a, const N: usize> Qureg<'a, N> {
     /// Creates a state-vector Qureg object.
     ///
     /// # Examples
@@ -30,10 +30,8 @@ impl<'a> Qureg<'a> {
     /// on failure.  This is an exception thrown by `QuEST`.
     ///
     /// [1]: https://quest-kit.github.io/QuEST/modules.html
-    pub fn try_new(
-        num_qubits: i32,
-        env: &'a QuestEnv,
-    ) -> Result<Self, QuestError> {
+    pub fn try_new(env: &'a QuestEnv) -> Result<Self, QuestError> {
+        let num_qubits = N as i32;
         Ok(Self {
             env,
             reg: catch_quest_exception(|| unsafe {
@@ -60,10 +58,8 @@ impl<'a> Qureg<'a> {
     /// on failure.  This is an exception thrown by `QuEST`.
     ///
     /// [1]: https://quest-kit.github.io/QuEST/modules.html
-    pub fn try_new_density(
-        num_qubits: i32,
-        env: &'a QuestEnv,
-    ) -> Result<Self, QuestError> {
+    pub fn try_new_density(env: &'a QuestEnv) -> Result<Self, QuestError> {
+        let num_qubits = N as i32;
         Ok(Self {
             env,
             reg: catch_quest_exception(|| unsafe {
@@ -234,7 +230,7 @@ impl<'a> Qureg<'a> {
     }
 }
 
-impl<'a> Drop for Qureg<'a> {
+impl<'a, const N: usize> Drop for Qureg<'a, N> {
     fn drop(&mut self) {
         catch_quest_exception(|| {
             unsafe { ffi::destroyQureg(self.reg, self.env.0) };
