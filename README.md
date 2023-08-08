@@ -44,11 +44,11 @@ fn main() -> Result<(), QuestError> {
     // Prepare a Bell state `|00> + |11>`: apply Hadamard gate
     // on qubit 0, then NOT on qubit 1, controlled by qubit 0.
     println!("---\nPrepare Bell state: |00> + |11>");
-    hadamard(qureg, 0).and(controlled_not(qureg, 0, 1))?;
+    qureg.hadamard(0).and(qureg.controlled_not(0, 1))?;
 
     // Measure both qubits
-    let outcome0 = measure(qureg, 0)?;
-    let outcome1 = measure(qureg, 1)?;
+    let outcome0 = qureg.measure(0)?;
+    let outcome1 = qureg.measure(1)?;
     println!("Qubit \"0\" measured in state: |{outcome0}>");
     println!("Qubit \"1\" measured in state: |{outcome1}>");
 
