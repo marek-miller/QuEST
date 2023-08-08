@@ -8,7 +8,6 @@
 use quest_bind::{
     controlled_not,
     hadamard,
-    init_zero_state,
     measure,
     QuestEnv,
     QuestError,
@@ -24,7 +23,7 @@ fn main() -> Result<(), QuestError> {
     let qureg = &mut Qureg::<'_, 2>::try_new(env)?;
     qureg.report_qureg_params();
     // Initialize |00> state and print out the state to screen
-    init_zero_state(qureg);
+    qureg.init_zero_state();
     qureg.report_state_to_screen(0);
 
     // Prepare a Bell state `|00> + |11>`: apply Hadamard gate

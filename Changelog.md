@@ -16,7 +16,8 @@
 
 - API breaking changes:
 
-  -
+  - Change `Qureg` type def. to `Qureg<'\_, const N: usize>`
+    - Move many, many functions onto Qureg type
   -
   -
 

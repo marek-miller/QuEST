@@ -7,7 +7,6 @@
 use quest_bind::{
     get_prob_amp,
     hadamard,
-    init_plus_state,
     multi_controlled_phase_flip,
     multi_qubit_not,
     Qreal,
@@ -80,16 +79,16 @@ fn main() -> Result<(), QuestError> {
     // FIXME
     const N: usize = NUM_QUBITS as usize;
     // prepare |+>
-    let qureg = &mut Qureg::<'_, N>::try_new(env)?;
-    init_plus_state(qureg);
+    let mut qureg = Qureg::<'_, N>::try_new(env)?;
+    qureg.init_plus_state();
     // use all qubits in the register
     let qubits = &(0..NUM_QUBITS).collect::<Vec<_>>();
 
     // apply Grover's algorithm
     (0..num_reps).try_for_each(|_| {
-        apply_oracle(qureg, qubits, sol_elem)
-            .and(apply_diffuser(qureg, qubits))
-            .and(get_prob_amp(qureg, sol_elem))
+        apply_oracle(&mut qureg, qubits, sol_elem)
+            .and(apply_diffuser(&mut qureg, qubits))
+            .and(get_prob_amp(&mut qureg, sol_elem))
             .map(|prob| {
                 println!("prob of solution |{sol_elem}> = {:.8}", prob);
             })
