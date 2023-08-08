@@ -799,7 +799,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let qureg = &mut create_qureg::<4>(env);
+    /// let mut qureg = create_qureg::<4>(&env);
     ///
     /// let control_qubits = &[0, 1, 3];
     /// let angle = 0.5;
@@ -864,7 +864,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let qureg = &mut create_qureg::<4>(env);
+    /// let mut qureg = create_qureg::<4>(&env);
     /// qureg.init_zero_state();
     ///
     /// let control_qubits = &[0, 1, 3];
@@ -2446,7 +2446,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let qureg = &mut create_qureg::<4>(env);
+    /// let mut qureg = create_qureg::<4>(&env);
     /// qureg.pauli_x(0).unwrap();
     /// qureg.pauli_x(1).unwrap();
     ///
@@ -2895,11 +2895,11 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// let env = QuestEnv::new();
     /// let mut qureg = create_qureg::<2>(&env);
     ///
-    /// start_recording_qasm(qureg);
-    /// hadamard(qureg, 0).and(controlled_not(qureg, 0, 1)).unwrap();
-    /// stop_recording_qasm(qureg);
+    /// qureg.start_recording_qasm();
+    /// qureg.hadamard(0).and(qureg.controlled_not(0, 1)).unwrap();
+    /// qureg.stop_recording_qasm();
     ///
-    /// print_recorded_qasm(qureg);
+    /// qureg.print_recorded_qasm();
     /// ```
     ///
     /// See [QuEST API] for more information.
@@ -2923,14 +2923,14 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
     /// let mut qureg = create_qureg::<2>(&env);
-    /// start_recording_qasm(qureg);
-    /// hadamard(qureg, 0).unwrap();
+    /// qureg.start_recording_qasm();
+    /// qureg.hadamard(0).unwrap();
     ///
-    /// clear_recorded_qasm(qureg);
+    /// qureg.clear_recorded_qasm();
     ///
     /// qureg.controlled_not(0, 1).unwrap();
-    /// stop_recording_qasm(qureg);
-    /// print_recorded_qasm(qureg);
+    /// qureg.stop_recording_qasm();
+    /// qureg.print_recorded_qasm();
     /// ```
     ///
     /// See [QuEST API] for more information.
@@ -2956,11 +2956,11 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// let env = QuestEnv::new();
     /// let mut qureg = create_qureg::<2>(&env);
     ///
-    /// start_recording_qasm(qureg);
-    /// hadamard(qureg, 0).and(controlled_not(qureg, 0, 1)).unwrap();
-    /// stop_recording_qasm(qureg);
+    /// qureg.start_recording_qasm();
+    /// qureg.hadamard(0).and(qureg.controlled_not(0, 1)).unwrap();
+    /// qureg.stop_recording_qasm();
     ///
-    /// print_recorded_qasm(qureg);
+    /// qureg.print_recorded_qasm();
     /// ```
     ///
     /// See [QuEST API] for more information.
@@ -2983,11 +2983,11 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// let env = QuestEnv::new();
     /// let mut qureg = create_qureg::<2>(&env);
     ///
-    /// start_recording_qasm(qureg);
-    /// hadamard(qureg, 0).and(controlled_not(qureg, 0, 1)).unwrap();
-    /// stop_recording_qasm(qureg);
+    /// qureg.start_recording_qasm();
+    /// qureg.hadamard(0).and(qureg.controlled_not(0, 1)).unwrap();
+    /// qureg.stop_recording_qasm();
     ///
-    /// write_recorded_qasm_to_file(qureg, "/dev/null").unwrap();
+    /// qureg.write_recorded_qasm_to_file("/dev/null").unwrap();
     /// ```
     ///
     /// See [QuEST API] for more information.
@@ -3045,7 +3045,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// let mut qureg = create_density_qureg(&env);
     /// qureg.init_plus_state();
     ///
-    /// mix_dephasing(qureg, 0, 0.5).unwrap();
+    /// qureg.mix_dephasing(0, 0.5).unwrap();
     ///
     /// let amp = qureg.get_density_amp(0, 0).unwrap();
     /// assert!((amp.re - 0.25).abs() < EPSILON);
@@ -3110,7 +3110,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// let mut qureg = create_density_qureg::<3>(&env);
     /// qureg.init_plus_state();
     ///
-    /// mix_two_qubit_dephasing(qureg, 0, 1, 0.75).unwrap();
+    /// qureg.mix_two_qubit_dephasing(0, 1, 0.75).unwrap();
     ///
     /// let amp = qureg.get_density_amp(0, 0).unwrap();
     /// assert!((amp.re - 0.125).abs() < EPSILON);
@@ -3172,9 +3172,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*; let env = QuestEnv::new();
     /// let mut qureg = create_density_qureg(&env);
-    /// qureg.init_zero_state();
     ///
-    /// mix_depolarising(qureg, 0, 0.75).unwrap();
+    /// qureg.mix_depolarising(0, 0.75).unwrap();
     /// let amp = qureg.get_density_amp(0, 0).unwrap();
     ///
     /// assert!((amp.re - 0.5) < EPSILON);
@@ -3241,7 +3240,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// let mut qureg = create_density_qureg(&env);
     /// qureg.init_plus_state();
     ///
-    /// mix_damping(qureg, 0, 1.).unwrap();
+    /// qureg.mix_damping(0, 1.).unwrap();
     ///
     /// let amp = qureg.get_density_amp(0, 0).unwrap();
     /// assert!((amp.re - 1.) < EPSILON);
@@ -3276,7 +3275,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// let mut qureg = create_density_qureg::<3>(&env);
     /// qureg.init_plus_state();
     ///
-    /// mix_two_qubit_depolarising(qureg, 0, 1, 15. / 16.).unwrap();
+    /// qureg.mix_two_qubit_depolarising(0, 1, 15. / 16.).unwrap();
     ///
     /// let amp = qureg.get_density_amp(0, 0).unwrap();
     /// assert!((amp.re - 0.125).abs() < EPSILON);
@@ -3307,10 +3306,9 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
     /// let mut qureg = create_density_qureg(&env);
-    /// qureg.init_zero_state();
     ///
     /// let (prob_x, prob_y, prob_z) = (0.25, 0.25, 0.25);
-    /// mix_pauli(qureg, 0, prob_x, prob_y, prob_z).unwrap();
+    /// qureg.mix_pauli(0, prob_x, prob_y, prob_z).unwrap();
     ///
     /// let mut outcome_prob = -1.;
     /// let _ = qureg.measure_with_stats(0, &mut outcome_prob).unwrap();
@@ -3343,13 +3341,14 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let combine_qureg = &mut Qureg::try_new_density(2, env).unwrap();
-    /// let other_qureg = &mut Qureg::try_new_density(2, env).unwrap();
+    /// let mut combine_qureg = create_density_qureg::<2>(&env);
+    /// let other_qureg = {
+    ///     let mut other qureg = create_density_qureg::<2>(&env);
+    ///     other_qureg.init_classical_state(3).unwrap();
+    ///     other_qureg
+    /// }
     ///
-    /// init_zero_state(combine_qureg);
-    /// init_classical_state(other_qureg, 3).unwrap();
-    ///
-    /// mix_density_matrix(combine_qureg, 0.5, other_qureg).unwrap();
+    /// combine_qureg.mix_density_matrix(, 0.5, other_qureg).unwrap();
     /// ```
     ///
     /// See [QuEST API] for more information.
@@ -3399,9 +3398,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
     /// let mut qureg = create_density_qureg(&env);
-    /// qureg.init_zero_state();
     ///
-    /// let purity = calc_purity(qureg).unwrap();
+    /// let purity = qureg.calc_purity().unwrap();
     /// assert!((purity - 1.).abs() < EPSILON);
     /// ```
     ///
@@ -3457,8 +3455,6 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
     /// let mut qureg = create_density_qureg(&env);
-    /// qureg.init_zero_state();
-
     /// let pure_state = {
     ///     let mut new_state = create_qureg::<2>(&env);
     ///     new_state.init_plus_state();
@@ -3468,7 +3464,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// let fidelity = qureg.calc_fidelity(pure_state).unwrap();
     /// assert!((fidelity - 0.25).abs() < EPSILON);
     /// ```
-    /// 
+    ///
     /// See [QuEST API] for more information.
     ///
     /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
@@ -3518,9 +3514,9 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// let mut qureg = create_qureg::<2>(&env);
     ///
     /// // init state |10>
-    /// init_classical_state(qureg, 1).unwrap();
+    /// qureg.init_classical_state(1).unwrap();
     /// // swap to |01>
-    /// swap_gate(qureg, 0, 1).unwrap();
+    /// qureg.swap_gate(0, 1).unwrap();
     ///
     /// let outcome = qureg.measure(0).unwrap();
     /// assert_eq!(outcome, 0);
@@ -3551,9 +3547,9 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// let env = QuestEnv::new();
     /// let mut qureg = create_qureg::<2>(&env);
     /// // init state |10>
-    /// init_classical_state(qureg, 1).unwrap();
-    /// sqrt_swap_gate(qureg, 0, 1).unwrap();
-    /// sqrt_swap_gate(qureg, 0, 1).unwrap();
+    /// qureg.init_classical_state(1).unwrap();
+    /// qureg.sqrt_swap_gate(0, 1).unwrap();
+    /// qureg.sqrt_swap_gate(0, 1).unwrap();
     /// let outcome = qureg.measure(0).unwrap();
     /// assert_eq!(outcome, 0);
     /// ```
@@ -3580,20 +3576,19 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
     /// let mut qureg = create_qureg::<3>(&env);
-    /// qureg.init_zero_state();
     ///
     /// let control_qubits = &[1, 2];
     /// let control_state = &[0, 0];
     /// let target_qubit = 0;
     /// let u = &ComplexMatrix2::new([[0., 1.], [1., 0.]], [[0., 0.], [0., 0.]]);
-    /// multi_state_controlled_unitary(
-    ///     qureg,
-    ///     control_qubits,
-    ///     control_state,
-    ///     target_qubit,
-    ///     u,
-    /// )
-    /// .unwrap();
+    /// qureg
+    ///     .multi_state_controlled_unitary(
+    ///         control_qubits,
+    ///         control_state,
+    ///         target_qubit,
+    ///         u,
+    ///     )
+    ///     .unwrap();
     ///
     /// let amp = qureg.get_real_amp(1).unwrap();
     /// assert!((amp - 1.).abs() < EPSILON);
@@ -3635,7 +3630,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// let qubits = &[0, 1];
     /// let angle = PI;
-    /// multi_qureg.rotate_z(qubits, angle).unwrap();
+    /// qureg.multi_rotate_z(qubits, angle).unwrap();
     ///
     /// let amp = qureg.get_imag_amp(0).unwrap();
     /// assert!((amp + 0.5).abs() < EPSILON);
@@ -3668,13 +3663,14 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// let env = QuestEnv::new();
     /// let mut qureg = create_qureg::<3>(&env);
-    /// qureg.init_zero_state();
     ///
     /// let target_qubits = &[1, 2];
     /// let target_paulis = &[PAULI_X, PAULI_X];
     /// let angle = PI;
     ///
-    /// multi_rotate_pauli(qureg, target_qubits, target_paulis, angle).unwrap();
+    /// qureg
+    ///     .multi_rotate_pauli(target_qubits, target_paulis, angle)
+    ///     .unwrap();
     ///
     /// let amp = qureg.get_imag_amp(6).unwrap();
     /// assert!((amp + 1.).abs() < 2. * EPSILON);
@@ -3709,22 +3705,17 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let qureg = &mut create_qureg::<4>(env);
+    /// let mut qureg = create_qureg::<4>(&env);
     ///
     /// // Initialize `|1111>`
-    /// qureg.init_zero_state();
     /// (0..4).try_for_each(|i| qureg.pauli_x(i)).unwrap();
     ///
     /// let control_qubits = &[0, 1];
     /// let target_qubits = &[2, 3];
     /// let angle = 2. * PI;
-    /// multi_controlled_multi_rotate_z(
-    ///     qureg,
-    ///     control_qubits,
-    ///     target_qubits,
-    ///     angle,
-    /// )
-    /// .unwrap();
+    /// qureg
+    ///     .multi_controlled_multi_rotate_z(control_qubits, target_qubits, angle)
+    ///     .unwrap();
     ///
     /// // the state is now `-1. * |1111>`
     /// let amp = qureg.get_real_amp(15).unwrap();
@@ -3764,24 +3755,23 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// use PauliOpType::PAULI_Z;
     ///
     /// let env = QuestEnv::new();
-    /// let qureg = &mut create_qureg::<4>(env);
+    /// let mut qureg = create_qureg::<4>(&env);
     ///
     /// // Initialize `|1111>`
-    /// qureg.init_zero_state();
     /// (0..4).try_for_each(|i| qureg.pauli_x(i)).unwrap();
     ///
     /// let control_qubits = &[0, 1];
     /// let target_qubits = &[2, 3];
     /// let target_paulis = &[PAULI_Z, PAULI_Z];
     /// let angle = 2. * PI;
-    /// multi_controlled_multi_rotate_pauli(
-    ///     qureg,
-    ///     control_qubits,
-    ///     target_qubits,
-    ///     target_paulis,
-    ///     angle,
-    /// )
-    /// .unwrap();
+    /// qureg
+    ///     .multi_controlled_multi_rotate_pauli(
+    ///         control_qubits,
+    ///         target_qubits,
+    ///         target_paulis,
+    ///         angle,
+    ///     )
+    ///     .unwrap();
     ///
     /// // the state is now `-1. * |1111>`
     /// let amp = qureg.get_real_amp(15).unwrap();
@@ -3823,17 +3813,18 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// use PauliOpType::PAULI_X;
     ///
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<2>(&env);
-    /// qureg.init_zero_state();
-    /// let workspace = create_qureg::<2>(&env);
+    /// let qureg = {
+    ///     let mut qureg = create_qureg::<2>(&env);
+    ///     qureg.init_plus_state();
+    ///     qureg
+    /// }
+    /// let mut workspace = create_qureg::<2>(&env);
     ///
     /// let target_qubits = &[0, 1];
     /// let pauli_codes = &[PAULI_X, PAULI_X];
     ///
-    /// calc_expec_pauli_prod(qureg, target_qubits, pauli_codes, workspace)
+    /// let product = qureg.calc_expec_pauli_prod(target_qubits, pauli_codes, &mut workspace)
     ///     .unwrap();
-    /// let amp = get_real_amp(workspace, 3).unwrap();
-    /// assert!((amp - 1.).abs() < EPSILON);
     /// ```
     ///
     /// See [QuEST API] for more information.
@@ -3870,18 +3861,18 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// };
     ///
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<2>(&env);
-    /// qureg.init_zero_state();
-    /// let workspace = create_qureg::<2>(&env);
+    /// let qureg = {
+    ///     let mut qureg = create_qureg::<2>(&env);
+    ///     qureg.init_plus_state();
+    ///     qureg
+    /// }
+    /// let mut workspace = create_qureg::<2>(&env);
     ///
     /// let all_pauli_codes = &[PAULI_X, PAULI_Z, PAULI_Z, PAULI_X];
     /// let term_coeffs = &[0.5, 0.5];
     ///
-    /// calc_expec_pauli_sum(qureg, all_pauli_codes, term_coeffs, workspace)
+    /// let sum = qureg.calc_expec_pauli_sum(all_pauli_codes, term_coeffs, &mut workspace)
     ///     .unwrap();
-    ///
-    /// let amp = get_real_amp(workspace, 2).unwrap();
-    /// assert!((amp - 1.).abs() < EPSILON);
     /// ```
     ///
     /// See [QuEST API] for more information.
@@ -3921,18 +3912,18 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// };
     ///
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<2>(&env);
-    /// qureg.init_zero_state();
-    /// let workspace = create_qureg::<2>(&env);
+    /// let qureg = {
+    ///     let mut qureg = create_qureg::<2>(&env);
+    ///     qureg.init_plus_state();
+    ///     qureg
+    /// }
+    /// let mut workspace = create_qureg::<2>(&env);
     ///
     /// let hamil = &mut PauliHamil::try_new(2, 2).unwrap();
     /// init_pauli_hamil(hamil, &[0.5, 0.5], &[PAULI_X, PAULI_X, PAULI_X, PAULI_Z])
     ///     .unwrap();
     ///
-    /// calc_expec_pauli_hamil(qureg, hamil, workspace).unwrap();
-    ///
-    /// let amp = get_real_amp(workspace, 1).unwrap();
-    /// assert!((amp - 1.).abs() < EPSILON);
+    /// let expec_val = qureg.calc_expec_pauli_hamil(hamil, &mut workspace).unwrap();
     /// ```
     ///
     /// See [QuEST API] for more information.
@@ -3957,7 +3948,6 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
     /// let mut qureg = create_qureg::<3>(&env);
-    /// qureg.init_zero_state();
     /// qureg.pauli_x(0).unwrap();
     ///
     /// let target_qubit1 = 1;
@@ -3977,7 +3967,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///     ],
     /// );
     ///
-    /// two_qubit_qureg.unitary(target_qubit1, target_qubit2, u).unwrap();
+    /// qureg.two_qubit_unitary(target_qubit1, target_qubit2, u).unwrap();
     ///
     /// let amp = qureg.get_real_amp(7).unwrap();
     /// assert!((aother_qureg.mp  < EPSILON);
@@ -4006,7 +3996,6 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
     /// let mut qureg = create_qureg::<3>(&env);
-    /// qureg.init_zero_state();
     /// qureg.pauli_x(0).unwrap();
     ///
     /// let control_qubit = 0;
@@ -4027,14 +4016,14 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///     ],
     /// );
     ///
-    /// controlled_two_qubit_unitary(
-    ///     qureg,
-    ///     control_qubit,
-    ///     target_qubit1,
-    ///     target_qubit2,
-    ///     u,
-    /// )
-    /// .unwrap();
+    /// qureg
+    ///     .controlled_two_qubit_unitary(
+    ///         control_qubit,
+    ///         target_qubit1,
+    ///         target_qubit2,
+    ///         u,
+    ///     )
+    ///     .unwrap();
     ///
     /// let amp = qureg.get_real_amp(7).unwrap();
     /// assert!((amp - 1.).abs() < EPSILON);
@@ -4069,8 +4058,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let qureg = &mut create_qureg::<4>(env);
-    /// qureg.init_zero_state();
+    /// let mut qureg = create_qureg::<4>(&env);
     /// qureg.pauli_x(0).unwrap();
     /// qureg.pauli_x(1).unwrap();
     ///
@@ -4092,14 +4080,14 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///     ],
     /// );
     ///
-    /// multi_controlled_two_qubit_unitary(
-    ///     qureg,
-    ///     control_qubits,
-    ///     target_qubit1,
-    ///     target_qubit2,
-    ///     u,
-    /// )
-    /// .unwrap();
+    /// qureg
+    ///     .multi_controlled_two_qubit_unitary(
+    ///         control_qubits,
+    ///         target_qubit1,
+    ///         target_qubit2,
+    ///         u,
+    ///     )
+    ///     .unwrap();
     ///
     /// let amp = qureg.get_real_amp(15).unwrap();
     /// assert!((amp - 1.).abs() < EPSILON);
@@ -4137,7 +4125,6 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
     /// let mut qureg = create_qureg::<2>(&env);
-    /// qureg.init_zero_state();
     ///
     /// let u = &mut ComplexMatrixN::try_new(2).unwrap();
     /// let zero_row = &[0., 0., 0., 0.];
@@ -4153,12 +4140,13 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// )
     /// .unwrap();
     ///
-    /// multi_qubit_qureg.unitary(&[0, 1], u).unwrap();
+    /// qureg.multi_qubit_unitary(&[0, 1], u).unwrap();
     ///
     /// // Check if the register is now in the state `|11>`
-    /// let amp = quother_qureg.reg.p(3).unwrap();
+    /// let amp = qureg.get_real_amp(3).unwrap();
     /// assert!((amp - 1.).abs() < EPSILON);
-    // qureg./ ```
+    /// ```
+    ///
     /// See [QuEST API] for more information.
     ///
     /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
@@ -4183,7 +4171,6 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
     /// let mut qureg = create_qureg::<3>(&env);
-    /// qureg.init_zero_state();
     /// qureg.pauli_x(0).unwrap();
     ///
     /// let u = &mut ComplexMatrixN::try_new(2).unwrap();
@@ -4202,12 +4189,14 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// let ctrl = 0;
     /// let targs = &[1, 2];
-    /// controlled_multi_qubit_qureg.unitary(ctrl, targs, u).unwrap();
+    /// qureg
+    ///     .controlled_multi_qubit_unitary(ctrl, targs, u)
+    ///     .unwrap();
     ///
     /// // Check if the register is now in the state `|111>`
-    /// let amp = qureg.get_reaother_qureg.l_amp(;
+    /// let amp = qureg.get_real_amp(7);
     /// assert!((amp - 1.).abs() < EPSILON);
-    // qureg./ ```
+    /// ```
     /// See [QuEST API] for more information.
     ///
     /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
@@ -4238,8 +4227,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let qureg = &mut create_qureg::<4>(env);
-    /// qureg.init_zero_state();
+    /// let mut qureg = create_qureg::<4>(&env);
     /// qureg.pauli_x(0).unwrap();
     /// qureg.pauli_x(1).unwrap();
     ///
@@ -4259,12 +4247,15 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// let ctrls = &[0, 1];
     /// let targs = &[2, 3];
-    /// multi_controlled_multi_qubit_qureg.unitary(ctrls, targs, u).unwrap();
+    /// qureg
+    ///     .multi_controlled_multi_qubit_unitary(ctrls, targs, u)
+    ///     .unwrap();
     ///
     /// // Check if the register is now in the state `|1111>`
-    /// let amp = qureg.get_real_ampother_qureg.(1;
+    /// let amp = qureg.get_real_amp(15);
     /// assert!((amp - 1.).abs() < EPSILON);
-    // qureg./ ```
+    /// ```
+    ///
     /// See [QuEST API] for more information.
     ///
     /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
@@ -4299,11 +4290,10 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
     /// let mut qureg = create_density_qureg(&env);
-    /// qureg.init_zero_state();
     ///
     /// let m = &ComplexMatrix2::new([[0., 1.], [1., 0.]], [[0., 0.], [0., 0.]]);
     /// let target = 1;
-    /// mix_kraus_map(qureg, target, &[m]).unwrap();
+    /// qureg.mix_kraus_map(target, &[m]).unwrap();
     ///
     /// // Check is the register is now in the state |01>
     /// let amp = qureg.get_density_amp(2, 2).unwrap();
@@ -4336,7 +4326,6 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
     /// let mut qureg = create_density_qureg::<3>(&env);
-    /// qureg.init_zero_state();
     ///
     /// let m = &ComplexMatrix4::new(
     ///     [
@@ -4354,7 +4343,9 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// );
     /// let target1 = 1;
     /// let target2 = 2;
-    /// mix_two_qubit_kraus_map(qureg, target1, target2, &[m]).unwrap();
+    /// qureg
+    ///     .mix_two_qubit_kraus_map(target1, target2, &[m])
+    ///     .unwrap();
     ///
     /// // Check is the register is now in the state |011>
     /// let amp = qureg.get_density_amp(6, 6).unwrap();
@@ -4394,7 +4385,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
     /// let mut qureg = create_density_qureg::<3>(&env);
-    /// qureg.init_zero_state();
+    ///
     /// let m = &mut ComplexMatrixN::try_new(2).unwrap();
     /// init_complex_matrix_n(
     ///     m,
@@ -4413,7 +4404,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// )
     /// .unwrap();
     /// let targets = &[1, 2];
-    /// mix_multi_qubit_kraus_map(qureg, targets, &[m]).unwrap();
+    /// qureg.mix_multi_qubit_kraus_map(targets, &[m]).unwrap();
     ///
     /// // Check if the register is now in the state |011>
     /// let amp = qureg.get_density_amp(6, 6).unwrap();
@@ -4454,11 +4445,10 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
     /// let mut qureg = create_density_qureg(&env);
-    /// qureg.init_zero_state();
     ///
     /// let m = &ComplexMatrix2::new([[0., 1.], [0., 0.]], [[0., 0.], [0., 0.]]);
     /// let target = 1;
-    /// mix_nontp_kraus_map(qureg, target, &[m]).unwrap();
+    /// qureg.mix_nontp_kraus_map(target, &[m]).unwrap();
     ///
     /// // The register is in an unphysical null state
     /// let amp = qureg.get_density_amp(2, 2).unwrap();
@@ -4497,7 +4487,6 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
     /// let mut qureg = create_density_qureg::<3>(&env);
-    /// qureg.init_zero_state();
     ///
     /// let m = &ComplexMatrix4::new(
     ///     [
@@ -4515,7 +4504,9 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// );
     /// let target1 = 1;
     /// let target2 = 2;
-    /// mix_nontp_two_qubit_kraus_map(qureg, target1, target2, &[m]).unwrap();
+    /// qureg
+    ///     .mix_nontp_two_qubit_kraus_map(target1, target2, &[m])
+    ///     .unwrap();
     ///
     /// // The register is in an unphysical null state
     /// let amp = qureg.get_density_amp(6, 6).unwrap();
@@ -4556,7 +4547,6 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
     /// let mut qureg = create_density_qureg::<3>(&env);
-    /// qureg.init_zero_state();
     /// let m = &mut ComplexMatrixN::try_new(2).unwrap();
     /// init_complex_matrix_n(
     ///     m,
@@ -4575,7 +4565,9 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// )
     /// .unwrap();
     /// let targets = &[1, 2];
-    /// mix_nontp_multi_qubit_kraus_map(qureg, targets, &[m]).unwrap();
+    /// qureg
+    ///     .mix_nontp_multi_qubit_kraus_map(targets, &[m])
+    ///     .unwrap();
     ///
     /// // The register is in an unphysical null state
     /// let amp = qureg.get_density_amp(6, 6).unwrap();
@@ -4790,7 +4782,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let qureg = &mut create_qureg::<4>(env);
+    /// let mut qureg = create_qureg::<4>(&env);
     /// qureg.init_zero_state();
     /// qureg.pauli_x(0).unwrap();
     /// qureg.pauli_x(1).unwrap();
