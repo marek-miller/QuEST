@@ -3551,17 +3551,17 @@ fn check_array_length_init_state_from_amps() {
 
     let reals = [0.; 4];
     let imags = [0.; 4];
-    init_state_from_amps(qureg, &reals, &imags).unwrap();
+    qureg.init_state_from_amps(&reals, &imags).unwrap();
 
     let reals = [0.; 3];
     let imags = [0.; 4];
-    init_state_from_amps(qureg, &reals, &imags).unwrap_err();
+    qureg.init_state_from_amps(&reals, &imags).unwrap_err();
 
     let reals = [0.; 4];
     let imags = [0.; 3];
-    init_state_from_amps(qureg, &reals, &imags).unwrap_err();
+    qureg.init_state_from_amps(&reals, &imags).unwrap_err();
 
     let reals = [0.; 5];
     let imags = [0.; 5];
-    init_state_from_amps(qureg, &reals, &imags).unwrap();
+    qureg.init_state_from_amps(&reals, &imags).unwrap();
 }

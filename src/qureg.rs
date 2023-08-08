@@ -4,6 +4,7 @@ use super::{
     QuestEnv,
     QuestError,
 };
+use crate::Qreal;
 
 #[derive(Debug)]
 pub struct Qureg<'a, const N: usize> {
@@ -403,6 +404,135 @@ impl<'a, const N: usize> Qureg<'a, N> {
     ) -> Result<(), QuestError> {
         catch_quest_exception(|| unsafe {
             ffi::initClassicalState(self.reg, state_ind);
+        })
+    }
+
+    /// Initialize `qureg` into a pure state.
+    ///
+    /// - If `qureg` is a state-vector, this merely clones `pure` into `qureg`.
+    /// - If `qureg` is a density matrix, this makes `qureg` 100% likely to be
+    ///   in the `pure` state.
+    ///
+    /// # Parameters
+    ///
+    /// - `qureg`: the register to modify
+    /// - `pure`: a state-vector containing the pure state into which to
+    ///   initialize `qureg`
+    ///
+    /// # Errors
+    ///
+    /// - [`InvalidQuESTInputError`],
+    ///   - if `qureg` and `pure` have mismatching dimensions
+    ///   - if `pure` is a density matrix
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use quest_bind::*;
+    /// let env = &QuestEnv::new();
+    /// let qureg = &mut Qureg::try_new_density(3, env).unwrap();
+    /// let pure_state = &mut Qureg::try_new(3, env).unwrap();
+    ///
+    /// init_zero_state(pure_state);
+    /// init_pure_state(qureg, pure_state).unwrap();
+    ///
+    /// assert!((calc_purity(qureg).unwrap() - 1.0).abs() < EPSILON);
+    /// ```
+    ///
+    /// See [QuEST API] for more information.
+    ///
+    /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+    /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+    #[allow(clippy::needless_pass_by_ref_mut)]
+    pub fn init_pure_state(
+        &mut self,
+        pure_: &Qureg<'_, N>,
+    ) -> Result<(), QuestError> {
+        catch_quest_exception(|| unsafe {
+            ffi::initPureState(self.reg, pure_.reg);
+        })
+    }
+
+    /// Initialize `qureg` to be in a debug state.
+    ///
+    /// Set `qureg` to be in the un-normalized, non-physical state with
+    /// with `n`th complex amplitude given by:
+    ///
+    /// ```text
+    ///   2n/10 + i*(2n+1)/10.
+    /// ```
+    ///
+    /// This is used internally for debugging and testing.
+    ///
+    /// See [QuEST API] for more information.
+    ///
+    /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+    #[allow(clippy::needless_pass_by_ref_mut)]
+    pub fn init_debug_state(&mut self) {
+        catch_quest_exception(|| unsafe {
+            ffi::initDebugState(self.reg);
+        })
+        .expect("init_debug_state() should always succeed");
+    }
+
+    /// Initialize `qureg` by specifying all amplitudes.
+    ///
+    /// For density matrices, it is assumed the amplitudes have been flattened
+    /// column-wise into the given arrays.
+    ///
+    /// The real and imaginary components of the amplitudes are passed in
+    /// separate arrays, `reals` and `imags`, each of which must have length
+    /// [`qureg.get_num_amps_total()`]. There is no automatic checking that the
+    /// passed arrays are L2 normalized, so this can be used to prepare `qureg`
+    /// in a non-physical state.
+    ///
+    /// In distributed mode, this would require the complete state to fit in
+    /// every node. To manually prepare a state for which all amplitudes cannot
+    /// fit into a single node, use [`set_amps()`]
+    ///
+    /// # Parameters
+    ///
+    /// - `qureg`: the register to overwrite
+    /// - `reals`: array of the real components of the new amplitudes
+    /// - `imags`: array of the imaginary components of the new amplitudes
+    ///
+    /// # Errors
+    ///
+    /// - [`ArrayLengthError`],
+    ///   - if either `reals` or `imags` have fewer than
+    ///     [`qureg.get_num_amps_total()`] elements
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use quest_bind::*;
+    /// let env = &QuestEnv::new();
+    /// let qureg = &mut Qureg::try_new(2, env).unwrap();
+    ///
+    /// init_state_from_amps(qureg, &[1., 0., 0., 0.], &[0., 0., 0., 0.]);
+    /// let prob = get_prob_amp(qureg, 0).unwrap();
+    ///
+    /// assert!((prob - 1.).abs() < EPSILON);
+    /// ```
+    ///
+    /// See [QuEST API] for more information.
+    ///
+    /// [`qureg.get_num_amps_total()`]: crate::Qureg::get_num_amps_total()
+    /// [`set_amps()`]: crate::set_amps()
+    /// [`ArrayLengthError`]: crate::QuestError::ArrayLengthError
+    /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+    #[allow(clippy::needless_pass_by_ref_mut)]
+    pub fn init_state_from_amps(
+        &mut self,
+        reals: &[Qreal],
+        imags: &[Qreal],
+    ) -> Result<(), QuestError> {
+        let num_amps_total = self.get_num_amps_total() as usize;
+        if reals.len() < num_amps_total || imags.len() < num_amps_total {
+            return Err(QuestError::ArrayLengthError);
+        }
+        catch_quest_exception(|| unsafe {
+            ffi::initStateFromAmps(self.reg, reals.as_ptr(), imags.as_ptr());
         })
     }
 }
