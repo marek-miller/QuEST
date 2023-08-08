@@ -7,11 +7,11 @@
 //! state `0` or `1`.
 use quest_bind::{
     controlled_not,
+    create_qureg,
     hadamard,
     measure,
     QuestEnv,
     QuestError,
-    Qureg,
 };
 
 fn main() -> Result<(), QuestError> {
@@ -20,7 +20,7 @@ fn main() -> Result<(), QuestError> {
     env.report_quest_env();
 
     // Create a 2-qubit register and report its parameters
-    let qureg = &mut Qureg::<'_, 2>::try_new(env)?;
+    let qureg = &mut create_qureg::<2>(env);
     qureg.report_qureg_params();
     // Initialize |00> state and print out the state to screen
     qureg.init_zero_state();

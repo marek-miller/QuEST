@@ -545,3 +545,11 @@ impl<'a, const N: u16> Drop for Qureg<'a, N> {
         .expect("dropping Qureg should always succeed");
     }
 }
+
+pub fn create_qureg<const N: u16>(env: &QuestEnv) -> Qureg<'_, N> {
+    Qureg::try_new(env).expect("cannot allocate new Qureg")
+}
+
+pub fn create_density_qureg<const N: u16>(env: &QuestEnv) -> Qureg<'_, N> {
+    Qureg::try_new_density(env).expect("cannot allocate new Qureg")
+}

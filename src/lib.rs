@@ -54,7 +54,11 @@ pub use operators::{
     PauliHamil,
 };
 pub use questenv::QuestEnv;
-pub use qureg::Qureg;
+pub use qureg::{
+    create_density_qureg,
+    create_qureg,
+    Qureg,
+};
 
 /// Print the Hamiltonian `hamil` to screen.
 pub fn report_pauli_hamil(hamil: &PauliHamil) -> Result<(), QuestError> {
