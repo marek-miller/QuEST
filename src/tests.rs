@@ -213,14 +213,14 @@ fn set_amps_01() {
     let re = [1., 2., 3., 4.];
     let im = [1., 2., 3., 4.];
 
-    set_amps(&mut qureg, 0, &re, &im).unwrap();
+    qureg.set_amps(0, &re, &im).unwrap();
     assert!((get_real_amp(&qureg, 0).unwrap() - 1.).abs() < EPSILON);
 
-    set_amps(&mut qureg, 3, &re, &im).unwrap();
+    qureg.set_amps(3, &re, &im).unwrap();
 
-    set_amps(&mut qureg, 9, &re, &im).unwrap_err();
-    set_amps(&mut qureg, 7, &re, &im).unwrap_err();
-    set_amps(&mut qureg, -1, &re, &im).unwrap_err();
+    qureg.set_amps(9, &re, &im).unwrap_err();
+    qureg.set_amps(7, &re, &im).unwrap_err();
+    qureg.set_amps(-1, &re, &im).unwrap_err();
 }
 
 #[test]
@@ -231,13 +231,13 @@ fn set_amps_02() {
     let re = [1.];
     let im = [1., 2.];
 
-    let res = set_amps(&mut qureg, 0, &re, &im).unwrap_err();
+    let res = qureg.set_amps(0, &re, &im).unwrap_err();
     assert_eq!(res, QuestError::ArrayLengthError);
 
     let re = [1., 2.];
     let im = [1.];
 
-    let res = set_amps(&mut qureg, 0, &re, &im).unwrap_err();
+    let res = qureg.set_amps(0, &re, &im).unwrap_err();
     assert_eq!(res, QuestError::ArrayLengthError);
 }
 
@@ -249,16 +249,16 @@ fn set_density_amps_01() {
     let re = &[1., 2., 3., 4.];
     let im = &[1., 2., 3., 4.];
 
-    set_density_amps(qureg, 0, 0, re, im).unwrap();
+    qureg.set_density_amps(0, 0, re, im).unwrap();
     assert!((get_density_amp(qureg, 0, 0).unwrap().re - 1.).abs() < EPSILON);
 
-    set_density_amps(qureg, 1, 3, re, im).unwrap();
+    qureg.set_density_amps(1, 3, re, im).unwrap();
 
-    set_amps(qureg, 0, re, im).unwrap_err();
+    qureg.set_amps(0, re, im).unwrap_err();
 
-    set_density_amps(qureg, 0, 9, re, im).unwrap_err();
-    set_density_amps(qureg, 8, 7, re, im).unwrap_err();
-    set_density_amps(qureg, 0, -1, re, im).unwrap_err();
+    qureg.set_density_amps(0, 9, re, im).unwrap_err();
+    qureg.set_density_amps(8, 7, re, im).unwrap_err();
+    qureg.set_density_amps(0, -1, re, im).unwrap_err();
 }
 
 #[test]
@@ -269,13 +269,13 @@ fn set_density_amps_02() {
     let re = [1.];
     let im = [1., 2.];
 
-    let res = set_density_amps(&mut qureg, 0, 0, &re, &im).unwrap_err();
+    let res = qureg.set_density_amps(0, 0, &re, &im).unwrap_err();
     assert_eq!(res, QuestError::ArrayLengthError);
 
     let re = [1., 2.];
     let im = [1.];
 
-    let res = set_density_amps(&mut qureg, 0, 0, &re, &im).unwrap_err();
+    let res = qureg.set_density_amps(0, 0, &re, &im).unwrap_err();
     assert_eq!(res, QuestError::ArrayLengthError);
 }
 

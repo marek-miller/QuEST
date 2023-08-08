@@ -137,7 +137,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = &QuestEnv::new();
-    /// let qureg = &create_qureg::<3>(env);
+    /// let qureg = create_qureg::<3>(env);
     ///
     /// assert_eq!(qureg.get_num_qubits(), 3);
     /// ```
@@ -535,7 +535,182 @@ impl<'a, const N: u16> Qureg<'a, N> {
             ffi::initStateFromAmps(self.reg, reals.as_ptr(), imags.as_ptr());
         })
     }
-}
+
+    /// Overwrites a contiguous subset of the amplitudes in a state-vector.
+    ///
+    /// Only amplitudes with indices in `[start_ind,  start_ind + reals.len()]`
+    /// will be changed. The resulting `qureg` may not necessarily be in an
+    /// L2 normalized state.
+    ///
+    /// In distributed mode, this function assumes the subset `reals` and
+    /// `imags` exist (at least) on the node containing the ultimately
+    /// updated elements. For example, below is the correct way to modify
+    /// the full 8 elements of `qureg` when split between 2 nodes:
+    ///
+    /// ```rust
+    /// # use quest_bind::*;
+    /// let env = &QuestEnv::new();
+    /// let qureg = &mut create_qureg::<3>(env);
+    ///
+    /// let re = &mut [1., 2., 3., 4.];
+    /// let im = &mut [1., 2., 3., 4.];
+    /// set_amps(qureg, 0, re, im);
+    ///
+    /// // modify re and im to the next set of elements
+    /// for i in 0..4 {
+    ///     re[i] += 4.;
+    ///     im[i] += 4.;
+    /// }
+    /// set_amps(qureg, 4, re, im);
+    /// ```
+    ///
+    /// # Parameters
+    ///
+    /// - `qureg`: the state-vector to modify
+    /// - `start_ind`: the index of the first amplitude in `qureg` to modify
+    /// - `reals`: array of the real components of the new amplitudes
+    /// - `imags`: array of the imaginary components of the new amplitudes
+    ///
+    /// # Errors
+    ///
+    /// - [`ArrayLengthError`]
+    ///   - if `reals.len()` and `imags.len()` are different
+    ///
+    /// - [`InvalidQuESTInputError`]
+    ///   - if `qureg` is not a state-vector (i.e. is a density matrix)
+    ///   - if `start_ind` is outside [0, [`qureg.get_num_amps_total()`]]
+    ///   - if `reals.len()` is outside [0, `qureg.get_num_amps_total()`]
+    ///   - if `reals.len()` + `start_ind` >= `qureg.get_num_amps_total()`
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use quest_bind::*;
+    /// let env = &QuestEnv::new();
+    /// let qureg = &mut create_qureg::<2>(env);
+    ///
+    /// let re = &[1., 2., 3.];
+    /// let im = &[4., 5., 6.];
+    /// let start_ind = 1;
+    /// set_amps(qureg, start_ind, re, im);
+    ///
+    /// let amp = get_real_amp(qureg, 3).unwrap();
+    /// assert!((amp - 3.).abs() < EPSILON);
+    /// ```
+    ///
+    /// See [QuEST API] for more information.
+    ///
+    /// [`qureg.get_num_amps_total()`]: crate::Qureg::get_num_amps_total()
+    /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+    /// [`ArrayLengthError`]: crate::QuestError::ArrayLengthError
+    /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+    #[allow(clippy::needless_pass_by_ref_mut)]
+    pub fn set_amps(
+        &mut self,
+        start_ind: i64,
+        reals: &[Qreal],
+        imags: &[Qreal],
+    ) -> Result<(), QuestError> {
+        if reals.len() != imags.len() {
+            return Err(QuestError::ArrayLengthError);
+        }
+        let num_amps = reals.len() as i64;
+        catch_quest_exception(|| unsafe {
+            ffi::setAmps(
+                self.reg,
+                start_ind,
+                reals.as_ptr(),
+                imags.as_ptr(),
+                num_amps,
+            );
+        })
+    }
+
+    /// Overwrites a contiguous subset of the amplitudes in a density-matrix.
+    ///
+    /// Only the first `reals.len()` amplitudes starting from row-column index
+    /// `(start_row, start_col)`, and proceeding down the column (wrapping
+    /// around between rows) will be modified. The resulting `qureg` may not
+    /// necessarily be in an L2 normalized state.
+    ///
+    /// In distributed mode, this function assumes the subset `reals` and
+    /// `imags` exist (at least) on the node containing the ultimately
+    /// updated elements. See also [`set_amps()`] for more details.
+    ///
+    /// # Parameters
+    ///
+    /// - `qureg`: the state-vector to modify
+    /// - `start_row`: the row-index of the first amplitude in `qureg` to modify
+    /// - `start_col`: the column-index of the first amplitude in `qureg` to
+    ///   modify
+    /// - `reals`: array of the real components of the new amplitudes
+    /// - `imags`: array of the imaginary components of the new amplitudes
+    ///
+    /// # Errors
+    ///
+    /// - [`ArrayLengthError`]
+    ///   - if `reals.len()` and `imags.len()` are different
+    ///
+    /// - [`InvalidQuESTInputError`]
+    ///   - if `qureg` is not a density-matrix (i.e. is a state vector)
+    ///   - if `start_row` is outside [0, 1 <<
+    ///     [`qureg.num_qubits_represented()`]]
+    ///   - if `start_col` is outside [0, 1 <<
+    ///     [`qureg.num_qubits_represented()`]]
+    ///   - if `reals.len()` is outside [0, `qureg.get_num_amps_total()`]
+    ///   - if `reals.len()` is larger than the remaining number of amplitudes
+    ///     from (`start_row`, `start_col`), column-wise
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use quest_bind::*;
+    /// let env = &QuestEnv::new();
+    /// let qureg = &mut Qureg::try_new_density(2, env).unwrap();
+    ///
+    /// let re = &[1., 2., 3.];
+    /// let im = &[4., 5., 6.];
+    /// let start_row = 1;
+    /// let start_col = 1;
+    /// set_density_amps(qureg, start_row, start_col, re, im);
+    ///
+    /// let amp = get_density_amp(qureg, 2, 1).unwrap();
+    ///
+    /// assert!((amp.re - 2.).abs() < EPSILON);
+    /// assert!((amp.im - 5.).abs() < EPSILON);
+    /// ```
+    ///
+    /// See [QuEST API] for more information.
+    ///
+    /// [`set_amps()`]: crate::set_amps()
+    /// [`num_qubits_represented()`]: crate::Qureg::num_qubits_represented()
+    /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+    /// [`ArrayLengthError`]: crate::QuestError::ArrayLengthError
+    /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+    #[allow(clippy::needless_pass_by_ref_mut)]
+    pub fn set_density_amps(
+        &mut self,
+        start_row: i64,
+        start_col: i64,
+        reals: &[Qreal],
+        imags: &[Qreal],
+    ) -> Result<(), QuestError> {
+        if reals.len() != imags.len() {
+            return Err(QuestError::ArrayLengthError);
+        }
+        let num_amps = reals.len() as i64;
+        catch_quest_exception(|| unsafe {
+            ffi::setDensityAmps(
+                self.reg,
+                start_row,
+                start_col,
+                reals.as_ptr(),
+                imags.as_ptr(),
+                num_amps,
+            );
+        })
+    }
+} // Qureg
 
 impl<'a, const N: u16> Drop for Qureg<'a, N> {
     fn drop(&mut self) {
