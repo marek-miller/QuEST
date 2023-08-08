@@ -334,7 +334,6 @@ pub fn apply_diagonal_op<const N: u16>(
 /// let qureg = &mut create_qureg::<2>(env);
 /// let op = &mut DiagonalOp::try_new(2, env).unwrap();
 ///
-/// init_zero_state(qureg);
 /// init_diagonal_op(op, &[1., 2., 3., 4.], &[5., 6., 7., 8.]).unwrap();
 ///
 /// let expec_val = calc_expec_diagonal_op(qureg, op).unwrap();

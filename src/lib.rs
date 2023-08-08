@@ -99,8 +99,8 @@ pub fn report_pauli_hamil(hamil: &PauliHamil) -> Result<(), QuestError> {
 /// See [QuEST API] for more information.
 ///
 /// [`QuestEnv::new()`]: crate::QuestEnv::new()
-/// [`measure()`]: crate::measure()
-/// [`measure_with_stats()`]: crate::measure_with_stats()
+/// [`measure()`]: crate::Qureg::measure()
+/// [`measure_with_stats()`]: crate::Qureg::measure_with_stats()
 /// [Mersenne Twister]: http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/MT2002/emt19937ar.html
 /// [`QuestEnv`]: crate::QuestEnv
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
@@ -145,8 +145,8 @@ pub fn seed_quest_default(env: &mut QuestEnv) {
 /// See [QuEST API] for more information.
 ///
 /// [`QuestEnv::new()`]: crate::QuestEnv::new()
-/// [`measure()`]: crate::measure()
-/// [`measure_with_stats()`]: crate::measure_with_stats()
+/// [`measure()`]: crate::Qureg::measure()
+/// [`measure_with_stats()`]: crate::Qureg::measure_with_stats()
 /// [Mersenne Twister]: http://www.math.sci.hiroshima-u.ac.jp/~m-mat/MT/MT2002/emt19937ar.html
 /// [`QuestEnv`]: crate::QuestEnv
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
@@ -200,8 +200,8 @@ pub fn seed_quest(
 /// See [QuEST API] for more information.
 ///
 /// [`QuestEnv::new()`]: crate::QuestEnv::new()
-/// [`measure()`]: crate::measure()
-/// [`measure_with_stats()`]: crate::measure_with_stats()
+/// [`measure()`]: crate::Qureg::measure()
+/// [`measure_with_stats()`]: crate::Qureg::measure_with_stats()
 /// [`seed_quest_default()`]: crate::seed_quest()
 /// [`seed_quest_default()`]: crate::seed_quest_default()
 /// [`QuestEnv`]: crate::QuestEnv
