@@ -6,13 +6,9 @@
 //! entangled, after the measurement they are both in the same, equally probable
 //! state `0` or `1`.
 use quest_bind::{
-    controlled_not,
-    hadamard,
-    init_zero_state,
-    measure,
+    create_qureg,
     QuestEnv,
     QuestError,
-    Qureg,
 };
 
 fn main() -> Result<(), QuestError> {
@@ -21,20 +17,20 @@ fn main() -> Result<(), QuestError> {
     env.report_quest_env();
 
     // Create a 2-qubit register and report its parameters
-    let qureg = &mut Qureg::try_new(2, env)?;
+    let mut qureg = create_qureg::<2>(env);
     qureg.report_qureg_params();
     // Initialize |00> state and print out the state to screen
-    init_zero_state(qureg);
+    qureg.init_zero_state();
     qureg.report_state_to_screen(0);
 
     // Prepare a Bell state `|00> + |11>`: apply Hadamard gate
     // on qubit 0, then NOT on qubit 1, controlled by qubit 0.
     println!("---\nPrepare Bell state: |00> + |11>");
-    hadamard(qureg, 0).and(controlled_not(qureg, 0, 1))?;
+    qureg.hadamard(0).and(qureg.controlled_not(0, 1))?;
 
     // Measure both qubits
-    let outcome0 = measure(qureg, 0)?;
-    let outcome1 = measure(qureg, 1)?;
+    let outcome0 = qureg.measure(0)?;
+    let outcome1 = qureg.measure(1)?;
     println!("Qubit \"0\" measured in state: |{outcome0}>");
     println!("Qubit \"1\" measured in state: |{outcome1}>");
 

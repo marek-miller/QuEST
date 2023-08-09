@@ -1,5 +1,26 @@
 # Releases
 
+## Next release
+
+- New features/improvements:
+
+  - Add methods `create_qureg()`, `create_density_qureg()`
+  -
+  -
+
+- Bug fixes:
+
+  -
+  -
+  -
+
+- API breaking changes:
+
+  - Change `Qureg` type def. to `Qureg<'\_, const N: usize>`
+    - Move many, many functions onto Qureg type
+  -
+  -
+
 ## v0.3.5 (05/08/2023)
 
 - Change git repository name to: `quest_bind`.
