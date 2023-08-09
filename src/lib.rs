@@ -4845,7 +4845,7 @@ pub fn apply_phase_func_overrides(
 ///   phase function `f(\vec{r})`
 /// - `num_terms_per_reg` a list of the number of `coeff` and `exponent` terms
 ///   supplied for each variable/sub-register
-////
+///
 /// # Errors
 ///
 /// - [`InvalidQuESTInputError`],
