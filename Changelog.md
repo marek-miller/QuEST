@@ -18,7 +18,9 @@
 
   - Change `Qureg` type def. to `Qureg<'\_, const N: usize>`
     - Move many, many functions onto Qureg type
-  - Remove redundant method: `Qureg::num_qubits_represented()`
+  - Remove redundant methods:
+    - `Qureg::num_qubits_represented()`
+    - `Qureg::get_num_amps()`
   -
 
 ## v0.3.5 (05/08/2023)

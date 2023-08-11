@@ -166,39 +166,10 @@ impl<'a, const N: u16> Qureg<'a, N> {
         N
     }
 
-    /// Return the number of complex amplitudes in a state-vector.
-    ///
-    /// In distributed mode, this returns the total number of amplitudes in the
-    /// full representation of `qureg`, and so may be larger than the number
-    /// stored on each node.
-    ///
-    ///
-    /// # Errors
-    ///
-    /// - [`InvalidQuESTInputError`], if `Qureg` is a density matrix
-    ///
-    /// # Examples
-    ///
-    /// ```rust
-    /// # use quest_bind::*;
-    /// let env = QuestEnv::new();
-    /// let qureg = create_qureg::<3>(&env);
-    ///
-    /// assert_eq!(qureg.get_num_amps().unwrap(), 8);
-    /// ```
-    ///
-    /// See [QuEST API] for more information.
-    ///
-    /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
-    /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
-    pub fn get_num_amps(&self) -> Result<i64, QuestError> {
-        catch_quest_exception(|| unsafe { ffi::getNumAmps(self.reg) })
-    }
-
-    /// Return the total number of amplitudes in the register.
+     /// Return the total number of amplitudes in the register.
     ///
     /// - If `Qureg` is a state-vector, this is equal to: `2^N`, where `N` is
-    ///   the number of qubits in the register [`get_num_qubits()`]
+    ///   the number of qubits in the register: [`get_num_qubits()`]
     /// - If `Qureg` is a density matrix, this is equal to `2^(2N)`
     ///
     /// # Examples
