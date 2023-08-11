@@ -260,7 +260,6 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// # Parameters
     ///
-    /// - `qureg`: a [`Qureg`][api-qureg] of which to clear all amplitudes
     ///
     ///
     /// # Examples
@@ -355,7 +354,6 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// # Parameters
     ///
-    ///  - `qureg`: the register to modify
     ///  - `state_ind` the index of the basis state to modify `qureg` into
     ///
     /// # Errors
@@ -401,14 +399,12 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// # Parameters
     ///
-    /// - `qureg`: the register to modify
     /// - `pure`: a state-vector containing the pure state into which to
     ///   initialize `qureg`
     ///
     /// # Errors
     ///
     /// - [`InvalidQuESTInputError`],
-    ///   - if `qureg` and `pure` have mismatching dimensions
     ///   - if `pure` is a density matrix
     ///
     /// # Examples
@@ -477,7 +473,6 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// # Parameters
     ///
-    /// - `qureg`: the register to overwrite
     /// - `reals`: array of the real components of the new amplitudes
     /// - `imags`: array of the imaginary components of the new amplitudes
     ///
@@ -551,7 +546,6 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// # Parameters
     ///
-    /// - `qureg`: the state-vector to modify
     /// - `start_ind`: the index of the first amplitude in `qureg` to modify
     /// - `reals`: array of the real components of the new amplitudes
     /// - `imags`: array of the imaginary components of the new amplitudes
@@ -624,7 +618,6 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// # Parameters
     ///
-    /// - `qureg`: the state-vector to modify
     /// - `start_row`: the row-index of the first amplitude in `qureg` to modify
     /// - `start_col`: the column-index of the first amplitude in `qureg` to
     ///   modify
@@ -715,11 +708,11 @@ impl<'a, const N: u16> Qureg<'a, N> {
     #[allow(clippy::needless_pass_by_ref_mut)]
     pub fn phase_shift(
         &mut self,
-        target_quibit: i32,
+        target_qubit: i32,
         angle: Qreal,
     ) -> Result<(), QuestError> {
         catch_quest_exception(|| unsafe {
-            ffi::phaseShift(self.reg, target_quibit, angle);
+            ffi::phaseShift(self.reg, target_qubit, angle);
         })
     }
 
@@ -863,13 +856,12 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// # Parameters
     ///
-    /// - `qureg`: object representing the set of all qubits
     /// - `target_qubit`: qubit to operate upon
     ///
     /// # Errors
     ///
     /// - [`InvalidQuESTInputError`],
-    ///   - if `target_qubit` is outside [0, qureg.[`get_num_qubits()`]).
+    ///   - if `target_qubit` is outside [0, [`get_num_qubits()`]).
     ///
     /// # Examples
     ///
@@ -913,13 +905,12 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// # Parameters
     ///
-    /// - `qureg`: object representing the set of all qubits
     /// - `target_qubit`: qubit to operate upon
     ///
     /// # Errors
     ///
     /// - [`InvalidQuESTInputError`],
-    ///   - if `target_qubit` is outside [0, qureg.[`get_num_qubits()`]).
+    ///   - if `target_qubit` is outside [0, [`get_num_qubits()`]).
     ///
     ///
     /// # Examples
@@ -1014,10 +1005,6 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// the state-vector in a hardware agnostic way. Note though that users
     /// should instead use [`set_amps()`][api-set-amps] if possible.
     ///
-    /// # Parameters
-    ///
-    /// - `qureg`: the qureg to copy
-    ///
     /// # Examples
     ///
     /// ```rust
@@ -1052,10 +1039,6 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// this allows a user to directly modify the state-vector in a hardware
     /// agnostic way. Note though that users should instead use
     /// [`set_amps()`][api-set-amps] if possible.
-    ///
-    /// # Parameters
-    ///
-    /// - `qureg`: the qureg to copy
     ///
     /// # Examples
     ///
@@ -1096,7 +1079,6 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// # Parameters
     ///
-    /// - `qureg`: the qureg to copy
     /// - `start_ind` the index of the first amplitude to copy
     /// - `num_amps` the number of contiguous amplitudes to copy (starting with
     ///   `start_ind`)
@@ -1146,7 +1128,6 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// # Parameters
     ///
-    /// - `qureg`: the qureg to copy
     /// - `start_ind` the index of the first amplitude to copy
     /// - `num_amps` the number of contiguous amplitudes to copy (starting with
     ///   `start_ind`)
@@ -1181,14 +1162,13 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// # Parameters
     ///
-    /// - `qureg`: object representing a set of qubits
     /// - `index`: index in state vector of probability amplitudes
     ///
     /// # Errors
     ///
     /// - [`InvalidQuESTInputError`],
-    ///   - if `qureg` is a density matrix
-    ///   - if `index` is outside [0, qureg.[`get_num_qubits()`]).
+    ///   - if `self` is a density matrix
+    ///   - if `index` is outside [0, [`get_num_qubits()`]).
     ///
     /// # Examples
     ///
@@ -1220,14 +1200,13 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// # Parameters
     ///
-    /// - `qureg`: object representing a set of qubits
     /// - `index`: index in state vector of probability amplitudes
     ///
     /// # Errors
     ///
     /// - [`InvalidQuESTInputError`],
     ///   - if `qureg` is a density matrix
-    ///   - if `index` is outside [0, qureg.[`get_num_qubits()`]).
+    ///   - if `index` is outside [0, [`get_num_qubits()`]).
     ///
     /// # Examples
     ///
@@ -1258,14 +1237,13 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// # Parameters
     ///
-    /// - `qureg`: object representing a set of qubits
     /// - `index`: index in state vector of probability amplitudes
     ///
     /// # Errors
     ///
     /// - [`InvalidQuESTInputError`],
     ///   - if `qureg` is a density matrix
-    ///   - if `index` is outside [0, qureg.[`get_num_qubits()`]).
+    ///   - if `index` is outside [0, [`get_num_qubits()`]).
     ///
     /// # Examples
     ///
@@ -1296,14 +1274,13 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// # Parameters
     ///
-    /// - `qureg`: object representing a set of qubits
     /// - `index`: index in state vector of probability amplitudes
     ///
     /// # Errors
     ///
     /// - [`InvalidQuESTInputError`],
     ///   - if `qureg` is a density matrix
-    ///   - if `index` is outside [0, qureg.[`get_num_qubits()`]).
+    ///   - if `index` is outside [0, [`get_num_qubits()`]).
     ///
     /// # Examples
     ///
@@ -1333,7 +1310,6 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// # Parameters
     ///
-    /// - `qureg`: object representing a set of qubits
     /// - `row`: row of the desired amplitude in the density matrix
     /// - `col`: column of the desired amplitude in the density matrix
     ///
@@ -1341,7 +1317,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// - [`InvalidQuESTInputError`],
     ///   - if `qureg` is a state vector
-    ///   - if `row` or `col` are outside [0, qureg.[`get_num_qubits()`]).
+    ///   - if `row` or `col` are outside [0, [`get_num_qubits()`]).
     ///
     /// # Examples
     ///
@@ -1412,7 +1388,6 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// # Parameters
     ///
-    /// - `qureg`: object representing the set of all qubits
     /// - `target_qubit`: qubit to operate on
     /// - `alpha`: complex unitary parameter (row 1, column 1)
     /// - `beta`: complex unitary parameter (row 2, column 1)
@@ -1420,7 +1395,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// # Errors
     ///
     /// - [`InvalidQuESTInputError`],
-    ///   - if `target_qubit` is outside [0, qureg.[`get_num_qubits()`]).
+    ///   - if `target_qubit` is outside [0, [`get_num_qubits()`]).
     ///   - if  `alpha`, `beta` don't satisfy: `|alpha|^2 + |beta|^2 = 1`.
     ///
     /// # Examples
@@ -1476,14 +1451,13 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// # Parameters
     ///
-    /// - `qureg`: object representing the set of all qubits
     /// - `target_qubit`: qubit to operate on
     /// - `u`: single-qubit unitary matrix to apply
     ///
     /// # Errors
     ///
     /// - [`InvalidQuESTInputError`],
-    ///   - if `target_qubit` is outside [0, qureg.[`get_num_qubits()`]).
+    ///   - if `target_qubit` is outside [0, [`get_num_qubits()`]).
     ///   - if `u` is not unitary
     ///
     /// # Examples
@@ -1537,14 +1511,13 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// # Parameters
     ///
-    /// - `qureg`: object representing the set of all qubits
     /// - `rot_qubit`: qubit to rotate
     /// - `angle`: angle by which to rotate in radians
     ///
     /// # Errors
     ///
     /// - [`InvalidQuESTInputError`],
-    ///   - if `rot_qubit` is outside [0, qureg.[`get_num_qubits()`]).
+    ///   - if `rot_qubit` is outside [0, [`get_num_qubits()`]).
     ///
     /// # Examples
     ///
@@ -1584,14 +1557,13 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// # Parameters
     ///
-    /// - `qureg`: object representing the set of all qubits
     /// - `rot_qubit`: qubit to rotate
     /// - `angle`: angle by which to rotate in radians
     ///
     /// # Errors
     ///
     /// - [`InvalidQuESTInputError`],
-    ///   - if `rot_qubit` is outside [0, qureg.[`get_num_qubits()`]).
+    ///   - if `rot_qubit` is outside [0, [`get_num_qubits()`]).
     ///
     /// # Examples
     ///
@@ -1631,14 +1603,13 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// # Parameters
     ///
-    /// - `qureg`: object representing the set of all qubits
     /// - `rot_qubit`: qubit to rotate
     /// - `angle`: angle by which to rotate in radians
     ///
     /// # Errors
     ///
     /// - [`InvalidQuESTInputError`],
-    ///   - if `rot_qubit` is outside [0, qureg.[`get_num_qubits()`]).
+    ///   - if `rot_qubit` is outside [0, [`get_num_qubits()`]).
     ///
     /// # Examples
     ///
@@ -1675,7 +1646,6 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// # Parameters
     ///
-    /// - `qureg`: object representing the set of all qubits
     /// - `rot_qubit`: qubit to rotate
     /// - `angle`: angle by which to rotate in radians
     /// - `axis`: vector around which to rotate (can be non-unit; will be
@@ -1684,7 +1654,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// # Errors
     ///
     /// - [`InvalidQuESTInputError`]
-    ///   - if `rot_qubit` is outside [0, qureg.[`get_num_qubits()`])
+    ///   - if `rot_qubit` is outside [0, [`get_num_qubits()`])
     ///   - if `axis` is the zero vector
     ///
     /// # Examples
@@ -1725,7 +1695,6 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// # Parameters
     ///
-    /// - `qureg`: object representing the set of all qubits
     /// - `control_qubit`: qubit which has value `1` in the rotated states
     /// - `target_qubit`: qubit to rotate
     /// - `angle`: angle by which to rotate the target qubit in radians
@@ -1734,7 +1703,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// - [`InvalidQuESTInputError`]
     ///   - if either `control_qubit` or `target_qubit` are outside [0,
-    ///     qureg.[`get_num_qubits()`])
+    ///     [`get_num_qubits()`])
     ///   - if `control_qubit` and `target_qubit` are equal
     ///
     /// # Examples
@@ -1782,7 +1751,6 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// # Parameters
     ///
-    /// - `qureg`: object representing the set of all qubits
     /// - `control_qubit`: qubit which has value `1` in the rotated states
     /// - `target_qubit`: qubit to rotate
     /// - `angle`: angle by which to rotate the target qubit in radians
@@ -1791,7 +1759,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// - [`InvalidQuESTInputError`]
     ///   - if either `control_qubit` or `target_qubit` are outside [0,
-    ///     qureg.[`get_num_qubits()`])
+    ///     [`get_num_qubits()`])
     ///   - if `control_qubit` and `target_qubit` are equal
     ///
     /// # Examples
@@ -1839,7 +1807,6 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// # Parameters
     ///
-    /// - `qureg`: object representing the set of all qubits
     /// - `control_qubit`: qubit which has value `1` in the rotated states
     /// - `target_qubit`: qubit to rotate
     /// - `angle`: angle by which to rotate the target qubit in radians
@@ -1848,7 +1815,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// - [`InvalidQuESTInputError`]
     ///   - if either `control_qubit` or `target_qubit` are outside [0,
-    ///     qureg.[`get_num_qubits()`])
+    ///     [`get_num_qubits()`])
     ///   - if `control_qubit` and `target_qubit` are equal
     ///
     /// # Examples
@@ -1896,7 +1863,6 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// # Parameters
     ///
-    /// - `qureg`: object representing the set of all qubits
     /// - `control_qubit`: qubit which has value `1` in the rotated states
     /// - `target_qubit`: qubit to rotate
     /// - `angle`: angle by which to rotate in radians
@@ -1907,7 +1873,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// - [`InvalidQuESTInputError`]
     ///   - if either `control_qubit` or `target_qubit` are outside [0,
-    ///     qureg.[`get_num_qubits()`])
+    ///     [`get_num_qubits()`])
     ///   - if `control_qubit` and `target_qubit` are equal
     ///   - if `axis` is the zero vector
     ///
@@ -1973,7 +1939,6 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// # Parameters
     ///
-    /// - `qureg`: object representing the set of all qubits
     /// - `control_qubit`: applies unitary if this qubit is `1`
     /// - `target_qubit`: qubit to operate on
     /// - `alpha`: complex unitary parameter (row 1, column 1)
@@ -2031,7 +1996,6 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// # Parameters
     ///
-    /// - `qureg`: object representing the set of all qubits
     /// - `control_qubit`: applies unitary if this qubit is `1`
     /// - `target_qubit`: qubit to operate on
     /// - `u`: single-qubit unitary matrix to apply
@@ -2084,7 +2048,6 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// # Parameters
     ///
-    /// - `qureg`: object representing the set of all qubits
     /// - `control_qubits`: applies unitary if all qubits in this slice are
     ///   equal to `1`
     /// - `target_qubit`: qubit to operate on
@@ -2142,7 +2105,6 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// # Parameters
     ///
-    ///  - `qureg`: object representing the set of all qubits
     ///  - `target_qubit`: qubit to operate on
     ///
     /// # Errors
@@ -2183,7 +2145,6 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// # Parameters
     ///
-    ///  - `qureg`: object representing the set of all qubits
     ///  - `target_qubit`: qubit to operate on
     ///
     /// # Errors
@@ -2224,7 +2185,6 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// # Parameters
     ///
-    ///  - `qureg`: object representing the set of all qubits
     ///  - `target_qubit`: qubit to operate on
     ///
     /// # Errors
@@ -2273,7 +2233,6 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// # Parameters
     ///
-    ///  - `qureg`: object representing the set of all qubits
     ///  - `target_qubit`: qubit to operate on
     ///
     /// # Errors
@@ -2327,7 +2286,6 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// # Parameters
     ///
-    /// - `qureg`: the state-vector or density matrix to modify
     /// - `control_qubit`: "nots" the target if this qubit is `1`
     /// - `target_qubit`: qubit to "not"
     ///
@@ -2335,7 +2293,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// - [`InvalidQuESTInputError`],
     ///   - if either `control_qubit` or `target_qubit` is outside [0,
-    ///     qureg.[`get_num_qubits()`])
+    ///     [`get_num_qubits()`])
     ///   - if `control_qubit` and `target_qubit` are equal
     ///
     /// # Examples
@@ -2384,7 +2342,6 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// # Parameters
     ///
-    ///  - `qureg`: a state-vector or density matrix to modify
     ///  - `ctrls`: a list of the control qubit indices
     ///  - `targs`: a list of the qubits to be targeted by the X gates
     ///
@@ -2458,7 +2415,6 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// # Parameters
     ///
-    ///  - `qureg`: a state-vector or density matrix to modify
     ///  - `targs`: a list of the qubits to be targeted by the X gates
     ///
     /// # Errors
@@ -2518,7 +2474,6 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// # Parameters
     ///
-    /// - `qureg`: the state-vector or density matrix to modify
     /// - `control_qubit`: applies pauli Y the target if this qubit is `1`
     /// - `target_qubit`: qubit to modify
     ///
@@ -2526,7 +2481,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// - [`InvalidQuESTInputError`],
     ///   - if either `control_qubit` or `target_qubit` is outside [0,
-    ///     qureg.[`get_num_qubits()`])
+    ///     [`get_num_qubits()`])
     ///   - if `control_qubit` and `target_qubit` are equal
     ///
     /// # Examples
@@ -2577,7 +2532,6 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// # Parameters
     ///
-    /// - `qureg`: object representing the set of all qubits
     /// - `measure_qubit`: qubit to study
     /// - `outcome`: for which to find the probability of the qubit being
     ///   measured in
@@ -2590,7 +2544,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// # Errors
     ///
     /// - [`InvalidQuESTInputError`],
-    ///   - if `measure_qubit` is outside [0, qureg.[`get_num_qubits()`])
+    ///   - if `measure_qubit` is outside [0, [`get_num_qubits()`])
     ///   - if `outcome` is not in {0, 1}
     ///
     /// # Examples
@@ -2647,14 +2601,13 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// - `outcome_probs`: a pre-allocated array of length `1 << n`, where `n =
     ///   qubits.len()`  which will be modified to contain all outcome
     ///   probabilities
-    /// - `qureg`: a state-vector or density matrix to study
     /// - `qubits`: a list of qubits to study
     ///
     /// # Errors
     ///
     /// - [`InvalidQuESTInputError`],
     ///   - if any index in `qubits` is invalid, i.e. outside [0,
-    ///     qureg.[`get_num_qubits()`])
+    ///     [`get_num_qubits()`])
     ///   - if `qubits` contains any repetitions
     /// - [`ArrayLengthError`],
     ///   - if `outcome_probs.len() < 1 << qubits.len()`
@@ -2980,7 +2933,6 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// # Parameters
     ///
-    /// - `qureg`: a density matrix
     /// - `target_qubit`: qubit upon which to induce dephasing noise
     /// - `prob`: the probability of the phase error occurring
     ///
@@ -2988,7 +2940,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// - [`InvalidQuESTInputError`],
     ///   - if `qureg` is not a density matrix
-    ///   - if `target_qubit` is outside [0, qureg.[`get_num_qubits()`]).
+    ///   - if `target_qubit` is outside [0, [`get_num_qubits()`]).
     ///   - if `prob` is not in `[0, 1/2]`
     ///
     /// # Examples
@@ -3042,7 +2994,6 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// # Parameters
     ///
-    /// - `qureg`: a density matrix
     /// - `qubit1`: qubit upon which to induce dephasing noise
     /// - `qubit2`: qubit upon which to induce dephasing noise
     /// - `prob`: the probability of the phase error occurring
@@ -3051,7 +3002,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// - [`InvalidQuESTInputError`],
     ///   - if `qureg` is not a density matrix
-    ///   - if `qubit1` or `qubit2` are outside [0, qureg.[`get_num_qubits()`]).
+    ///   - if `qubit1` or `qubit2` are outside [0, [`get_num_qubits()`]).
     ///   - if `qubit1 = qubit2`
     ///   - if `prob` is not in `[0, 3/4]`
     ///
@@ -3108,7 +3059,6 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// # Parameters
     ///
-    /// - `qureg`: a density matrix
     /// - `target_qubit`: qubit upon which to induce depolarizing noise
     /// - `prob`: the probability of the depolarizing error occurring
     ///
@@ -3116,7 +3066,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// - [`InvalidQuESTInputError`],
     ///   - if `qureg` is not a density matrix
-    ///   - if `target_qubit` is outside [0, qureg.[`get_num_qubits()`]).
+    ///   - if `target_qubit` is outside [0, [`get_num_qubits()`]).
     ///   - if `prob` is not in `[0, 3/4]`
     ///
     /// # Examples
@@ -3173,7 +3123,6 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// # Parameters
     ///
-    /// - `qureg`: a density matrix
     /// - `target_qubit`: qubit upon which to induce amplitude damping
     /// - `prob`: the probability of the damping
     ///
@@ -3181,7 +3130,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// - [`InvalidQuESTInputError`],
     ///   - if `qureg` is not a density matrix
-    ///   - if `target_qubit` is outside [0, qureg.[`get_num_qubits()`]).
+    ///   - if `target_qubit` is outside [0, [`get_num_qubits()`]).
     ///   - if `prob` is not in `[0, 1]`
     ///
     /// # Examples
@@ -3336,7 +3285,6 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// # Parameters
     ///
-    /// - `qureg`: a density matrix of which to measure the purity
     ///
     /// # Errors
     ///
@@ -3389,7 +3337,6 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// # Parameters
     ///
-    /// - `qureg`: a density matrix or state vector
     /// - `pure_state`: a state vector
     ///
     /// Returns the fidelity between the input registers
@@ -3447,7 +3394,6 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// # Parameters
     ///
-    /// - `qureg`: object representing the set of all qubits
     /// - `qubit1`: qubit to swap
     /// - `qubit2`: other qubit to swap
     ///
@@ -4862,7 +4808,6 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// # Parameters
     ///
-    /// - `qureg`: the state-vector or density matrix to be modified
     /// - `qubits`: a list of the indices of the qubits which will inform `r`
     ///   for each amplitude in `qureg`
     /// - `encoding`: the [`BitEncoding`] under which to infer the binary value
@@ -4969,7 +4914,6 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// # Parameters
     ///
-    /// - `qureg`:  the state-vector or density matrix to be modified
     /// - `qubits`: a list of the indices of the qubits which will inform `r`
     ///   for each amplitude in `qureg`
     /// - `encoding`: [`BitEncoding`] under which to infer the binary value `r`
@@ -5157,7 +5101,6 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// # Parameters
     ///
-    /// - `qureg`: the state-vector or density matrix to be modified
     /// - `qubits`: a list of all the qubit indices contained in each
     ///   sub-register
     /// - `num_qubits_per_reg`: a list of the lengths of each sub-list in
@@ -5588,7 +5531,6 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// # Parameters
     ///
-    /// - `qureg`: a state-vector or density matrix to modify
     ///
     ///
     /// # Examples
@@ -5651,7 +5593,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// - [`InvalidQuESTInputError`],
     ///   - if the length of `qubits` is less than [`qureg.get_num_qubits()`]
-    ///   - if any of `qubits` is outside [0, qureg.[`get_num_qubits()`]).
+    ///   - if any of `qubits` is outside [0, [`get_num_qubits()`]).
     ///   - if `qubits` contains any repetitions
     ///
     ///
@@ -5702,14 +5644,13 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// # Parameters
     ///
-    /// - `qureg`:  a state-vector or density matrix to modify
     /// - `qubit`: the qubit to which to apply the projector
     /// - `outcome`: the single-qubit outcome (`0` or `1`) to project `qubit`
     ///
     /// # Errors
     ///
     /// - [`InvalidQuESTInputError`],
-    ///   - if `qubit` is outside [0, qureg.[`get_num_qubits()`]).
+    ///   - if `qubit` is outside [0, [`get_num_qubits()`]).
     ///   - if `outcome` is not in {0,1}
     ///
     /// # Examples
