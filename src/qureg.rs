@@ -166,7 +166,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
         N
     }
 
-     /// Return the total number of amplitudes in the register.
+    /// Return the total number of amplitudes in the register.
     ///
     /// - If `Qureg` is a state-vector, this is equal to: `2^N`, where `N` is
     ///   the number of qubits in the register: [`get_num_qubits()`]
@@ -361,7 +361,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// # Errors
     ///
     /// - [`InvalidQuESTInputError`],
-    ///   - if `state_ind` is outside [0, qureg.[`get_num_qubits()`]).
+    ///   - if `state_ind` is outside [0, qureg.[`get_num_amps_total()`]).
     ///
     /// # Examples
     ///
@@ -380,7 +380,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// See [QuEST API] for more information.
     ///
     /// [api-get-prob-amp]: crate::Qureg::get_prob_amp()
-    /// [`get_num_qubits()`]: crate::Qureg::get_num_qubits()
+    /// [`get_num_amps_total()`]: crate::Qureg::get_num_amps_total()
     /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
     /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
     #[allow(clippy::needless_pass_by_ref_mut)]
