@@ -3273,24 +3273,6 @@ fn calc_expec_pauli_hamil_01() {
     qureg.calc_expec_pauli_hamil(hamil, workspace).unwrap();
 }
 
-// #[test]
-// fn calc_expec_pauli_hamil_02() {
-//     use PauliOpType::{
-//         PAULI_X,
-//         PAULI_Z,
-//     };
-//     let env = &QuestEnv::new();
-//     let qureg = &mut create_qureg::<2>(env);
-//     qureg.init_zero_state();
-//     let workspace = &mut create_qureg::<3>(env);
-
-//     let hamil = &mut PauliHamil::try_new(2, 2).unwrap();
-//     init_pauli_hamil(hamil, &[0.5, 0.5], &[PAULI_X, PAULI_X, PAULI_X,
-// PAULI_Z])         .unwrap();
-
-//     qureg.calc_expec_pauli_hamil( hamil, workspace).unwrap_err();
-// }
-
 #[test]
 fn two_qubit_unitary_01() {
     let env = &QuestEnv::new();
@@ -3591,24 +3573,6 @@ fn apply_pauli_sum_01() {
     apply_pauli_sum(in_qureg, all_pauli_codes, term_coeffs, out_qureg).unwrap();
 }
 
-// #[test]
-// fn apply_pauli_sum_02() {
-//     use PauliOpType::{
-//         PAULI_I,
-//         PAULI_X,
-//     };
-//     let env = &QuestEnv::new();
-//     let in_qureg = &mut create_qureg::<2>(env);
-//     in_qureg.init_zero_state();
-//     let out_qureg = &mut create_qureg::<3>(env);
-//     let all_pauli_codes = &[PAULI_I, PAULI_X, PAULI_X, PAULI_I];
-//     let term_coeffs = &[SQRT_2.recip(), SQRT_2.recip()];
-
-//     // in_ and out_qureg' dimensions are different
-//     apply_pauli_sum(in_qureg, all_pauli_codes, term_coeffs, out_qureg)
-//         .unwrap_err();
-// }
-
 #[test]
 fn apply_pauli_sum_03() {
     use PauliOpType::{
@@ -3645,26 +3609,6 @@ fn apply_pauli_hamil_01() {
 
     apply_pauli_hamil(in_qureg, hamil, out_qureg).unwrap();
 }
-
-// #[test]
-// fn apply_pauli_hamil_02() {
-//     use PauliOpType::{
-//         PAULI_I,
-//         PAULI_X,
-//     };
-//     let env = &QuestEnv::new();
-//     let in_qureg = &mut create_qureg::<2>(env);
-//     in_qureg.init_zero_state();
-//     // out_qureg is of different dimension
-//     let out_qureg = &mut create_qureg::<3>(env);
-
-//     let hamil = &mut PauliHamil::try_new(2, 2).unwrap();
-//     let coeffs = &[SQRT_2.recip(), SQRT_2.recip()];
-//     let codes = &[PAULI_I, PAULI_X, PAULI_X, PAULI_I];
-//     init_pauli_hamil(hamil, coeffs, codes).unwrap();
-
-//     apply_pauli_hamil(in_qureg, hamil, out_qureg).unwrap_err();
-// }
 
 #[test]
 fn apply_trotter_circuit_01() {
@@ -3707,65 +3651,25 @@ fn set_weighted_qureg_01() {
     set_weighted_qureg(fac1, qureg1, fac2, qureg2, fac_out, out).unwrap();
 }
 
-// #[test]
-// fn set_weighted_qureg_02() {
-//     let env = &QuestEnv::new();
-//     let qureg1 = &mut Qureg::<'_, 1>::try_new(env).unwrap();
-//     init_zero_state(qureg1);
-//     // dimensions are not equal
-//     let qureg2 = &mut create_qureg::<2>(env);
-//     init_zero_state(qureg2);
-//     pauli_x(qureg2, 0).unwrap();
+#[test]
+fn set_weighted_qureg_04() {
+    let env = &QuestEnv::new();
+    let qureg1 = &mut create_qureg::<2>(env);
+    qureg1.init_zero_state();
+    // all quregs should either state vectors of density matrices
+    let qureg2 = &mut create_density_qureg::<2>(env);
+    qureg2.init_zero_state();
+    qureg2.pauli_x(0).unwrap();
 
-//     let out = &mut Qureg::<'_, 1>::try_new(env).unwrap();
-//     init_zero_state(out);
+    let out = &mut create_qureg::<2>(env);
+    out.init_zero_state();
 
-//     let fac1 = Qcomplex::new(SQRT_2.recip(), 0.);
-//     let fac2 = Qcomplex::new(SQRT_2.recip(), 0.);
-//     let fac_out = Qcomplex::zero();
+    let fac1 = Qcomplex::new(SQRT_2.recip(), 0.);
+    let fac2 = Qcomplex::new(SQRT_2.recip(), 0.);
+    let fac_out = Qcomplex::zero();
 
-//     set_weighted_qureg(fac1, qureg1, fac2, qureg2, fac_out,
-// out).unwrap_err(); }
-
-// #[test]
-// fn set_weighted_qureg_03() {
-//     let env = &QuestEnv::new();
-//     let qureg1 = &mut Qureg::<'_, 1>::try_new(env).unwrap();
-//     init_zero_state(qureg1);
-//     let qureg2 = &mut Qureg::<'_, 1>::try_new(env).unwrap();
-//     init_zero_state(qureg2);
-//     pauli_x(qureg2, 0).unwrap();
-
-//     // dimensions are not equal
-//     let out = &mut create_qureg::<2>(env);
-//     init_zero_state(out);
-
-//     let fac1 = Qcomplex::new(SQRT_2.recip(), 0.);
-//     let fac2 = Qcomplex::new(SQRT_2.recip(), 0.);
-//     let fac_out = Qcomplex::zero();
-
-//     set_weighted_qureg(fac1, qureg1, fac2, qureg2, fac_out,
-// out).unwrap_err(); }
-
-// #[test]
-// fn set_weighted_qureg_04() {
-//     let env = &QuestEnv::new();
-//     let qureg1 = &mut Qureg::<'_, 1>::try_new(env).unwrap();
-//     init_zero_state(qureg1);
-//     // all quregs should either state vectors of density matrices
-//     let qureg2 = &mut Qureg::try_new_density(1, env).unwrap();
-//     init_zero_state(qureg2);
-//     pauli_x(qureg2, 0).unwrap();
-
-//     let out = &mut create_qureg::<2>(env);
-//     init_zero_state(out);
-
-//     let fac1 = Qcomplex::new(SQRT_2.recip(), 0.);
-//     let fac2 = Qcomplex::new(SQRT_2.recip(), 0.);
-//     let fac_out = Qcomplex::zero();
-
-//     set_weighted_qureg(fac1, qureg1, fac2, qureg2, fac_out,
-// out).unwrap_err(); }
+    set_weighted_qureg(fac1, qureg1, fac2, qureg2, fac_out, out).unwrap_err();
+}
 
 #[test]
 fn multi_controlled_multi_rotate_z_01() {

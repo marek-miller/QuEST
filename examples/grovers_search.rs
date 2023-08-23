@@ -51,7 +51,8 @@ fn apply_diffuser<const N: u16>(
     qubits: &[i32],
 ) -> Result<(), QuestError> {
     // apply H to transform |+> into |0>
-    tensor_gate(qureg, Qureg::hadamard, qubits) // apply X to transform |11..1>  into |00..0>
+    tensor_gate(qureg, Qureg::hadamard, qubits)
+        // apply X to transform |11..1>  into |00..0>
         .and(qureg.multi_qubit_not(qubits))?;
 
     // effect |11..1> -> -|11..1>
