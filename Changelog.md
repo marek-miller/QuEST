@@ -4,7 +4,7 @@
 
 - New features/improvements:
 
-  -
+  - Add methods `create_qureg()`, `create_density_qureg()`
   -
   -
 
@@ -16,8 +16,11 @@
 
 - API breaking changes:
 
-  -
-  -
+  - Change `Qureg` type def. to `Qureg<'\_, const N: usize>`
+    - Move many, many functions onto Qureg type
+  - Remove redundant methods:
+    - `Qureg::num_qubits_represented()`
+    - `Qureg::get_num_amps()`
   -
 
 ## v0.3.5 (05/08/2023)
@@ -27,8 +30,8 @@
 - Rewrite exception handling using `panic` mechanism. No more global API locks!
   Our wrapper is now fully concurrent and much faster.
 - Remove spurious checks that existed due to imperfect error catching.
-- Fix bug: `calc_prob_of_all_outcomes()` didn't check properly for the length of
-  the passed slice.
+- Fix bug: `calc_prob_of_all_outcomes()` didn't check properly for the length
+  of the passed slice.
 
 - Add method: `Qureg::get_num_amps_total()`
 
