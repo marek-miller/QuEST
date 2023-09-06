@@ -689,6 +689,28 @@ impl<'a, const N: u16> Qureg<'a, N> {
 
     /// Shift the phase of a single qubit by a given angle.
     ///
+    /// This is equivalent to a Z-axis rotation of the Bloch-sphere up to a
+    /// global phase factor.
+    ///
+    /// For angle `theta`, this effects single-qubit unitary
+    ///
+    /// ```text
+    ///   [ 1      0        ]
+    ///   [ 0  exp(i theta) ]
+    /// ```
+    ///
+    /// # Parameters
+    ///
+    /// - `qureg`: object representing the set of all qubits
+    /// - `target_qubit`: qubit to undergo a phase shift
+    /// - `angle`: amount by which to shift the phase in radians
+    ///
+    ///
+    /// # Errors
+    ///
+    /// - [`InvalidQuESTInputError`], if
+    ///  - `target_qubit` is outside `[0, N)`.
+    ///
     /// # Examples
     ///
     /// ```rust
@@ -704,6 +726,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// See [QuEST API] for more information.
     ///
+    /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
     /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
     #[allow(clippy::needless_pass_by_ref_mut)]
     pub fn phase_shift(
