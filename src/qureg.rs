@@ -701,7 +701,6 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// # Parameters
     ///
-    /// - `qureg`: object representing the set of all qubits
     /// - `target_qubit`: qubit to undergo a phase shift
     /// - `angle`: amount by which to shift the phase in radians
     ///
@@ -739,7 +738,30 @@ impl<'a, const N: u16> Qureg<'a, N> {
         })
     }
 
-    /// Introduce a phase factor on state of qubits.
+    /// Controlled shift of the phase of a single qubit by a given angle.
+    ///
+    /// Introduce a phase factor `exp(i theta)` on state `|11>` of qubits
+    /// `id_qubit1` and `id_qubit2`.  For angle `theta`, this effects
+    /// the unitary
+    ///
+    /// ```text
+    ///  [ 1  0  0        0      ]
+    ///  [ 0  1  0        0      ]
+    ///  [ 0  0  1        0      ]
+    ///  [ 0  0  0  exp(i theta) ]
+    /// ```
+    ///
+    /// # Parameters
+    ///
+    /// - `id_qubit1`: first qubit in the state to phase shift
+    /// - `id_qubit2`: second qubit in the state to phase shift
+    /// - `angle`: amount by which to shift the phase in radians
+    ///
+    /// # Errors
+    ///
+    /// - [`InvalidQuESTInputError`], if
+    ///  - if `id_qubit1` or `id_qubit2` are outside `[0, N)`
+    ///  - if `id_qubit1` and `id_qubit2` are equal
     ///
     /// # Examples
     ///
@@ -758,6 +780,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// See [QuEST API] for more information.
     ///
+    /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
     /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
     #[allow(clippy::needless_pass_by_ref_mut)]
     pub fn controlled_phase_shift(
