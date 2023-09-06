@@ -1,5 +1,13 @@
 # Releases
 
+## v0.3.7 (??/??/????)
+
+- API breaking changes: 
+
+  - Rename methods:
+    - `Qureg::get_num_qubits()` to `num_qubits()`
+    - `Qureg::get_num_amps_total()` to `num_amps_total()`
+
 ## v0.3.6 (23/08/2023)
 
 - New features/improvements:
