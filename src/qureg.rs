@@ -796,6 +796,21 @@ impl<'a, const N: u16> Qureg<'a, N> {
 
     /// Introduce a phase factor of the passed qubits.
     ///
+    /// The phase factor is `exp(i theta)`, controlled by the state `|1..1>` of
+    /// the passed qubits.
+    ///
+    /// # Parameters
+    ///
+    /// - `control_qubits`: array of qubits to phase shift
+    /// - `angle`: amount by which to shift the phase in radians
+    ///
+    /// # Errors
+    ///
+    /// - [`InvalidQuESTInputError`], if
+    ///  - if `control_qubits.len()` is outside `[0, N)`
+    ///  - if any qubit index in `control_qubits` is outside `[0, N)`
+    ///  - if qubits in `control_qubits` are not unique
+    ///
     /// # Examples
     ///
     /// ```rust
@@ -812,6 +827,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// See [QuEST API] for more information.
     ///
+    /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
     /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
     #[allow(clippy::needless_pass_by_ref_mut)]
     pub fn multi_controlled_phase_shift(
@@ -1077,7 +1093,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// Copy the state-vector (or density matrix) from GPU memory.
     ///
     /// In GPU mode, this copies the state-vector (or density matrix) from GPU
-    /// memory  to RAM , where it can be accessed/modified  by the user.
+    /// memory to RAM , where it can be accessed/modified  by the user.
     ///
     /// In CPU mode, this function has no effect.
     ///
