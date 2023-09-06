@@ -3,10 +3,9 @@
 // #![deny(unreachable_pub)]
 #![warn(rust_2018_idioms)]
 
-use exceptions::catch_quest_exception;
+use error::catch_quest_exception;
 
-mod errors;
-mod exceptions;
+mod error;
 mod ffi;
 mod matrices;
 mod numbers;
@@ -16,7 +15,7 @@ mod qureg;
 #[cfg(test)]
 mod tests;
 
-pub use errors::QuestError;
+pub use error::QuestError;
 pub use ffi::{
     bitEncoding as BitEncoding,
     pauliOpType as PauliOpType,

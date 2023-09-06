@@ -1,7 +1,7 @@
 use std::ffi::CString;
 
 use crate::{
-    exceptions::catch_quest_exception,
+    error::catch_quest_exception,
     ffi::{
         self,
         pauliOpType as PauliOpType,

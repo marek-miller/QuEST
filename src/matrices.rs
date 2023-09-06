@@ -1,5 +1,5 @@
 use crate::{
-    exceptions::catch_quest_exception,
+    error::catch_quest_exception,
     ffi,
     Qreal,
     QuestError,
