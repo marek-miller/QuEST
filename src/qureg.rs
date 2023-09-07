@@ -708,7 +708,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// # Errors
     ///
     /// - [`InvalidQuESTInputError`], if
-    ///  - `target_qubit` is outside `[0, N)`.
+    ///   - `target_qubit` is outside `[0, N)`.
     ///
     /// # Examples
     ///
@@ -760,8 +760,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// # Errors
     ///
     /// - [`InvalidQuESTInputError`], if
-    ///  - if `id_qubit1` or `id_qubit2` are outside `[0, N)`
-    ///  - if `id_qubit1` and `id_qubit2` are equal
+    ///   - if `id_qubit1` or `id_qubit2` are outside `[0, N)`
+    ///   - if `id_qubit1` and `id_qubit2` are equal
     ///
     /// # Examples
     ///
@@ -807,9 +807,9 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// # Errors
     ///
     /// - [`InvalidQuESTInputError`], if
-    ///  - if `control_qubits.len()` is outside `[0, N)`
-    ///  - if any qubit index in `control_qubits` is outside `[0, N)`
-    ///  - if qubits in `control_qubits` are not unique
+    ///   - if `control_qubits.len()` is outside `[0, N)`
+    ///   - if any qubit index in `control_qubits` is outside `[0, N)`
+    ///   - if qubits in `control_qubits` are not unique
     ///
     /// # Examples
     ///
@@ -848,7 +848,27 @@ impl<'a, const N: u16> Qureg<'a, N> {
 
     /// Apply the (two-qubit) controlled phase flip gate.
     ///
-    /// Also known as the controlled pauliZ gate.
+    /// Also known as the controlled pauliZ gate. For each state, if both input
+    /// qubits have value one, multiply the amplitude of that state by `-1`.
+    /// This applies the two-qubit unitary:
+    ///
+    /// ```text
+    ///   [ 1  0  0   0 ]
+    ///   [ 0  1  0   0 ]
+    ///   [ 0  0  1   0 ]
+    ///   [ 0  0  0  -1 ]
+    /// ```
+    ///
+    /// # Parameters
+    ///
+    /// - `id_qubit1`: first qubit in the state to operate on
+    /// - `id_qubit2`: second qubit in the state to operate on
+    ///
+    /// # Errors
+    ///
+    /// - [`InvalidQuESTInputError`], if
+    ///   - if `id_qubit1` or `id_qubit2` are outside `[0, N)`
+    ///   - if `id_qubit1` and `id_qubit2` are equal
     ///
     /// # Examples
     ///
@@ -863,6 +883,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// See [QuEST API] for more information.
     ///
+    /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
     /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
     #[allow(clippy::needless_pass_by_ref_mut)]
     pub fn controlled_phase_flip(
@@ -876,6 +897,30 @@ impl<'a, const N: u16> Qureg<'a, N> {
     }
 
     /// Apply the (multiple-qubit) controlled phase flip gate.
+    ///
+    /// Also known as the multiple-qubit controlled pauliZ gate. For each state,
+    /// if all control qubits have value one, multiply the amplitude of that
+    /// state by `-1`. This applies the many-qubit unitary:
+    ///
+    /// ```text
+    ///   [  1  0  0  0   0  ]
+    ///   [  0  1  0  0   0  ]
+    ///   [  0  0   ...   0  ]
+    ///   [  0  0  0  1   0  ]
+    ///   [  0  0  0  0  -1  ]
+    /// ```
+    /// on the control qubits.
+    ///
+    /// # Parameters
+    ///
+    /// - `control_qubits`: array of input qubits
+    ///
+    /// # Errors
+    ///
+    /// - [`InvalidQuESTInputError`], if
+    ///   - if `control_qubits.len()` is outside `[0, N)`
+    ///   - if any qubit index in `control_qubits` is outside `[0, N)`
+    ///   - if qubits in `control_qubits` are not unique
     ///
     /// # Examples
     ///
@@ -891,6 +936,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// See [QuEST API] for more information.
     ///
+    /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
     /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
     #[allow(clippy::needless_pass_by_ref_mut)]
     pub fn multi_controlled_phase_flip(
@@ -1007,6 +1053,16 @@ impl<'a, const N: u16> Qureg<'a, N> {
 
     /// Overwrite the amplitudes of `target_qureg` with those from `copy_qureg`.
     ///
+    /// # Parameters
+    ///
+    /// - `copy_qureg`: the `Qureg` to have its quantum state clone into `self`
+    ///
+    /// # Errors
+    ///
+    /// - [`InvalidQuESTInputError`],
+    ///   - if `self` is a state-vector while `copy_qureg` is a density matrix
+    ///     (and vice versa)
+    ///
     /// # Examples
     ///
     /// ```rust
@@ -1020,6 +1076,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// See [QuEST API] for more information.
     ///
+    /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
     /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
     #[allow(clippy::needless_pass_by_ref_mut)]
     pub fn clone_qureg(
@@ -1412,8 +1469,22 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// A debugging function which calculates the total probability of the
     /// qubits.
     ///
-    /// This function should always be 1 for correctly normalised states
+    /// This function should always be 1 for correctly normalized states
     /// (hence returning a real number).
+    /// For state-vectors, this is the norm of the entire state-vector
+    /// (the sum of the absolute-value-squared of every amplitude).
+    /// For density matrices, it is the trace.
+    /// For un-normalized density matrices (those directly modified or
+    /// initialized by the user),  this function returns the real component
+    /// of the trace.
+    ///
+    /// Note this calculation utilizes Kahan summation for greater accuracy,
+    /// and hence is not parallelized and so will be slower than other
+    /// functions.
+    ///
+    /// # Returns
+    ///
+    /// The total probability of the qubits in this `Qureg` being in any state.
     ///
     /// # Examples
     ///
@@ -2598,7 +2669,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// - `outcome`: for which to find the probability of the qubit being
     ///   measured in
     ///
-    /// # Return
+    /// # Returns
     ///
     /// Returns probability of qubit `measure_qubit` being measured in the given
     /// outcome.
@@ -2720,6 +2791,39 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// Updates `qureg` to be consistent with measuring qubit in the given
     /// outcome.
     ///
+    /// Returns the probability of such a measurement outcome. This is
+    /// effectively performing a renormalizing projection, or a measurement
+    /// with a forced outcome.  This is an irreversible change to the state,
+    /// whereby computational states inconsistent with the outcome are
+    /// given zero amplitude and the `Qureg` is renormalized.  The given
+    /// outcome must not have a near zero probability, else it cannot
+    /// be collapsed into.
+    ///
+    /// Note that the collapse probably used for renormalization is calculated
+    /// for  `outcome = 0`, and assumed `1` minus this probability if
+    /// `outcome = 1`.  Hence this routine will not correctly project
+    /// un-normalised `Qureg`s onto  `outcome = 1`.
+    ///
+    /// To avoid renormalization after projection, or force projection into
+    /// non-physical states with very small probability, use
+    /// [`apply_projector()`].  
+    ///
+    /// # Parameters
+    ///
+    /// - `measure_qubit`: qubit to measure
+    /// - `outcome`: to force the measure qubit to enter
+    ///
+    /// # Returns
+    ///
+    /// Probability of the (forced) measurement outcome.
+    ///
+    /// # Errors
+    ///
+    /// - [`InvalidQuESTInputError`],
+    ///   - if `measure_qubit` is outside `[0, N)`
+    ///   - if `outcome` is not in `{0, 1}`
+    ///   - if the probability of `outcome` is zero (within machine epsilon)
+    ///
     /// # Examples
     ///
     /// ```rust
@@ -2737,6 +2841,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// See [QuEST API] for more information.
     ///
+    /// [`apply_projector()`]: Qureg::apply_projector()
+    /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
     /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
     #[allow(clippy::needless_pass_by_ref_mut)]
     pub fn collapse_to_outcome(
@@ -2749,7 +2855,28 @@ impl<'a, const N: u16> Qureg<'a, N> {
         })
     }
 
-    /// Measures a single qubit, collapsing it randomly to 0 or 1.
+    /// Measures a single qubit, collapsing it randomly to `0` or `1`.
+    ///
+    /// Outcome probabilities are weighted by the state vector, which is
+    /// irreversibly  changed after collapse to be consistent with the
+    /// outcome.
+    ///
+    /// The random number generator is seeded by [`seed_quest_default()`]
+    /// within  [`QuestEnv::new()`], unless later overridden by
+    /// [`seed_quest()`].
+    ///
+    /// # Parameters
+    ///
+    /// - `measure_qubit`: index of a qubit to measure
+    ///
+    /// # Returns
+    ///
+    /// The measurement outcome, `0` or `1`.
+    ///
+    /// # Errors
+    ///
+    /// - [`InvalidQuESTInputError`],
+    ///   - if `measure_qubit` is outside `[0, N)`
     ///
     /// # Examples
     ///
@@ -2770,6 +2897,10 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// See [QuEST API] for more information.
     ///
+    /// [`seed_quest_default()`]: crate::seed_quest_default()
+    /// [`QuestEnv::new()`]: QuestEnv::new()
+    /// [`seed_quest()`]: crate::seed_quest()
+    /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
     /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
     #[allow(clippy::needless_pass_by_ref_mut)]
     pub fn measure(
@@ -2784,6 +2915,27 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// Measures a single qubit, collapsing it randomly to 0 or 1
     ///
     /// Additionally, the function gives the probability of that outcome.
+    /// Outcome probabilities are weighted by the state vector, which is
+    /// irreversibly changed after collapse to be consistent with the outcome.
+    ///
+    /// The random number generator is seeded by [`seed_quest_default()`]
+    /// within  [`QuestEnv::new()`], unless later overridden by
+    /// [`seed_quest()`].
+    ///
+    /// # Parameters
+    ///
+    /// - `measure_qubit`: index of a qubit to measure
+    /// - `outcome_prob`: a mutable reference to a `Qreal` which is set to the
+    ///   probability of the occurred outcome
+    ///
+    /// # Returns
+    ///
+    /// The measurement outcome, `0` or `1`.
+    ///
+    /// # Errors
+    ///
+    /// - [`InvalidQuESTInputError`],
+    ///   - if `measure_qubit` is outside `[0, N)`
     ///
     /// # Examples
     ///
@@ -2808,6 +2960,10 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// See [QuEST API] for more information.
     ///
+    /// [`seed_quest_default()`]: crate::seed_quest_default()
+    /// [`QuestEnv::new()`]: QuestEnv::new()
+    /// [`seed_quest()`]: crate::seed_quest()
+    /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
     /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
     #[allow(clippy::needless_pass_by_ref_mut)]
     pub fn measure_with_stats(
@@ -2825,7 +2981,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// Gates applied to qureg will here-after be added to a growing log of QASM
     /// instructions, progressively consuming more memory until disabled with
-    /// `stop_recording_qasm()`. The QASM log is bound to this qureg instance.
+    /// [`stop_recording_qasm()`]. The QASM log is bound to this qureg instance.
     ///
     ///
     /// # Examples
@@ -2844,6 +3000,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// See [QuEST API] for more information.
     ///
+    /// [`stop_recording_qasm()`]: Qureg::stop_recording_qasm()
     /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
     #[allow(clippy::needless_pass_by_ref_mut)]
     pub fn start_recording_qasm(&mut self) {
@@ -2856,7 +3013,9 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// Disable QASM recording.
     ///
     /// The recorded QASM will be maintained in qureg and continue to be
-    /// appended to if `startRecordingQASM` is recalled.
+    /// appended to if [`start_recording_qasm()`] is recalled.
+    ///
+    /// Has no effect if this `Qureg` was not already recording operations.
     ///
     /// # Examples
     ///
@@ -2874,6 +3033,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// See [QuEST API] for more information.
     ///
+    /// [`start_recording_qasm()`]: Qureg::start_recording_qasm()
     /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
     #[allow(clippy::needless_pass_by_ref_mut)]
     pub fn stop_recording_qasm(&mut self) {
@@ -2946,6 +3106,15 @@ impl<'a, const N: u16> Qureg<'a, N> {
 
     /// Writes recorded QASM to a file, throwing an error if inaccessible.
     ///
+    /// # Parameters
+    ///
+    /// - `filename`: the filename of the file to contain the recorded QASM
+    ///
+    /// # Errors
+    ///
+    /// - [`InvalidQuESTInputError`],
+    ///   - if `filename` cannot be written to
+    ///
     /// # Examples
     ///
     /// ```rust
@@ -2962,6 +3131,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// See [QuEST API] for more information.
     ///
+    /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
     /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
     #[allow(clippy::needless_pass_by_ref_mut)]
     pub fn write_recorded_qasm_to_file(
