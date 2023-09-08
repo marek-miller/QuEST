@@ -1,6 +1,6 @@
 # Releases
 
-## v0.3.7 (??/??/????)
+## v0.3.7 (08/09/2023)
 
 - New features/improvements:
 
