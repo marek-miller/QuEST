@@ -301,7 +301,8 @@ pub fn set_diagonal_op_elems(
 /// ```rust
 /// # use quest_bind::*;
 /// let env = &QuestEnv::new();
-/// let qureg = &mut create_qureg::<2>(env);
+/// let qureg =
+///     &mut Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
 /// let op = &mut DiagonalOp::try_new(2, env).unwrap();
 ///
 /// init_diagonal_op(op, &[1., 2., 3., 4.], &[5., 6., 7., 8.]).unwrap();
@@ -331,7 +332,8 @@ pub fn apply_diagonal_op(
 /// ```rust
 /// # use quest_bind::*;
 /// let env = &QuestEnv::new();
-/// let qureg = &mut create_qureg::<2>(env);
+/// let qureg =
+///     &mut Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
 /// let op = &mut DiagonalOp::try_new(2, env).unwrap();
 ///
 /// init_diagonal_op(op, &[1., 2., 3., 4.], &[5., 6., 7., 8.]).unwrap();
