@@ -64,6 +64,20 @@ impl ComplexMatrixN {
         })
     }
 
+    /// Get number of qubits this operators acts on.
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use quest_bind::*;
+    /// let mtr = ComplexMatrixN::try_new(3).unwrap();
+    ///
+    /// assert_eq!(mtr.num_qubits(), 3);
+    /// ```
+    pub fn num_qubits(&self) -> i32 {
+        self.0.numQubits
+    }
+
     /// Get the real part of the `i`th row of the matrix as shared slice.
     ///
     /// # Examples
