@@ -57,8 +57,8 @@ pub use qureg::{
     calc_density_inner_product,
     calc_hilbert_schmidt_distance,
     calc_inner_product,
-    create_density_qureg,
-    create_qureg,
+    // create_density_qureg,
+    // create_qureg,
     set_weighted_qureg,
     Qureg,
 };

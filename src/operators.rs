@@ -301,7 +301,8 @@ pub fn set_diagonal_op_elems(
 /// ```rust
 /// # use quest_bind::*;
 /// let env = &QuestEnv::new();
-/// let qureg = &mut create_qureg::<2>(env);
+/// let qureg =
+///     &mut Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
 /// let op = &mut DiagonalOp::try_new(2, env).unwrap();
 ///
 /// init_diagonal_op(op, &[1., 2., 3., 4.], &[5., 6., 7., 8.]).unwrap();
@@ -312,8 +313,8 @@ pub fn set_diagonal_op_elems(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
-pub fn apply_diagonal_op<const N: u16>(
-    qureg: &mut Qureg<'_, N>,
+pub fn apply_diagonal_op(
+    qureg: &mut Qureg<'_>,
     op: &DiagonalOp<'_>,
 ) -> Result<(), QuestError> {
     catch_quest_exception(|| unsafe {
@@ -331,7 +332,8 @@ pub fn apply_diagonal_op<const N: u16>(
 /// ```rust
 /// # use quest_bind::*;
 /// let env = &QuestEnv::new();
-/// let qureg = &mut create_qureg::<2>(env);
+/// let qureg =
+///     &mut Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
 /// let op = &mut DiagonalOp::try_new(2, env).unwrap();
 ///
 /// init_diagonal_op(op, &[1., 2., 3., 4.], &[5., 6., 7., 8.]).unwrap();
@@ -345,8 +347,8 @@ pub fn apply_diagonal_op<const N: u16>(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
-pub fn calc_expec_diagonal_op<const N: u16>(
-    qureg: &Qureg<'_, N>,
+pub fn calc_expec_diagonal_op(
+    qureg: &Qureg<'_>,
     op: &DiagonalOp<'_>,
 ) -> Result<Qcomplex, QuestError> {
     catch_quest_exception(|| unsafe {

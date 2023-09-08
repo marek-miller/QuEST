@@ -6,8 +6,10 @@
 
   - New method: `ComplexMatrixN::num_qubits()`
 
-- API breaking changes: 
+- API breaking changes:
 
+  - Remove const generic parameter `N` from `Qureg`
+  - Delete function: `create_*_qureg()`
   - Rename methods:
     - `Qureg::get_num_qubits()` to `num_qubits()`
     - `Qureg::get_num_amps_total()` to `num_amps_total()`

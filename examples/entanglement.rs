@@ -6,9 +6,9 @@
 //! entangled, after the measurement they are both in the same, equally probable
 //! state `0` or `1`.
 use quest_bind::{
-    create_qureg,
     QuestEnv,
     QuestError,
+    Qureg,
 };
 
 fn main() -> Result<(), QuestError> {
@@ -17,7 +17,7 @@ fn main() -> Result<(), QuestError> {
     env.report_quest_env();
 
     // Create a 2-qubit register and report its parameters
-    let mut qureg = create_qureg::<2>(env);
+    let mut qureg = Qureg::try_new(2, env).expect("cannot allocate new Qureg");
     qureg.report_qureg_params();
     // Initialize |00> state and print out the state to screen
     qureg.init_zero_state();

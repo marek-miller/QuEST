@@ -17,23 +17,18 @@ use super::{
     Vector,
 };
 
-#[must_use]
-pub fn create_qureg<const N: u16>(env: &QuestEnv) -> Qureg<'_, N> {
-    Qureg::try_new(env).expect("cannot allocate new state-vector Qureg")
-}
-
-#[must_use]
-pub fn create_density_qureg<const N: u16>(env: &QuestEnv) -> Qureg<'_, N> {
-    Qureg::try_new_density(env).expect("cannot allocate new density Qureg")
-}
+// #[must_use]
+// pub fn create_density_qureg(env: &QuestEnv) -> Qureg<'_> {
+//     Qureg::try_new_density(env).expect("cannot allocate new density Qureg")
+// }
 
 #[derive(Debug)]
-pub struct Qureg<'a, const N: u16> {
+pub struct Qureg<'a> {
     pub(crate) env: &'a QuestEnv,
     pub(crate) reg: ffi::Qureg,
 }
 
-impl<'a, const N: u16> Qureg<'a, N> {
+impl<'a> Qureg<'a> {
     /// Creates a state-vector Qureg object.
     ///
     /// # Examples
@@ -41,7 +36,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let qureg = create_qureg::<2>(&env);
+    /// let qureg =
+    ///     Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
     /// ```
     ///
     /// See [QuEST API][1] for more information.
@@ -52,8 +48,10 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// on failure.  This is an exception thrown by `QuEST`.
     ///
     /// [1]: https://quest-kit.github.io/QuEST/modules.html
-    pub fn try_new(env: &'a QuestEnv) -> Result<Self, QuestError> {
-        let num_qubits = i32::from(N);
+    pub fn try_new(
+        num_qubits: i32,
+        env: &'a QuestEnv,
+    ) -> Result<Self, QuestError> {
         Ok(Self {
             env,
             reg: catch_quest_exception(|| unsafe {
@@ -69,7 +67,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let qureg = create_density_qureg::<2>(&env);
+    /// let qureg = Qureg::try_new_density(2, &env)
+    ///     .expect("cannot allocate memory for Qureg");
     /// ```
     ///
     /// See [QuEST API][1] for more information.
@@ -80,8 +79,10 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// on failure.  This is an exception thrown by `QuEST`.
     ///
     /// [1]: https://quest-kit.github.io/QuEST/modules.html
-    pub fn try_new_density(env: &'a QuestEnv) -> Result<Self, QuestError> {
-        let num_qubits = i32::from(N);
+    pub fn try_new_density(
+        num_qubits: i32,
+        env: &'a QuestEnv,
+    ) -> Result<Self, QuestError> {
         Ok(Self {
             env,
             reg: catch_quest_exception(|| unsafe {
@@ -153,7 +154,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let qureg = create_qureg::<3>(&env);
+    /// let qureg =
+    ///     Qureg::try_new(3, &env).expect("cannot allocate memory for Qureg");
     ///
     /// assert_eq!(qureg.num_qubits(), 3);
     /// ```
@@ -162,8 +164,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
     #[must_use]
-    pub const fn num_qubits(&self) -> u16 {
-        N
+    pub const fn num_qubits(&self) -> i32 {
+        self.reg.numQubitsRepresented
     }
 
     /// Return the total number of amplitudes in the register.
@@ -177,7 +179,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let qureg = create_density_qureg::<3>(&env);
+    /// let qureg = Qureg::try_new_density(3, &env)
+    ///     .expect("cannot allocate memory for Qureg");
     ///
     /// assert_eq!(qureg.num_amps_total(), 64);
     /// ```
@@ -201,7 +204,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let qureg = create_qureg::<2>(&env);
+    /// let qureg =
+    ///     Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
     ///
     /// qureg.report_qureg_params();
     /// ```
@@ -228,7 +232,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<2>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
     ///
     /// qureg.init_blank_state();
     ///
@@ -267,7 +272,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<2>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
     ///
     /// qureg.init_zero_state();
     ///
@@ -308,7 +314,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<2>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
     ///
     /// qureg.init_plus_state();
     ///
@@ -366,7 +373,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<3>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(3, &env).expect("cannot allocate memory for Qureg");
     ///
     /// qureg.init_classical_state(8);
     /// let prob = qureg.get_prob_amp(0).unwrap();
@@ -405,6 +413,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// # Errors
     ///
     /// - [`InvalidQuESTInputError`],
+    ///   - if `self` and `pure` have mismatching dimensions
     ///   - if `pure` is a density matrix
     ///
     /// # Examples
@@ -412,8 +421,10 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_density_qureg::<3>(&env);
-    /// let pure_state = create_qureg::<3>(&env);
+    /// let mut qureg = Qureg::try_new_density(3, &env)
+    ///     .expect("cannot allocate memory for Qureg");
+    /// let pure_state =
+    ///     Qureg::try_new(3, &env).expect("cannot allocate memory for Qureg");
     ///
     /// qureg.init_pure_state(&pure_state).unwrap();
     ///
@@ -427,7 +438,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     #[allow(clippy::needless_pass_by_ref_mut)]
     pub fn init_pure_state(
         &mut self,
-        pure_: &Qureg<'_, N>,
+        pure_: &Qureg<'_>,
     ) -> Result<(), QuestError> {
         catch_quest_exception(|| unsafe {
             ffi::initPureState(self.reg, pure_.reg);
@@ -487,7 +498,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<2>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
     ///
     /// qureg.init_state_from_amps(&[1., 0., 0., 0.], &[0., 0., 0., 0.]);
     /// let prob = qureg.get_prob_amp(0).unwrap();
@@ -530,7 +542,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<3>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(3, &env).expect("cannot allocate memory for Qureg");
     ///
     /// let re = &mut [1., 2., 3., 4.];
     /// let im = &mut [1., 2., 3., 4.];
@@ -566,7 +579,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<2>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
     ///
     /// let re = &[1., 2., 3.];
     /// let im = &[4., 5., 6.];
@@ -642,7 +656,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_density_qureg::<2>(&env);
+    /// let mut qureg = Qureg::try_new_density(2, &env)
+    ///     .expect("cannot allocate memory for Qureg");
     ///
     /// let re = &[1., 2., 3.];
     /// let im = &[4., 5., 6.];
@@ -715,7 +730,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<3>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(3, &env).expect("cannot allocate memory for Qureg");
     ///
     /// let target_qubit = 1;
     /// let angle = 0.5;
@@ -768,7 +784,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<3>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(3, &env).expect("cannot allocate memory for Qureg");
     ///
     /// let id_qubit1 = 0;
     /// let id_qubit2 = 2;
@@ -816,7 +833,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<4>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(4, &env).expect("cannot allocate memory for Qureg");
     ///
     /// let control_qubits = &[0, 1, 3];
     /// let angle = 0.5;
@@ -875,7 +893,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<2>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
     /// qureg.init_zero_state();
     ///
     /// qureg.controlled_phase_flip(0, 1);
@@ -927,7 +946,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<4>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(4, &env).expect("cannot allocate memory for Qureg");
     /// qureg.init_zero_state();
     ///
     /// let control_qubits = &[0, 1, 3];
@@ -976,7 +996,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<2>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
     /// qureg.init_zero_state();
     /// qureg.pauli_x(0).unwrap();
     ///
@@ -1026,7 +1047,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<2>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
     /// qureg.init_zero_state();
     /// qureg.pauli_x(0).unwrap();
     ///
@@ -1062,14 +1084,17 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// - [`InvalidQuESTInputError`],
     ///   - if `self` is a state-vector while `copy_qureg` is a density matrix
     ///     (and vice versa)
+    ///   - if `self` and `copy_qureg` have different dimensions
     ///
     /// # Examples
     ///
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<3>(&env);
-    /// let copy_qureg = create_qureg::<3>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(3, &env).expect("cannot allocate memory for Qureg");
+    /// let copy_qureg =
+    ///     Qureg::try_new(3, &env).expect("cannot allocate memory for Qureg");
     ///
     /// qureg.clone_qureg(&copy_qureg);
     /// ```
@@ -1081,7 +1106,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     #[allow(clippy::needless_pass_by_ref_mut)]
     pub fn clone_qureg(
         &mut self,
-        copy_qureg: &Qureg<'_, N>,
+        copy_qureg: &Qureg<'_>,
     ) -> Result<(), QuestError> {
         catch_quest_exception(|| unsafe {
             ffi::cloneQureg(self.reg, copy_qureg.reg);
@@ -1129,7 +1154,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<2>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
     ///
     /// qureg.copy_state_to_gpu();
     /// ```
@@ -1164,7 +1190,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<2>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
     ///
     /// qureg.copy_state_from_gpu();
     /// ```
@@ -1294,7 +1321,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<2>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
     /// qureg.init_plus_state();
     ///
     /// let amp = qureg.get_amp(0).unwrap().re;
@@ -1332,7 +1360,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<2>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
     /// qureg.init_plus_state();
     ///
     /// let amp = qureg.get_real_amp(0).unwrap();
@@ -1369,7 +1398,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<2>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
     /// qureg.init_plus_state();
     ///
     /// let amp = qureg.get_imag_amp(0).unwrap();
@@ -1406,7 +1436,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<2>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
     /// qureg.init_plus_state();
     ///
     /// let amp = qureg.get_prob_amp(0).unwrap();
@@ -1443,7 +1474,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_density_qureg::<2>(&env);
+    /// let mut qureg = Qureg::try_new_density(2, &env)
+    ///     .expect("cannot allocate memory for Qureg");
     /// qureg.init_plus_state();
     ///
     /// let amp = qureg.get_density_amp(0, 0).unwrap().re;
@@ -1491,7 +1523,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<2>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
     /// qureg.init_plus_state();
     ///
     /// let amp = qureg.calc_total_prob();
@@ -1536,7 +1569,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<2>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
     /// qureg.init_zero_state();
     ///
     /// let norm = SQRT_2.recip();
@@ -1545,7 +1579,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// qureg.compact_unitary(0, alpha, beta).unwrap();
     ///
     /// let other_qureg = {
-    ///     let mut other_qureg = create_qureg::<2>(&env);
+    ///     let mut other_qureg =
+    ///         Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
     ///     other_qureg.init_zero_state();
     ///     other_qureg.hadamard(0).unwrap();
     ///     other_qureg
@@ -1598,7 +1633,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<2>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
     /// qureg.init_zero_state();
     ///
     /// let norm = SQRT_2.recip();
@@ -1609,7 +1645,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// qureg.unitary(0, &mtr).unwrap();
     ///
     /// let other_qureg = {
-    ///     let mut other_qureg = create_qureg::<2>(&env);
+    ///     let mut other_qureg =
+    ///         Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
     ///     other_qureg.hadamard(0).unwrap();
     ///     other_qureg
     /// };
@@ -1657,7 +1694,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<3>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(3, &env).expect("cannot allocate memory for Qureg");
     /// let theta = PI;
     ///
     /// qureg.rotate_x(0, theta).unwrap();
@@ -1703,7 +1741,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<3>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(3, &env).expect("cannot allocate memory for Qureg");
     /// let theta = PI;
     ///
     /// qureg.rotate_y(0, theta).unwrap();
@@ -1749,7 +1788,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<3>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(3, &env).expect("cannot allocate memory for Qureg");
     /// let theta = PI;
     ///
     /// qureg.rotate_z(0, theta).unwrap();
@@ -1795,7 +1835,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<3>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(3, &env).expect("cannot allocate memory for Qureg");
     ///
     /// let angle = 2.0 * PI;
     /// let axis = &Vector::new(0., 0., 1.);
@@ -1844,7 +1885,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<3>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(3, &env).expect("cannot allocate memory for Qureg");
     ///
     /// let control_qubit = 1;
     /// let target_qubit = 0;
@@ -1900,7 +1942,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<3>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(3, &env).expect("cannot allocate memory for Qureg");
     ///
     /// let control_qubit = 1;
     /// let target_qubit = 0;
@@ -1956,7 +1999,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<3>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(3, &env).expect("cannot allocate memory for Qureg");
     ///
     /// let control_qubit = 1;
     /// let target_qubit = 0;
@@ -2015,7 +2059,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<3>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(3, &env).expect("cannot allocate memory for Qureg");
     ///
     /// let control_qubit = 1;
     /// let target_qubit = 0;
@@ -2090,7 +2135,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<2>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
     ///
     /// let norm = SQRT_2.recip();
     /// let alpha = Qcomplex::new(0., norm);
@@ -2146,7 +2192,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<2>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
     ///
     /// let norm = SQRT_2.recip();
     /// let mtr = &ComplexMatrix2::new(
@@ -2200,7 +2247,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<3>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(3, &env).expect("cannot allocate memory for Qureg");
     ///
     /// let norm = SQRT_2.recip();
     /// let mtr = &ComplexMatrix2::new(
@@ -2251,7 +2299,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<2>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
     ///
     /// qureg.pauli_x(0).unwrap();
     ///
@@ -2291,7 +2340,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<2>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
     ///
     /// qureg.pauli_y(0).unwrap();
     ///
@@ -2331,7 +2381,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<2>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
     ///
     /// qureg.pauli_z(0).unwrap();
     ///
@@ -2379,7 +2430,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<2>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
     ///
     /// qureg.hadamard(0).unwrap();
     ///
@@ -2434,7 +2486,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<2>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
     /// qureg.pauli_x(1).unwrap();
     ///
     /// qureg.controlled_not(1, 0).unwrap();
@@ -2493,7 +2546,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<4>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(4, &env).expect("cannot allocate memory for Qureg");
     /// qureg.pauli_x(0).unwrap();
     /// qureg.pauli_x(1).unwrap();
     ///
@@ -2563,7 +2617,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<2>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
     ///
     /// let targs = &[0, 1];
     /// qureg.multi_qubit_not(targs).unwrap();
@@ -2622,7 +2677,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<2>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
     /// qureg.pauli_x(1).unwrap();
     ///
     /// qureg.controlled_pauli_y(1, 0).unwrap();
@@ -2685,7 +2741,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<3>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(3, &env).expect("cannot allocate memory for Qureg");
     ///
     /// let prob = qureg.calc_prob_of_outcome(0, 0).unwrap();
     /// assert!((prob - 1.).abs() < EPSILON);
@@ -2750,7 +2807,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let qureg = create_qureg::<3>(&env);
+    /// let qureg =
+    ///     Qureg::try_new(3, &env).expect("cannot allocate memory for Qureg");
     ///
     /// let qubits = &[1, 2];
     /// let outcome_probs = &mut vec![0.; 4];
@@ -2829,7 +2887,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<2>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
     /// qureg.init_plus_state();
     ///
     /// qureg.collapse_to_outcome(0, 0).unwrap();
@@ -2883,7 +2942,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<2>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
     ///
     /// // Prepare an entangled state `|00> + |11>`
     /// qureg.hadamard(0).and(qureg.controlled_not(0, 1)).unwrap();
@@ -2942,7 +3002,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<2>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
     ///
     /// // Prepare an entangled state `|00> + |11>`
     /// qureg.hadamard(0).and(qureg.controlled_not(0, 1)).unwrap();
@@ -2989,7 +3050,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<2>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
     ///
     /// qureg.start_recording_qasm();
     /// qureg.hadamard(0).and(qureg.controlled_not(0, 1)).unwrap();
@@ -3022,7 +3084,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<2>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
     ///
     /// qureg.start_recording_qasm();
     /// qureg.hadamard(0).and(qureg.controlled_not(0, 1)).unwrap();
@@ -3052,7 +3115,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<2>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
     /// qureg.start_recording_qasm();
     /// qureg.hadamard(0).unwrap();
     ///
@@ -3084,7 +3148,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<2>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
     ///
     /// qureg.start_recording_qasm();
     /// qureg.hadamard(0).and(qureg.controlled_not(0, 1)).unwrap();
@@ -3120,7 +3185,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<2>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
     ///
     /// qureg.start_recording_qasm();
     /// qureg.hadamard(0).and(qureg.controlled_not(0, 1)).unwrap();
@@ -3180,7 +3246,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_density_qureg::<2>(&env);
+    /// let mut qureg = Qureg::try_new_density(2, &env)
+    ///     .expect("cannot allocate memory for Qureg");
     /// qureg.init_plus_state();
     ///
     /// qureg.mix_dephasing(0, 0.5).unwrap();
@@ -3243,7 +3310,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_density_qureg::<3>(&env);
+    /// let mut qureg = Qureg::try_new_density(3, &env)
+    ///     .expect("cannot allocate memory for Qureg");
     /// qureg.init_plus_state();
     ///
     /// qureg.mix_two_qubit_dephasing(0, 1, 0.75).unwrap();
@@ -3306,7 +3374,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_density_qureg::<2>(&env);
+    /// let mut qureg = Qureg::try_new_density(2, &env)
+    ///     .expect("cannot allocate memory for Qureg");
     ///
     /// qureg.mix_depolarising(0, 0.75).unwrap();
     /// let amp = qureg.get_density_amp(0, 0).unwrap();
@@ -3370,7 +3439,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_density_qureg::<2>(&env);
+    /// let mut qureg = Qureg::try_new_density(2, &env)
+    ///     .expect("cannot allocate memory for Qureg");
     /// qureg.init_plus_state();
     ///
     /// qureg.mix_damping(0, 1.).unwrap();
@@ -3405,7 +3475,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_density_qureg::<3>(&env);
+    /// let mut qureg = Qureg::try_new_density(3, &env)
+    ///     .expect("cannot allocate memory for Qureg");
     /// qureg.init_plus_state();
     ///
     /// qureg.mix_two_qubit_depolarising(0, 1, 15. / 16.).unwrap();
@@ -3438,7 +3509,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_density_qureg::<2>(&env);
+    /// let mut qureg = Qureg::try_new_density(2, &env)
+    ///     .expect("cannot allocate memory for Qureg");
     ///
     /// let (prob_x, prob_y, prob_z) = (0.25, 0.25, 0.25);
     /// qureg.mix_pauli(0, prob_x, prob_y, prob_z).unwrap();
@@ -3474,9 +3546,11 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut combine_qureg = create_density_qureg::<2>(&env);
+    /// let mut combine_qureg = Qureg::try_new_density(2, &env)
+    ///     .expect("cannot allocate memory for Qureg");
     /// let other_qureg = {
-    ///     let mut other_qureg = create_density_qureg::<2>(&env);
+    ///     let mut other_qureg = Qureg::try_new_density(2, &env)
+    ///         .expect("cannot allocate memory for Qureg");
     ///     other_qureg.init_classical_state(3).unwrap();
     ///     other_qureg
     /// };
@@ -3491,7 +3565,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     pub fn mix_density_matrix(
         &mut self,
         prob: Qreal,
-        other_qureg: &Qureg<'_, N>,
+        other_qureg: &Qureg<'_>,
     ) -> Result<(), QuestError> {
         catch_quest_exception(|| unsafe {
             ffi::mixDensityMatrix(self.reg, prob, other_qureg.reg);
@@ -3529,7 +3603,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let qureg = create_density_qureg::<2>(&env);
+    /// let qureg = Qureg::try_new_density(2, &env)
+    ///     .expect("cannot allocate memory for Qureg");
     ///
     /// let purity = qureg.calc_purity().unwrap();
     /// assert!((purity - 1.).abs() < EPSILON);
@@ -3585,9 +3660,11 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_density_qureg(&env);
+    /// let mut qureg = Qureg::try_new_density(2, &env)
+    ///     .expect("cannot allocate memory for Qureg");
     /// let pure_state = {
-    ///     let mut new_state = create_qureg::<2>(&env);
+    ///     let mut new_state =
+    ///         Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
     ///     new_state.init_plus_state();
     ///     new_state
     /// };
@@ -3602,7 +3679,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
     pub fn calc_fidelity(
         &self,
-        pure_state: &Qureg<'_, N>,
+        pure_state: &Qureg<'_>,
     ) -> Result<Qreal, QuestError> {
         catch_quest_exception(|| unsafe {
             ffi::calcFidelity(self.reg, pure_state.reg)
@@ -3641,7 +3718,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<2>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
     ///
     /// // init state |10>
     /// qureg.init_classical_state(1).unwrap();
@@ -3675,7 +3753,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<2>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
     /// // init state |10>
     /// qureg.init_classical_state(1).unwrap();
     /// qureg.sqrt_swap_gate(0, 1).unwrap();
@@ -3705,7 +3784,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<3>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(3, &env).expect("cannot allocate memory for Qureg");
     ///
     /// let control_qubits = &[1, 2];
     /// let control_state = &[0, 0];
@@ -3755,7 +3835,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<2>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
     /// qureg.init_plus_state();
     ///
     /// let qubits = &[0, 1];
@@ -3792,7 +3873,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// use PauliOpType::PAULI_X;
     ///
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<3>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(3, &env).expect("cannot allocate memory for Qureg");
     ///
     /// let target_qubits = &[1, 2];
     /// let target_paulis = &[PAULI_X, PAULI_X];
@@ -3835,7 +3917,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<4>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(4, &env).expect("cannot allocate memory for Qureg");
     ///
     /// // Initialize `|1111>`
     /// (0..4).try_for_each(|i| qureg.pauli_x(i)).unwrap();
@@ -3885,7 +3968,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// use PauliOpType::PAULI_Z;
     ///
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<4>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(4, &env).expect("cannot allocate memory for Qureg");
     ///
     /// // Initialize `|1111>`
     /// (0..4).try_for_each(|i| qureg.pauli_x(i)).unwrap();
@@ -3944,11 +4028,13 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// let env = QuestEnv::new();
     /// let qureg = {
-    ///     let mut qureg = create_qureg::<2>(&env);
+    ///     let mut qureg =
+    ///         Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
     ///     qureg.init_plus_state();
     ///     qureg
     /// };
-    /// let mut workspace = create_qureg::<2>(&env);
+    /// let mut workspace =
+    ///     Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
     ///
     /// let target_qubits = &[0, 1];
     /// let pauli_codes = &[PAULI_X, PAULI_X];
@@ -3966,7 +4052,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
         &self,
         target_qubits: &[i32],
         pauli_codes: &[PauliOpType],
-        workspace: &mut Qureg<'_, N>,
+        workspace: &mut Qureg<'_>,
     ) -> Result<Qreal, QuestError> {
         let num_targets = target_qubits.len() as i32;
         catch_quest_exception(|| unsafe {
@@ -3993,11 +4079,13 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// let env = QuestEnv::new();
     /// let qureg = {
-    ///     let mut qureg = create_qureg::<2>(&env);
+    ///     let mut qureg =
+    ///         Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
     ///     qureg.init_plus_state();
     ///     qureg
     /// };
-    /// let mut workspace = create_qureg::<2>(&env);
+    /// let mut workspace =
+    ///     Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
     ///
     /// let all_pauli_codes = &[PAULI_X, PAULI_Z, PAULI_Z, PAULI_X];
     /// let term_coeffs = &[0.5, 0.5];
@@ -4015,7 +4103,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
         &self,
         all_pauli_codes: &[PauliOpType],
         term_coeffs: &[Qreal],
-        workspace: &mut Qureg<'_, N>,
+        workspace: &mut Qureg<'_>,
     ) -> Result<Qreal, QuestError> {
         let num_sum_terms = term_coeffs.len() as i32;
         catch_quest_exception(|| unsafe {
@@ -4045,11 +4133,13 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// let env = QuestEnv::new();
     /// let qureg = {
-    ///     let mut qureg = create_qureg::<2>(&env);
+    ///     let mut qureg =
+    ///         Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
     ///     qureg.init_plus_state();
     ///     qureg
     /// };
-    /// let mut workspace = create_qureg::<2>(&env);
+    /// let mut workspace =
+    ///     Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
     ///
     /// let hamil = &mut PauliHamil::try_new(2, 2).unwrap();
     /// init_pauli_hamil(hamil, &[0.5, 0.5], &[PAULI_X, PAULI_X, PAULI_X, PAULI_Z])
@@ -4066,7 +4156,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     pub fn calc_expec_pauli_hamil(
         &self,
         hamil: &PauliHamil,
-        workspace: &mut Qureg<'_, N>,
+        workspace: &mut Qureg<'_>,
     ) -> Result<Qreal, QuestError> {
         catch_quest_exception(|| unsafe {
             ffi::calcExpecPauliHamil(self.reg, hamil.0, workspace.reg)
@@ -4080,7 +4170,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<3>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(3, &env).expect("cannot allocate memory for Qureg");
     /// qureg.pauli_x(0).unwrap();
     ///
     /// let target_qubit1 = 1;
@@ -4130,7 +4221,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<3>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(3, &env).expect("cannot allocate memory for Qureg");
     /// qureg.pauli_x(0).unwrap();
     ///
     /// let control_qubit = 0;
@@ -4193,7 +4285,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<4>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(4, &env).expect("cannot allocate memory for Qureg");
     /// qureg.pauli_x(0).unwrap();
     /// qureg.pauli_x(1).unwrap();
     ///
@@ -4259,7 +4352,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<2>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
     ///
     /// let u = &mut ComplexMatrixN::try_new(2).unwrap();
     /// let zero_row = &[0., 0., 0., 0.];
@@ -4305,7 +4399,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<3>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(3, &env).expect("cannot allocate memory for Qureg");
     /// qureg.pauli_x(0).unwrap();
     ///
     /// let u = &mut ComplexMatrixN::try_new(2).unwrap();
@@ -4362,7 +4457,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<4>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(4, &env).expect("cannot allocate memory for Qureg");
     /// qureg.pauli_x(0).unwrap();
     /// qureg.pauli_x(1).unwrap();
     ///
@@ -4424,7 +4520,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_density_qureg::<2>(&env);
+    /// let mut qureg = Qureg::try_new_density(2, &env)
+    ///     .expect("cannot allocate memory for Qureg");
     ///
     /// let m = &ComplexMatrix2::new([[0., 1.], [1., 0.]], [[0., 0.], [0., 0.]]);
     /// let target = 1;
@@ -4460,7 +4557,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_density_qureg::<3>(&env);
+    /// let mut qureg = Qureg::try_new_density(3, &env)
+    ///     .expect("cannot allocate memory for Qureg");
     ///
     /// let m = &ComplexMatrix4::new(
     ///     [
@@ -4519,7 +4617,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_density_qureg::<3>(&env);
+    /// let mut qureg = Qureg::try_new_density(3, &env)
+    ///     .expect("cannot allocate memory for Qureg");
     ///
     /// let m = &mut ComplexMatrixN::try_new(2).unwrap();
     /// init_complex_matrix_n(
@@ -4579,7 +4678,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_density_qureg::<2>(&env);
+    /// let mut qureg = Qureg::try_new_density(2, &env)
+    ///     .expect("cannot allocate memory for Qureg");
     ///
     /// let m = &ComplexMatrix2::new([[0., 1.], [0., 0.]], [[0., 0.], [0., 0.]]);
     /// let target = 1;
@@ -4621,7 +4721,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_density_qureg::<3>(&env);
+    /// let mut qureg = Qureg::try_new_density(3, &env)
+    ///     .expect("cannot allocate memory for Qureg");
     ///
     /// let m = &ComplexMatrix4::new(
     ///     [
@@ -4681,7 +4782,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_density_qureg::<3>(&env);
+    /// let mut qureg = Qureg::try_new_density(3, &env)
+    ///     .expect("cannot allocate memory for Qureg");
     /// let m = &mut ComplexMatrixN::try_new(2).unwrap();
     /// init_complex_matrix_n(
     ///     m,
@@ -4742,7 +4844,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// use PauliOpType::PAULI_X;
     ///
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<1>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(1, &env).expect("cannot allocate memory for Qureg");
     ///
     /// let hamil = &mut PauliHamil::try_new(1, 1).unwrap();
     /// let coeffs = &[1.];
@@ -4784,7 +4887,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<2>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
     ///
     /// let target_qubit = 0;
     /// let u = &ComplexMatrix2::new([[0., 1.], [1., 0.]], [[0., 0.], [0., 0.]]);
@@ -4815,7 +4919,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<2>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
     ///
     /// let target_qubit1 = 0;
     /// let target_qubit2 = 1;
@@ -4866,7 +4971,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<3>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(3, &env).expect("cannot allocate memory for Qureg");
     ///
     /// let mtr = &mut ComplexMatrixN::try_new(3).unwrap();
     /// let empty = &[0., 0., 0., 0., 0., 0., 0., 0.];
@@ -4916,7 +5022,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<4>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(4, &env).expect("cannot allocate memory for Qureg");
     /// qureg.pauli_x(0).unwrap();
     /// qureg.pauli_x(1).unwrap();
     ///
@@ -5072,7 +5179,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<3>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(3, &env).expect("cannot allocate memory for Qureg");
     /// qureg.pauli_x(1).unwrap();
     ///
     /// let qubits = &[0, 1];
@@ -5188,7 +5296,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<3>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(3, &env).expect("cannot allocate memory for Qureg");
     /// qureg.pauli_x(1).unwrap();
     ///
     /// let qubits = &[0, 1];
@@ -5368,7 +5477,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<3>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(3, &env).expect("cannot allocate memory for Qureg");
     /// qureg.pauli_x(1).unwrap();
     ///
     /// let qubits = &[0, 1];
@@ -5434,7 +5544,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<3>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(3, &env).expect("cannot allocate memory for Qureg");
     /// qureg.pauli_x(1).unwrap();
     ///
     /// let qubits = &[0, 1];
@@ -5505,7 +5616,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<2>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
     ///
     /// let qubits = &[0, 1];
     /// let num_qubits_per_reg = &[1, 1];
@@ -5557,7 +5669,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<3>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(3, &env).expect("cannot allocate memory for Qureg");
     ///
     /// let qubits = &[0, 1];
     /// let num_qubits_per_reg = &[1, 1];
@@ -5619,7 +5732,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<2>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
     ///
     /// let qubits = &[0, 1];
     /// let num_qubits_per_reg = &[1, 1];
@@ -5679,7 +5793,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<3>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(3, &env).expect("cannot allocate memory for Qureg");
     ///
     /// let qubits = &[0, 1];
     /// let num_qubits_per_reg = &[1, 1];
@@ -5770,7 +5885,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<3>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(3, &env).expect("cannot allocate memory for Qureg");
     ///
     /// qureg.apply_full_qft();
     /// ```
@@ -5834,7 +5950,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<3>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(3, &env).expect("cannot allocate memory for Qureg");
     ///
     /// qureg.apply_qft(&[0, 1]).unwrap();
     /// ```
@@ -5890,7 +6007,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// ```rust
     /// # use quest_bind::*;
     /// let env = QuestEnv::new();
-    /// let mut qureg = create_qureg::<2>(&env);
+    /// let mut qureg =
+    ///     Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
     ///
     /// qureg.apply_projector(0, 0).unwrap();
     ///
@@ -5918,7 +6036,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     }
 } // Qureg
 
-impl<'a, const N: u16> Drop for Qureg<'a, N> {
+impl<'a> Drop for Qureg<'a> {
     fn drop(&mut self) {
         catch_quest_exception(|| {
             unsafe { ffi::destroyQureg(self.reg, self.env.0) };
@@ -5947,8 +6065,10 @@ impl<'a, const N: u16> Drop for Qureg<'a, N> {
 /// };
 ///
 /// let env = QuestEnv::new();
-/// let mut in_qureg = create_qureg::<2>(&env);
-/// let mut out_qureg = create_qureg::<2>(&env);
+/// let mut in_qureg =
+///     Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
+/// let mut out_qureg =
+///     Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
 ///
 /// let hamil = &mut PauliHamil::try_new(2, 2).unwrap();
 /// let coeffs = &[SQRT_2.recip(), SQRT_2.recip()];
@@ -5967,10 +6087,10 @@ impl<'a, const N: u16> Drop for Qureg<'a, N> {
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
-pub fn apply_pauli_hamil<const N: u16>(
-    in_qureg: &mut Qureg<'_, N>,
+pub fn apply_pauli_hamil(
+    in_qureg: &mut Qureg<'_>,
     hamil: &PauliHamil,
-    out_qureg: &mut Qureg<'_, N>,
+    out_qureg: &mut Qureg<'_>,
 ) -> Result<(), QuestError> {
     catch_quest_exception(|| unsafe {
         ffi::applyPauliHamil(in_qureg.reg, hamil.0, out_qureg.reg);
@@ -5994,8 +6114,10 @@ pub fn apply_pauli_hamil<const N: u16>(
 /// };
 ///
 /// let env = QuestEnv::new();
-/// let mut in_qureg = create_qureg::<2>(&env);
-/// let mut out_qureg = create_qureg::<2>(&env);
+/// let mut in_qureg =
+///     Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
+/// let mut out_qureg =
+///     Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
 /// let all_pauli_codes = &[PAULI_I, PAULI_X, PAULI_X, PAULI_I];
 /// let term_coeffs = &[SQRT_2.recip(), SQRT_2.recip()];
 ///
@@ -6017,11 +6139,11 @@ pub fn apply_pauli_hamil<const N: u16>(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
-pub fn apply_pauli_sum<const N: u16>(
-    in_qureg: &mut Qureg<'_, N>,
+pub fn apply_pauli_sum(
+    in_qureg: &mut Qureg<'_>,
     all_pauli_codes: &[PauliOpType],
     term_coeffs: &[Qreal],
-    out_qureg: &mut Qureg<'_, N>,
+    out_qureg: &mut Qureg<'_>,
 ) -> Result<(), QuestError> {
     let num_sum_terms = term_coeffs.len() as i32;
     catch_quest_exception(|| unsafe {
@@ -6042,9 +6164,11 @@ pub fn apply_pauli_sum<const N: u16>(
 /// ```rust
 /// # use quest_bind::*;
 /// let env = QuestEnv::new();
-/// let a = create_density_qureg::<2>(&env);
+/// let a = Qureg::try_new_density(2, &env)
+///     .expect("cannot allocate memory for Qureg");
 /// let b = {
-///     let mut b = create_density_qureg::<2>(&env);
+///     let mut b = Qureg::try_new_density(2, &env)
+///         .expect("cannot allocate memory for Qureg");
 ///     b.init_classical_state(1).unwrap();
 ///     b
 /// };
@@ -6056,9 +6180,9 @@ pub fn apply_pauli_sum<const N: u16>(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
-pub fn calc_hilbert_schmidt_distance<const N: u16>(
-    a: &Qureg<'_, N>,
-    b: &Qureg<'_, N>,
+pub fn calc_hilbert_schmidt_distance(
+    a: &Qureg<'_>,
+    b: &Qureg<'_>,
 ) -> Result<Qreal, QuestError> {
     catch_quest_exception(|| unsafe {
         ffi::calcHilbertSchmidtDistance(a.reg, b.reg)
@@ -6072,9 +6196,11 @@ pub fn calc_hilbert_schmidt_distance<const N: u16>(
 /// ```rust
 /// # use quest_bind::*;
 /// let env = QuestEnv::new();
-/// let qureg = create_qureg::<2>(&env);
+/// let qureg =
+///     Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
 /// let other_qureg = {
-///     let mut other_qureg = create_qureg::<2>(&env);
+///     let mut other_qureg =
+///         Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
 ///     other_qureg.init_plus_state();
 ///     other_qureg
 /// };
@@ -6087,9 +6213,9 @@ pub fn calc_hilbert_schmidt_distance<const N: u16>(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
-pub fn calc_inner_product<const N: u16>(
-    bra: &Qureg<'_, N>,
-    ket: &Qureg<'_, N>,
+pub fn calc_inner_product(
+    bra: &Qureg<'_>,
+    ket: &Qureg<'_>,
 ) -> Result<Qcomplex, QuestError> {
     catch_quest_exception(|| unsafe { ffi::calcInnerProduct(bra.reg, ket.reg) })
         .map(Into::into)
@@ -6102,9 +6228,11 @@ pub fn calc_inner_product<const N: u16>(
 /// ```rust
 /// # use quest_bind::*;
 /// let env = QuestEnv::new();
-/// let qureg = create_density_qureg::<2>(&env);
+/// let qureg = Qureg::try_new_density(2, &env)
+///     .expect("cannot allocate memory for Qureg");
 /// let other_qureg = {
-///     let mut other_qureg = create_density_qureg::<2>(&env);
+///     let mut other_qureg = Qureg::try_new_density(2, &env)
+///         .expect("cannot allocate memory for Qureg");
 ///     other_qureg.init_plus_state();
 ///     other_qureg
 /// };
@@ -6116,9 +6244,9 @@ pub fn calc_inner_product<const N: u16>(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
-pub fn calc_density_inner_product<const N: u16>(
-    rho1: &Qureg<'_, N>,
-    rho2: &Qureg<'_, N>,
+pub fn calc_density_inner_product(
+    rho1: &Qureg<'_>,
+    rho2: &Qureg<'_>,
 ) -> Result<Qreal, QuestError> {
     catch_quest_exception(|| unsafe {
         ffi::calcDensityInnerProduct(rho1.reg, rho2.reg)
@@ -6141,13 +6269,13 @@ pub fn calc_density_inner_product<const N: u16>(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
-pub fn set_weighted_qureg<const N: u16>(
+pub fn set_weighted_qureg(
     fac1: Qcomplex,
-    qureg1: &Qureg<'_, N>,
+    qureg1: &Qureg<'_>,
     fac2: Qcomplex,
-    qureg2: &Qureg<'_, N>,
+    qureg2: &Qureg<'_>,
     fac_out: Qcomplex,
-    out: &mut Qureg<'_, N>,
+    out: &mut Qureg<'_>,
 ) -> Result<(), QuestError> {
     catch_quest_exception(|| unsafe {
         ffi::setWeightedQureg(
