@@ -23,6 +23,7 @@ pub use ffi::{
     phaseGateType as PhaseGateType,
 };
 pub use matrices::{
+    init_complex_matrix_from_slice,
     init_complex_matrix_n,
     ComplexMatrix2,
     ComplexMatrix4,

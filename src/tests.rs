@@ -1,6 +1,9 @@
 #![allow(clippy::cast_sign_loss)]
 
-use num::Zero;
+use num::{
+    Complex,
+    Zero,
+};
 
 use super::*;
 
@@ -125,6 +128,27 @@ fn complex_matrix_n_row_slice_02() {
     assert_eq!(row.len(), 4);
     assert_eq!(row[0], 3.);
     assert_eq!(row[1], 4.);
+}
+
+#[test]
+fn init_complex_matrix_from_slice_01() {
+    let mut m = ComplexMatrixN::try_new(1).unwrap();
+    init_complex_matrix_from_slice(
+        &mut m,
+        &[
+            Complex::new(1., 11.),
+            Complex::new(2., 12.),
+            Complex::new(3., 13.),
+            Complex::new(4., 14.),
+        ],
+    )
+    .unwrap();
+
+    assert_eq!(m.row_real_as_slice(0), &[1., 2.]);
+    assert_eq!(m.row_real_as_slice(1), &[3., 4.]);
+
+    assert_eq!(m.row_imag_as_slice(0), &[11., 12.]);
+    assert_eq!(m.row_imag_as_slice(1), &[13., 14.]);
 }
 
 #[test]
