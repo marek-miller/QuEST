@@ -2,6 +2,10 @@
 
 ## v0.3.7 (??/??/????)
 
+- New features/improvements:
+
+  - New method: `ComplexMatrixN::num_qubits()`
+
 - API breaking changes: 
 
   - Rename methods:
