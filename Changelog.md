@@ -1,5 +1,11 @@
 # Releases
 
+## v0.3.8 (??/??/????)
+
+- New features/improvements:
+
+  - New function: `init_complex_matrix_from_slice()`
+
 ## v0.3.7 (08/09/2023)
 
 - New features/improvements:

@@ -1,3 +1,5 @@
+use num::Complex;
+
 use crate::{
     error::catch_quest_exception,
     ffi,
@@ -353,6 +355,64 @@ pub fn init_complex_matrix_n(
             unsafe {
                 *(*m.0.real.add(i)).add(j) = real[i][j];
                 *(*m.0.imag.add(i)).add(j) = imag[i][j];
+            }
+        }
+    }
+    Ok(())
+}
+
+/// Initialize matrix from a flat array of concatenated rows.
+///
+/// If the slice is longer than `2.pow(2 * m.num_qubits())`, the remaining
+/// elements are ignored.  If it's shorter, the function returns an error.
+///
+/// # Errors
+///
+/// Returns [`InvalidQuESTInputError`],
+///
+/// - if `elems.len() < 2.pow(2 * m.num_qubits())
+///
+/// # Examples
+///
+/// ```rust
+/// # use quest_bind::*;
+/// use num::{
+///     Complex,
+///     One,
+///     Zero,
+/// };
+///
+/// let mut m = ComplexMatrixN::try_new(1).unwrap();
+/// let phase = 0.123;
+/// init_complex_matrix_from_slice(
+///     &mut m,
+///     &[
+///         Complex::one(),
+///         Complex::zero(),
+///         Complex::zero(),
+///         Complex::cis(phase),
+///     ],
+/// )
+/// .unwrap();
+/// ```
+///
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+#[allow(clippy::needless_pass_by_ref_mut)]
+pub fn init_complex_matrix_from_slice(
+    m: &mut ComplexMatrixN,
+    elems: &[Complex<Qreal>],
+) -> Result<(), QuestError> {
+    let num_elems = 1 << m.0.numQubits;
+
+    if elems.len() < num_elems * num_elems {
+        return Err(QuestError::ArrayLengthError);
+    }
+
+    for i in 0..num_elems {
+        for j in 0..num_elems {
+            unsafe {
+                *(*m.0.real.add(i)).add(j) = elems[i * num_elems + j].re;
+                *(*m.0.imag.add(i)).add(j) = elems[i * num_elems + j].im;
             }
         }
     }
