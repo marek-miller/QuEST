@@ -7,10 +7,10 @@ use super::*;
 #[test]
 fn create_qureg_01() -> Result<(), QuestError> {
     let env = &QuestEnv::new();
-    let _ = Qureg::<'_, 1>::try_new(env)?;
-    let _ = Qureg::<'_, 5>::try_new(env)?;
+    let _ = Qureg::try_new(1, env)?;
+    let _ = Qureg::try_new(5, env)?;
 
-    let _ = Qureg::<'_, 0>::try_new(env).unwrap_err();
+    let _ = Qureg::try_new(0, env).unwrap_err();
     Ok(())
 }
 
@@ -25,10 +25,10 @@ fn create_qureg_01() -> Result<(), QuestError> {
 fn create_density_qureg_01() -> Result<(), QuestError> {
     let env = &QuestEnv::new();
     {
-        let _ = Qureg::<'_, 1>::try_new_density(env)?;
-        let _ = Qureg::<'_, 5>::try_new_density(env)?;
+        let _ = Qureg::try_new_density(1, env)?;
+        let _ = Qureg::try_new_density(5, env)?;
 
-        let _ = Qureg::<'_, 0>::try_new_density(env).unwrap_err();
+        let _ = Qureg::try_new_density(0, env).unwrap_err();
     }
     Ok(())
 }
@@ -36,7 +36,7 @@ fn create_density_qureg_01() -> Result<(), QuestError> {
 #[test]
 fn get_matrix_n_elem_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
 
     qureg.init_zero_state();
     let amp = qureg.get_imag_amp(0).unwrap();
@@ -152,7 +152,7 @@ fn set_diagonal_op_elems_01() {
 #[test]
 fn apply_diagonal_op_01() {
     let env = &QuestEnv::new();
-    let mut qureg = create_qureg::<2>(env);
+    let mut qureg = Qureg::try_new(2, env).unwrap();
     let mut op = DiagonalOp::try_new(2, env).unwrap();
 
     init_diagonal_op(&mut op, &[1., 2., 3., 4.], &[5., 6., 7., 8.]).unwrap();
@@ -166,7 +166,7 @@ fn apply_diagonal_op_01() {
 #[test]
 fn calc_expec_diagonal_op_() {
     let env = &QuestEnv::new();
-    let mut qureg = create_qureg::<2>(env);
+    let mut qureg = Qureg::try_new(2, env).unwrap();
     let mut op = DiagonalOp::try_new(2, env).unwrap();
 
     qureg.init_plus_state();
@@ -208,7 +208,7 @@ fn initialize_pauli_hamil_01() {
 #[test]
 fn set_amps_01() {
     let env = &QuestEnv::new();
-    let mut qureg = create_qureg::<3>(env);
+    let mut qureg = Qureg::try_new(3, env).unwrap();
 
     let re = [1., 2., 3., 4.];
     let im = [1., 2., 3., 4.];
@@ -226,7 +226,7 @@ fn set_amps_01() {
 #[test]
 fn set_amps_02() {
     let env = &QuestEnv::new();
-    let mut qureg = create_qureg::<2>(env);
+    let mut qureg = Qureg::try_new(2, env).unwrap();
 
     let re = [1.];
     let im = [1., 2.];
@@ -244,7 +244,7 @@ fn set_amps_02() {
 #[test]
 fn set_density_amps_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_density_qureg::<3>(env);
+    let qureg = &mut Qureg::try_new_density(3, env).unwrap();
 
     let re = &[1., 2., 3., 4.];
     let im = &[1., 2., 3., 4.];
@@ -264,7 +264,7 @@ fn set_density_amps_01() {
 #[test]
 fn set_density_amps_02() {
     let env = &QuestEnv::new();
-    let mut qureg = create_density_qureg::<2>(env);
+    let mut qureg = Qureg::try_new_density(2, env).unwrap();
 
     let re = [1.];
     let im = [1., 2.];
@@ -282,7 +282,7 @@ fn set_density_amps_02() {
 #[test]
 fn phase_shift_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<3>(env);
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
 
     qureg.phase_shift(0, 0.0).unwrap();
     qureg.phase_shift(1, 0.5).unwrap();
@@ -295,7 +295,7 @@ fn phase_shift_01() {
 #[test]
 fn controlled_phase_shift_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<3>(env);
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
 
     qureg.controlled_phase_shift(0, 1, 0.5).unwrap();
     qureg.controlled_phase_shift(0, 2, 0.5).unwrap();
@@ -307,7 +307,7 @@ fn controlled_phase_shift_01() {
 #[test]
 fn multi_controlled_phase_shift_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<3>(env);
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
     qureg.multi_controlled_phase_shift(&[0, 1, 2], 0.5).unwrap();
     qureg.multi_controlled_phase_shift(&[2, 1, 0], 0.5).unwrap();
 
@@ -326,7 +326,7 @@ fn multi_controlled_phase_shift_01() {
 #[test]
 fn controlled_phase_flip_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<3>(env);
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
 
     qureg.controlled_phase_flip(0, 1).unwrap();
     qureg.controlled_phase_flip(0, 2).unwrap();
@@ -338,7 +338,7 @@ fn controlled_phase_flip_01() {
 #[test]
 fn multi_controlled_phase_flip_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut Qureg::<'_, 4>::try_new(env).unwrap();
+    let qureg = &mut Qureg::try_new(4, env).unwrap();
     qureg.multi_controlled_phase_flip(&[0, 1, 3]).unwrap();
     qureg.multi_controlled_phase_flip(&[0, 1, 3]).unwrap();
 
@@ -351,7 +351,7 @@ fn multi_controlled_phase_flip_01() {
 #[test]
 fn s_gate_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
     qureg.init_zero_state();
 
     qureg.s_gate(0).unwrap();
@@ -370,7 +370,7 @@ fn s_gate_01() {
 #[test]
 fn t_gate_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
     qureg.init_zero_state();
 
     qureg.t_gate(0).unwrap();
@@ -381,7 +381,7 @@ fn t_gate_01() {
 #[test]
 fn get_amp_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
     qureg.init_plus_state();
 
     qureg.get_amp(0).unwrap();
@@ -396,7 +396,7 @@ fn get_amp_01() {
 #[test]
 fn get_real_amp_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
     qureg.init_plus_state();
 
     qureg.get_real_amp(0).unwrap();
@@ -411,7 +411,7 @@ fn get_real_amp_01() {
 #[test]
 fn get_imag_amp_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
     qureg.init_plus_state();
 
     qureg.get_imag_amp(0).unwrap();
@@ -426,7 +426,7 @@ fn get_imag_amp_01() {
 #[test]
 fn get_prob_amp_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
     qureg.init_plus_state();
 
     qureg.get_prob_amp(0).unwrap();
@@ -441,7 +441,7 @@ fn get_prob_amp_01() {
 #[test]
 fn get_density_amp_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
 
     qureg.get_density_amp(0, 0).unwrap_err();
     qureg.get_density_amp(1, 0).unwrap_err();
@@ -454,7 +454,7 @@ fn get_density_amp_01() {
 #[test]
 fn get_density_amp_02() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_density_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new_density(2, env).unwrap();
 
     qureg.get_density_amp(0, 0).unwrap();
     qureg.get_density_amp(1, 0).unwrap();
@@ -467,7 +467,7 @@ fn get_density_amp_02() {
 #[test]
 fn compact_unitary_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
     qureg.init_zero_state();
 
     let norm = SQRT_2.recip();
@@ -485,7 +485,7 @@ fn compact_unitary_01() {
 fn compact_unitary_02() {
     // env_logger::init();
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
     qureg.init_zero_state();
 
     // this doesn't define a unitary matrix
@@ -502,7 +502,7 @@ fn compact_unitary_02() {
 #[test]
 fn unitary_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
     qureg.init_zero_state();
 
     let norm = SQRT_2.recip();
@@ -519,7 +519,7 @@ fn unitary_01() {
 #[test]
 fn unitary_02() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
     qureg.init_zero_state();
 
     // This isn't a unitary
@@ -533,7 +533,7 @@ fn unitary_02() {
 #[test]
 fn rotate_x_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<3>(env);
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
     let theta = PI;
     qureg.rotate_x(0, theta).unwrap();
     qureg.rotate_x(1, theta).unwrap();
@@ -546,7 +546,7 @@ fn rotate_x_01() {
 #[test]
 fn rotate_y_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<3>(env);
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
     let theta = PI;
     qureg.rotate_y(0, theta).unwrap();
     qureg.rotate_y(1, theta).unwrap();
@@ -559,7 +559,7 @@ fn rotate_y_01() {
 #[test]
 fn rotate_z_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<3>(env);
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
     let theta = PI;
     qureg.rotate_z(0, theta).unwrap();
     qureg.rotate_z(1, theta).unwrap();
@@ -572,7 +572,7 @@ fn rotate_z_01() {
 #[test]
 fn rotate_around_axis_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<3>(env);
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
     qureg.init_zero_state();
 
     let angle = 0.;
@@ -588,7 +588,7 @@ fn rotate_around_axis_01() {
 #[test]
 fn rotate_around_axis_02() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<3>(env);
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
     qureg.init_zero_state();
 
     let angle = 0.;
@@ -605,7 +605,7 @@ fn rotate_around_axis_02() {
 #[test]
 fn controlled_rotate_x_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<3>(env);
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
 
     qureg.controlled_rotate_x(1, 0, 0.5).unwrap();
     qureg.controlled_rotate_x(1, 2, 0.5).unwrap();
@@ -621,7 +621,7 @@ fn controlled_rotate_x_01() {
 #[test]
 fn controlled_rotate_y_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<3>(env);
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
 
     qureg.controlled_rotate_y(1, 0, 0.5).unwrap();
     qureg.controlled_rotate_y(1, 2, 0.5).unwrap();
@@ -637,7 +637,7 @@ fn controlled_rotate_y_01() {
 #[test]
 fn controlled_rotate_z_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<3>(env);
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
 
     qureg.controlled_rotate_z(1, 0, 0.5).unwrap();
     qureg.controlled_rotate_z(1, 2, 0.5).unwrap();
@@ -653,7 +653,7 @@ fn controlled_rotate_z_01() {
 #[test]
 fn controlled_rotate_around_axis_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<3>(env);
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
     let vector = &Vector::new(0., 0., 1.);
 
     qureg
@@ -686,7 +686,7 @@ fn controlled_rotate_around_axis_01() {
 #[test]
 fn controlled_rotate_around_axis_02() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<3>(env);
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
     // vector cannot be zero
     let vector = &Vector::new(0., 0., 0.);
 
@@ -701,7 +701,7 @@ fn controlled_rotate_around_axis_02() {
 #[test]
 fn controlled_compact_unitary_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
     qureg.init_zero_state();
 
     let norm = SQRT_2.recip();
@@ -729,7 +729,7 @@ fn controlled_compact_unitary_01() {
 fn controlled_compact_unitary_02() {
     // env_logger::init();
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
     qureg.init_zero_state();
 
     // this doesn't define a unitary matrix
@@ -757,7 +757,7 @@ fn controlled_compact_unitary_02() {
 #[test]
 fn controlled_unitary_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
     qureg.init_zero_state();
 
     let norm = SQRT_2.recip();
@@ -778,7 +778,7 @@ fn controlled_unitary_01() {
 #[test]
 fn controlled_unitary_02() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
     qureg.init_zero_state();
 
     // this doesn't define a unitary matrix
@@ -796,7 +796,7 @@ fn controlled_unitary_02() {
 #[test]
 fn multi_controlled_unitary_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<3>(env);
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
     qureg.init_zero_state();
 
     let norm = SQRT_2.recip();
@@ -826,7 +826,7 @@ fn multi_controlled_unitary_01() {
 #[test]
 fn multi_controlled_unitary_02() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<3>(env);
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
     qureg.init_zero_state();
 
     // this doesn't define a unitary matrix
@@ -841,7 +841,7 @@ fn multi_controlled_unitary_02() {
 #[test]
 fn pauli_x_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
     qureg.init_zero_state();
 
     qureg.pauli_x(0).unwrap();
@@ -854,7 +854,7 @@ fn pauli_x_01() {
 #[test]
 fn pauli_y_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
     qureg.init_zero_state();
 
     qureg.pauli_y(0).unwrap();
@@ -867,7 +867,7 @@ fn pauli_y_01() {
 #[test]
 fn pauli_z_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
     qureg.init_zero_state();
 
     qureg.pauli_z(0).unwrap();
@@ -880,7 +880,7 @@ fn pauli_z_01() {
 #[test]
 fn hadamard_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
     qureg.init_zero_state();
 
     qureg.hadamard(0).unwrap();
@@ -892,7 +892,7 @@ fn hadamard_01() {
 #[test]
 fn controlled_not_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
     qureg.init_zero_state();
     qureg.pauli_x(1).unwrap();
 
@@ -909,7 +909,7 @@ fn controlled_not_01() {
 #[test]
 fn multi_qubit_not_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
     qureg.init_zero_state();
 
     qureg.multi_qubit_not(&[0, 1]).unwrap();
@@ -923,7 +923,7 @@ fn multi_qubit_not_01() {
 #[test]
 fn multi_controlled_multi_qubit_not_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut Qureg::<'_, 4>::try_new(env).unwrap();
+    let qureg = &mut Qureg::try_new(4, env).unwrap();
     qureg.init_zero_state();
 
     qureg
@@ -959,7 +959,7 @@ fn multi_controlled_multi_qubit_not_01() {
 #[test]
 fn controlled_pauli_y_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
     qureg.init_zero_state();
 
     qureg.controlled_pauli_y(1, 0).unwrap();
@@ -975,7 +975,7 @@ fn controlled_pauli_y_01() {
 #[test]
 fn calc_prob_of_outcome_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
     qureg.init_zero_state();
 
     let _ = qureg.calc_prob_of_outcome(0, 0).unwrap();
@@ -992,7 +992,7 @@ fn calc_prob_of_outcome_01() {
 #[test]
 fn calc_prob_of_all_outcomes_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<3>(env);
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
     qureg.init_zero_state();
 
     let outcome_probs = &mut vec![0.; 4];
@@ -1023,7 +1023,7 @@ fn calc_prob_of_all_outcomes_01() {
 #[test]
 fn calc_prob_of_all_outcomes_02() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<3>(env);
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
     qureg.init_zero_state();
 
     let outcome_probs = &mut vec![0.; 3];
@@ -1036,7 +1036,7 @@ fn calc_prob_of_all_outcomes_02() {
 #[test]
 fn collapse_to_outcome_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
 
     qureg.init_zero_state();
     qureg.collapse_to_outcome(0, 0).unwrap();
@@ -1054,7 +1054,7 @@ fn collapse_to_outcome_01() {
 #[test]
 fn measure_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
 
     qureg.init_zero_state();
 
@@ -1067,7 +1067,7 @@ fn measure_01() {
 #[test]
 fn measure_with_stats_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
 
     // Prepare a triplet state `|00> + |11>`
     qureg.init_zero_state();
@@ -1082,9 +1082,9 @@ fn measure_with_stats_01() {
 #[test]
 fn calc_inner_product_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
     qureg.init_zero_state();
-    let other_qureg = &mut create_qureg::<2>(env);
+    let other_qureg = &mut Qureg::try_new(2, env).unwrap();
     other_qureg.init_zero_state();
 
     let _ = calc_inner_product(qureg, other_qureg).unwrap();
@@ -1093,9 +1093,9 @@ fn calc_inner_product_01() {
 // #[test]
 // fn calc_inner_product_02() {
 //     let env = &QuestEnv::new();
-//     let qureg = &mut create_qureg::<2>(env);
+//     let qureg = &mut Qureg::try_new(2,env).unwrap();
 //     qureg.init_zero_state();
-//     let other_qureg = &mut Qureg::<'_, 1>::try_new(env).unwrap();
+//     let other_qureg = &mut Qureg::try_new(1, env).unwrap();
 //     other_qureg.init_zero_state();
 
 //     let _ = calc_inner_product(qureg, other_qureg).unwrap_err();
@@ -1104,9 +1104,9 @@ fn calc_inner_product_01() {
 #[test]
 fn calc_inner_product_03() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
     qureg.init_zero_state();
-    let other_qureg = &mut create_density_qureg::<2>(env);
+    let other_qureg = &mut Qureg::try_new_density(2, env).unwrap();
     other_qureg.init_zero_state();
 
     let _ = calc_inner_product(qureg, other_qureg).unwrap_err();
@@ -1115,9 +1115,9 @@ fn calc_inner_product_03() {
 #[test]
 fn calc_density_inner_product_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_density_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new_density(2, env).unwrap();
     qureg.init_zero_state();
-    let other_qureg = &mut create_density_qureg::<2>(env);
+    let other_qureg = &mut Qureg::try_new_density(2, env).unwrap();
     other_qureg.init_zero_state();
 
     let _ = calc_density_inner_product(qureg, other_qureg).unwrap();
@@ -1126,7 +1126,7 @@ fn calc_density_inner_product_01() {
 // #[test]
 // fn calc_density_inner_product_02() {
 //     let env = &QuestEnv::new();
-//     let qureg = &mut create_density_qureg::<2>(env);
+//     let qureg = &mut Qureg::try_new_density(2,env).unwrap();
 //     qureg.init_zero_state();
 //     let other_qureg = &mut Qureg::try_new_density(1, env).unwrap();
 //     other_qureg.init_zero_state();
@@ -1137,9 +1137,9 @@ fn calc_density_inner_product_01() {
 #[test]
 fn calc_density_inner_product_03() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_density_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new_density(2, env).unwrap();
     qureg.init_zero_state();
-    let other_qureg = &mut create_qureg::<2>(env);
+    let other_qureg = &mut Qureg::try_new(2, env).unwrap();
     other_qureg.init_zero_state();
 
     let _ = calc_density_inner_product(qureg, other_qureg).unwrap_err();
@@ -1167,7 +1167,7 @@ fn get_quest_seeds_02() {
 #[test]
 fn start_recording_qasm_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
 
     qureg.start_recording_qasm();
     qureg.hadamard(0).and(qureg.controlled_not(0, 1)).unwrap();
@@ -1179,7 +1179,7 @@ fn start_recording_qasm_01() {
 #[test]
 fn mix_dephasing_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_density_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new_density(2, env).unwrap();
     qureg.init_plus_state();
 
     qureg.mix_dephasing(0, 0.5).unwrap();
@@ -1194,7 +1194,7 @@ fn mix_dephasing_01() {
 #[test]
 fn mix_dephasing_02() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
     qureg.init_plus_state();
 
     // qureg is not a density matrix
@@ -1205,7 +1205,7 @@ fn mix_dephasing_02() {
 #[test]
 fn mix_two_qubit_dephasing_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_density_qureg::<3>(env);
+    let qureg = &mut Qureg::try_new_density(3, env).unwrap();
     qureg.init_plus_state();
 
     qureg.mix_two_qubit_dephasing(0, 1, 0.75).unwrap();
@@ -1227,7 +1227,7 @@ fn mix_two_qubit_dephasing_01() {
 #[test]
 fn mix_two_qubit_dephasing_02() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<3>(env);
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
     qureg.init_plus_state();
 
     // qureg is not a density matrix
@@ -1238,7 +1238,7 @@ fn mix_two_qubit_dephasing_02() {
 #[test]
 fn mix_depolarising_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_density_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new_density(2, env).unwrap();
     qureg.init_zero_state();
 
     qureg.mix_depolarising(0, 0.00).unwrap();
@@ -1255,7 +1255,7 @@ fn mix_depolarising_01() {
 #[test]
 fn mix_damping_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_density_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new_density(2, env).unwrap();
     qureg.init_plus_state();
 
     qureg.mix_damping(0, 1.).unwrap();
@@ -1274,7 +1274,7 @@ fn mix_damping_01() {
 #[test]
 fn mix_damping_02() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
     qureg.init_plus_state();
 
     // qureg is not a density matrix
@@ -1287,7 +1287,7 @@ fn mix_damping_02() {
 #[test]
 fn mix_two_qubit_depolarising_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_density_qureg::<3>(env);
+    let qureg = &mut Qureg::try_new_density(3, env).unwrap();
     qureg.init_plus_state();
 
     qureg.mix_two_qubit_depolarising(0, 1, 15. / 16.).unwrap();
@@ -1309,7 +1309,7 @@ fn mix_two_qubit_depolarising_01() {
 #[test]
 fn mix_two_qubit_depolarising_02() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<3>(env);
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
     qureg.init_plus_state();
 
     // qureg is not a density matrix
@@ -1320,7 +1320,7 @@ fn mix_two_qubit_depolarising_02() {
 #[test]
 fn mix_pauli_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_density_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new_density(2, env).unwrap();
     qureg.init_zero_state();
 
     let (prob_x, prob_y, prob_z) = (0.25, 0.25, 0.25);
@@ -1334,7 +1334,7 @@ fn mix_pauli_01() {
 #[test]
 fn mix_pauli_02() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_density_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new_density(2, env).unwrap();
     qureg.init_zero_state();
 
     // this is not a prob distribution
@@ -1347,7 +1347,7 @@ fn mix_pauli_02() {
 fn mix_pauli_03() {
     let env = &QuestEnv::new();
     // not a density matrix
-    let qureg = &mut create_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
     qureg.init_zero_state();
 
     let (prob_x, prob_y, prob_z) = (0.25, 0.25, 0.25);
@@ -1358,8 +1358,8 @@ fn mix_pauli_03() {
 #[test]
 fn mix_density_matrix_01() {
     let env = &QuestEnv::new();
-    let combine_qureg = &mut create_density_qureg::<2>(env);
-    let other_qureg = &mut create_density_qureg::<2>(env);
+    let combine_qureg = &mut Qureg::try_new_density(2, env).unwrap();
+    let other_qureg = &mut Qureg::try_new_density(2, env).unwrap();
 
     combine_qureg.init_zero_state();
     other_qureg.init_zero_state();
@@ -1380,8 +1380,8 @@ fn mix_density_matrix_01() {
 fn mix_density_matrix_02() {
     let env = &QuestEnv::new();
     // this is not a density matrix
-    let combine_qureg = &mut create_qureg::<2>(env);
-    let other_qureg = &mut create_density_qureg::<2>(env);
+    let combine_qureg = &mut Qureg::try_new(2, env).unwrap();
+    let other_qureg = &mut Qureg::try_new_density(2, env).unwrap();
 
     combine_qureg.init_zero_state();
     other_qureg.init_zero_state();
@@ -1394,9 +1394,9 @@ fn mix_density_matrix_02() {
 #[test]
 fn mix_density_matrix_03() {
     let env = &QuestEnv::new();
-    let combine_qureg = &mut create_density_qureg::<2>(env);
+    let combine_qureg = &mut Qureg::try_new_density(2, env).unwrap();
     // this is not a density matrix
-    let other_qureg = &mut create_qureg::<2>(env);
+    let other_qureg = &mut Qureg::try_new(2, env).unwrap();
 
     combine_qureg.init_zero_state();
     other_qureg.init_zero_state();
@@ -1410,8 +1410,8 @@ fn mix_density_matrix_03() {
 // fn mix_density_matrix_04() {
 //     let env = &QuestEnv::new();
 //     // dimensions don't match
-//     let combine_qureg = &mut create_density_qureg::<2>(env);
-//     let other_qureg = &mut create_density_qureg::<3>(env);
+//     let combine_qureg = &mut Qureg::try_new_density(2,env).unwrap();
+//     let other_qureg = &mut Qureg::try_new_density(3,env).unwrap();
 
 //     combine_qureg.init_zero_state();
 //     other_qureg.init_zero_state();
@@ -1422,12 +1422,12 @@ fn mix_density_matrix_03() {
 #[test]
 fn calc_purity_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_density_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new_density(2, env).unwrap();
     qureg.init_zero_state();
 
     let _ = qureg.calc_purity().unwrap();
 
-    let qureg = &mut create_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
     qureg.init_zero_state();
     let _ = qureg.calc_purity().unwrap_err();
 }
@@ -1435,8 +1435,8 @@ fn calc_purity_01() {
 #[test]
 fn calc_fidelity_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_density_qureg::<2>(env);
-    let pure_state = &mut create_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new_density(2, env).unwrap();
+    let pure_state = &mut Qureg::try_new(2, env).unwrap();
 
     qureg.init_zero_state();
     pure_state.init_zero_state();
@@ -1447,8 +1447,8 @@ fn calc_fidelity_01() {
 // #[test]
 // fn calc_fidelity_02() {
 //     let env = &QuestEnv::new();
-//     let qureg = &mut create_density_qureg::<3>(env);
-//     let pure_state = &mut create_qureg::<2>(env);
+//     let qureg = &mut Qureg::try_new_density(3,env).unwrap();
+//     let pure_state = &mut Qureg::try_new(2,env).unwrap();
 
 //     qureg.init_zero_state();
 //     pure_state.init_zero_state();
@@ -1459,8 +1459,8 @@ fn calc_fidelity_01() {
 #[test]
 fn calc_fidelity_03() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<2>(env);
-    let pure_state = &mut create_density_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
+    let pure_state = &mut Qureg::try_new_density(2, env).unwrap();
 
     qureg.init_zero_state();
     pure_state.init_zero_state();
@@ -1471,7 +1471,7 @@ fn calc_fidelity_03() {
 #[test]
 fn swap_gate_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
     qureg.init_zero_state();
 
     qureg.swap_gate(0, 1).unwrap();
@@ -1484,7 +1484,7 @@ fn swap_gate_01() {
 #[test]
 fn swap_gate_02() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
     qureg.init_zero_state();
 
     qureg.swap_gate(0, 2).unwrap_err();
@@ -1501,7 +1501,7 @@ fn swap_gate_02() {
 #[test]
 fn swap_gate_03() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
     qureg.init_zero_state();
 
     // QuEST seg faults here
@@ -1513,7 +1513,7 @@ fn swap_gate_03() {
 #[test]
 fn sqrt_swap_gate_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
     qureg.init_zero_state();
 
     qureg.sqrt_swap_gate(0, 1).unwrap();
@@ -1526,7 +1526,7 @@ fn sqrt_swap_gate_01() {
 #[test]
 fn sqrt_swap_gate_02() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
     qureg.init_zero_state();
 
     qureg.sqrt_swap_gate(0, 2).unwrap_err();
@@ -1543,7 +1543,7 @@ fn sqrt_swap_gate_02() {
 #[test]
 fn sqrt_swap_gate_03() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
     qureg.init_zero_state();
 
     // QuEST seg faults here
@@ -1555,7 +1555,7 @@ fn sqrt_swap_gate_03() {
 #[test]
 fn multi_rotate_z_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
     qureg.init_zero_state();
 
     qureg.multi_rotate_z(&[0, 1], PI).unwrap();
@@ -1567,7 +1567,7 @@ fn multi_rotate_z_01() {
 #[test]
 fn multi_state_controlled_unitary_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<3>(env);
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
     qureg.init_zero_state();
 
     let u = &ComplexMatrix2::new([[0., 1.], [1., 0.]], [[0., 0.], [0., 0.]]);
@@ -1608,7 +1608,7 @@ fn multi_state_controlled_unitary_01() {
 #[test]
 fn multi_qubit_unitary_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
     qureg.init_zero_state();
 
     let u = &mut ComplexMatrixN::try_new(2).unwrap();
@@ -1638,7 +1638,7 @@ fn multi_qubit_unitary_01() {
 #[test]
 fn multi_qubit_unitary_02() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
     qureg.init_zero_state();
 
     let u = &mut ComplexMatrixN::try_new(2).unwrap();
@@ -1665,7 +1665,7 @@ fn multi_qubit_unitary_02() {
 #[test]
 fn controlled_multi_qubit_unitary_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<3>(env);
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
     qureg.init_zero_state();
 
     let u = &mut ComplexMatrixN::try_new(2).unwrap();
@@ -1710,7 +1710,7 @@ fn controlled_multi_qubit_unitary_01() {
 #[test]
 fn controlled_multi_qubit_unitary_02() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<3>(env);
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
     qureg.init_zero_state();
 
     let u = &mut ComplexMatrixN::try_new(2).unwrap();
@@ -1755,7 +1755,7 @@ fn controlled_multi_qubit_unitary_02() {
 #[test]
 fn muti_controlled_multi_qubit_unitary_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut Qureg::<'_, 4>::try_new(env).unwrap();
+    let qureg = &mut Qureg::try_new(4, env).unwrap();
     qureg.init_zero_state();
 
     let u = &mut ComplexMatrixN::try_new(2).unwrap();
@@ -1804,7 +1804,7 @@ fn muti_controlled_multi_qubit_unitary_01() {
 #[test]
 fn muti_controlled_multi_qubit_unitary_02() {
     let env = &QuestEnv::new();
-    let qureg = &mut Qureg::<'_, 4>::try_new(env).unwrap();
+    let qureg = &mut Qureg::try_new(4, env).unwrap();
     qureg.init_zero_state();
 
     let u = &mut ComplexMatrixN::try_new(2).unwrap();
@@ -1853,7 +1853,7 @@ fn muti_controlled_multi_qubit_unitary_02() {
 #[test]
 fn muti_controlled_multi_qubit_unitary_03() {
     let env = &QuestEnv::new();
-    let qureg = &mut Qureg::<'_, 4>::try_new(env).unwrap();
+    let qureg = &mut Qureg::try_new(4, env).unwrap();
     qureg.init_zero_state();
 
     let u = &mut ComplexMatrixN::try_new(2).unwrap();
@@ -1898,7 +1898,7 @@ fn muti_controlled_multi_qubit_unitary_03() {
 #[test]
 fn apply_matrix2_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
     qureg.init_zero_state();
 
     let m = &ComplexMatrix2::new([[0., 1.], [1., 0.]], [[0., 0.], [0., 0.]]);
@@ -1913,7 +1913,7 @@ fn apply_matrix2_01() {
 #[test]
 fn mix_kraus_map_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_density_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new_density(2, env).unwrap();
     qureg.init_zero_state();
 
     let m = &ComplexMatrix2::new([[0., 1.], [1., 0.]], [[0., 0.], [0., 0.]]);
@@ -1928,7 +1928,7 @@ fn mix_kraus_map_01() {
 #[test]
 fn mix_kraus_map_02() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_density_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new_density(2, env).unwrap();
     qureg.init_zero_state();
 
     // This is not a CPTP map
@@ -1942,7 +1942,7 @@ fn mix_kraus_map_02() {
 #[test]
 fn mix_kraus_map_03() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_density_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new_density(2, env).unwrap();
     qureg.init_zero_state();
 
     let m1 = &ComplexMatrix2::new([[0., 1.], [1., 0.]], [[0., 0.], [0., 0.]]);
@@ -1956,7 +1956,7 @@ fn mix_kraus_map_03() {
 #[test]
 fn mix_two_qubit_kraus_map_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_density_qureg::<3>(env);
+    let qureg = &mut Qureg::try_new_density(3, env).unwrap();
     qureg.init_zero_state();
 
     let m = &ComplexMatrix4::new(
@@ -1988,7 +1988,7 @@ fn mix_two_qubit_kraus_map_01() {
 #[test]
 fn mix_two_qubit_kraus_map_02() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_density_qureg::<3>(env);
+    let qureg = &mut Qureg::try_new_density(3, env).unwrap();
     qureg.init_zero_state();
 
     // This is not a TP map
@@ -2014,7 +2014,7 @@ fn mix_two_qubit_kraus_map_02() {
 #[test]
 fn mix_two_qubit_kraus_map_03() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_density_qureg::<3>(env);
+    let qureg = &mut Qureg::try_new_density(3, env).unwrap();
     qureg.init_zero_state();
 
     let m = &ComplexMatrix4::new(
@@ -2039,7 +2039,7 @@ fn mix_two_qubit_kraus_map_03() {
 #[test]
 fn mix_multi_qubit_kraus_map_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_density_qureg::<3>(env);
+    let qureg = &mut Qureg::try_new_density(3, env).unwrap();
     qureg.init_zero_state();
     let m = &mut ComplexMatrixN::try_new(2).unwrap();
     init_complex_matrix_n(
@@ -2075,7 +2075,7 @@ fn mix_multi_qubit_kraus_map_01() {
 #[test]
 fn mix_multi_qubit_kraus_map_02() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_density_qureg::<3>(env);
+    let qureg = &mut Qureg::try_new_density(3, env).unwrap();
     qureg.init_zero_state();
     let m = &mut ComplexMatrixN::try_new(2).unwrap();
 
@@ -2113,7 +2113,7 @@ fn mix_multi_qubit_kraus_map_02() {
 #[test]
 fn mix_multi_qubit_kraus_map_03() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_density_qureg::<3>(env);
+    let qureg = &mut Qureg::try_new_density(3, env).unwrap();
     qureg.init_zero_state();
     let m = &mut ComplexMatrixN::try_new(2).unwrap();
     init_complex_matrix_n(
@@ -2145,9 +2145,9 @@ fn mix_multi_qubit_kraus_map_03() {
 #[test]
 fn calc_hilbert_schmidt_distance_01() {
     let env = &QuestEnv::new();
-    let a = &mut create_density_qureg::<2>(env);
+    let a = &mut Qureg::try_new_density(2, env).unwrap();
     a.init_classical_state(0).unwrap();
-    let b = &mut create_density_qureg::<2>(env);
+    let b = &mut Qureg::try_new_density(2, env).unwrap();
     b.init_classical_state(1).unwrap();
 
     let _ = calc_hilbert_schmidt_distance(a, b).unwrap();
@@ -2158,7 +2158,7 @@ fn calc_hilbert_schmidt_distance_01() {
 //     let env = &QuestEnv::new();
 //     let a = &mut Qureg::try_new_density(1, env).unwrap();
 //     init_classical_state(a, 0).unwrap();
-//     let b = &mut create_density_qureg::<2>(env);
+//     let b = &mut Qureg::try_new_density(2,env).unwrap();
 //     init_classical_state(b, 1).unwrap();
 
 //     let _ = calc_hilbert_schmidt_distance(a, b).unwrap_err();
@@ -2167,9 +2167,9 @@ fn calc_hilbert_schmidt_distance_01() {
 #[test]
 fn calc_hilbert_schmidt_distance_03() {
     let env = &QuestEnv::new();
-    let a = &mut create_density_qureg::<2>(env);
+    let a = &mut Qureg::try_new_density(2, env).unwrap();
     a.init_classical_state(0).unwrap();
-    let b = &mut create_qureg::<2>(env);
+    let b = &mut Qureg::try_new(2, env).unwrap();
     b.init_classical_state(1).unwrap();
 
     let _ = calc_hilbert_schmidt_distance(a, b).unwrap_err();
@@ -2178,7 +2178,7 @@ fn calc_hilbert_schmidt_distance_03() {
 #[test]
 fn mix_nontp_kraus_map_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_density_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new_density(2, env).unwrap();
     qureg.init_zero_state();
 
     let m = &ComplexMatrix2::new([[0., 1.], [0., 0.]], [[0., 0.], [0., 0.]]);
@@ -2197,7 +2197,7 @@ fn mix_nontp_kraus_map_01() {
 #[test]
 fn mix_nontp_two_qubit_kraus_map_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_density_qureg::<3>(env);
+    let qureg = &mut Qureg::try_new_density(3, env).unwrap();
     qureg.init_zero_state();
 
     let m = &ComplexMatrix4::new(
@@ -2231,7 +2231,7 @@ fn mix_nontp_two_qubit_kraus_map_01() {
 #[test]
 fn mix_nontp_multi_qubit_kraus_map_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_density_qureg::<3>(env);
+    let qureg = &mut Qureg::try_new_density(3, env).unwrap();
     qureg.init_zero_state();
     let m = &mut ComplexMatrixN::try_new(2).unwrap();
     init_complex_matrix_n(
@@ -2285,7 +2285,7 @@ fn mix_nontp_multi_qubit_kraus_map_01() {
 #[test]
 fn mix_nontp_multi_qubit_kraus_map_02() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_density_qureg::<3>(env);
+    let qureg = &mut Qureg::try_new_density(3, env).unwrap();
     qureg.init_zero_state();
     let m = &mut ComplexMatrixN::try_new(2).unwrap();
     init_complex_matrix_n(
@@ -2320,7 +2320,7 @@ fn mix_nontp_multi_qubit_kraus_map_02() {
 #[test]
 fn apply_matrix4_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
     qureg.init_zero_state();
 
     let m = &ComplexMatrix4::new(
@@ -2354,7 +2354,7 @@ fn apply_matrix4_01() {
 #[test]
 fn apply_matrix_n_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<3>(env);
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
     qureg.init_zero_state();
 
     let mtr = &mut ComplexMatrixN::try_new(3).unwrap();
@@ -2393,7 +2393,7 @@ fn apply_matrix_n_01() {
 #[test]
 fn apply_multi_controlled_matrix_n_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut Qureg::<'_, 4>::try_new(env).unwrap();
+    let qureg = &mut Qureg::try_new(4, env).unwrap();
     qureg.init_zero_state();
 
     let u = &mut ComplexMatrixN::try_new(2).unwrap();
@@ -2447,7 +2447,7 @@ fn apply_multi_controlled_matrix_n_01() {
 #[test]
 fn apply_qft_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<3>(env);
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
     qureg.init_zero_state();
 
     qureg.apply_qft(&[0, 1]).unwrap();
@@ -2459,7 +2459,7 @@ fn apply_qft_01() {
 #[test]
 fn apply_qft_02() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<3>(env);
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
     qureg.init_zero_state();
 
     qureg.apply_qft(&[0, 0]).unwrap_err();
@@ -2471,7 +2471,7 @@ fn apply_qft_02() {
 #[test]
 fn apply_projector_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
     qureg.init_zero_state();
     qureg.apply_projector(0, 0).unwrap();
     qureg.init_zero_state();
@@ -2485,7 +2485,7 @@ fn apply_projector_01() {
 #[test]
 fn apply_projector_02() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
     qureg.init_zero_state();
     qureg.apply_projector(0, -1).unwrap_err();
     qureg.apply_projector(0, 3).unwrap_err();
@@ -2498,7 +2498,7 @@ fn multi_rotate_pauli_01() {
     use PauliOpType::PAULI_X;
 
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<3>(env);
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
     qureg.init_zero_state();
 
     qureg
@@ -2541,7 +2541,7 @@ fn multi_rotate_pauli_01() {
 #[test]
 fn apply_phase_func_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
     qureg.init_zero_state();
 
     qureg
@@ -2599,7 +2599,7 @@ fn apply_phase_func_01() {
 #[test]
 fn apply_phase_func_02() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
     qureg.init_zero_state();
 
     // exponents contains a fractional number despite \p encoding <b>=</b>
@@ -2617,7 +2617,7 @@ fn apply_phase_func_02() {
 #[test]
 fn apply_phase_func_overrides_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<3>(env);
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
     qureg.init_zero_state();
     qureg.pauli_x(1).unwrap();
 
@@ -2691,7 +2691,7 @@ fn apply_phase_func_overrides_01() {
 #[test]
 fn apply_multi_var_phase_func_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<3>(env);
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
     qureg.init_zero_state();
     qureg.pauli_x(1).unwrap();
 
@@ -2776,7 +2776,7 @@ fn apply_multi_var_phase_func_01() {
 #[test]
 fn apply_multi_var_phase_func_overrides_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<3>(env);
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
     qureg.init_zero_state();
     qureg.pauli_x(1).unwrap();
 
@@ -2888,7 +2888,7 @@ fn apply_multi_var_phase_func_overrides_01() {
 #[test]
 fn appply_named_phase_func_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
     qureg.init_zero_state();
 
     qureg
@@ -2940,7 +2940,7 @@ fn appply_named_phase_func_01() {
 #[test]
 fn apply_named_phase_func_overrides_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<3>(env);
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
     qureg.init_zero_state();
 
     qureg
@@ -3013,7 +3013,7 @@ fn apply_named_phase_func_overrides_01() {
 #[test]
 fn apply_param_named_phase_func_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
     qureg.init_zero_state();
 
     qureg
@@ -3081,7 +3081,7 @@ fn apply_param_named_phase_func_01() {
 #[test]
 fn apply_param_named_phase_func_overrides_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<3>(env);
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
     qureg.init_zero_state();
 
     qureg
@@ -3174,9 +3174,9 @@ fn apply_param_named_phase_func_overrides_01() {
 fn calc_expec_pauli_prod_01() {
     use PauliOpType::PAULI_X;
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
     qureg.init_zero_state();
-    let workspace = &mut create_qureg::<2>(env);
+    let workspace = &mut Qureg::try_new(2, env).unwrap();
 
     qureg
         .calc_expec_pauli_prod(&[0, 1], &[PAULI_X, PAULI_X], workspace)
@@ -3210,9 +3210,9 @@ fn calc_expec_pauli_prod_01() {
 // fn calc_expec_pauli_prod_02() {
 //     use PauliOpType::PAULI_X;
 //     let env = &QuestEnv::new();
-//     let qureg = &mut create_qureg::<2>(env);
+//     let qureg = &mut Qureg::try_new(2,env).unwrap();
 //     qureg.init_zero_state();
-//     let workspace = &mut create_qureg::<3>(env);
+//     let workspace = &mut Qureg::try_new(3,env).unwrap();
 
 //     qureg.calc_expec_pauli_prod( &[0, 1], &[PAULI_X, PAULI_X], workspace)
 //         .unwrap_err();
@@ -3225,9 +3225,9 @@ fn calc_expec_pauli_sum_01() {
         PAULI_Z,
     };
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
     qureg.init_zero_state();
-    let workspace = &mut create_qureg::<2>(env);
+    let workspace = &mut Qureg::try_new(2, env).unwrap();
 
     let all_pauli_codes = &[PAULI_X, PAULI_Z, PAULI_Z, PAULI_X];
     let term_coeffs = &[0.5, 0.5];
@@ -3244,9 +3244,9 @@ fn calc_expec_pauli_sum_01() {
 //         PAULI_Z,
 //     };
 //     let env = &QuestEnv::new();
-//     let qureg = &mut create_qureg::<2>(env);
+//     let qureg = &mut Qureg::try_new(2,env).unwrap();
 //     qureg.init_zero_state();
-//     let workspace = &mut create_qureg::<3>(env);
+//     let workspace = &mut Qureg::try_new(3,env).unwrap();
 
 //     let all_pauli_codes = &[PAULI_X, PAULI_Z, PAULI_Z, PAULI_X];
 //     let term_coeffs = &[0.5, 0.5];
@@ -3262,9 +3262,9 @@ fn calc_expec_pauli_hamil_01() {
         PAULI_Z,
     };
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
     qureg.init_zero_state();
-    let workspace = &mut create_qureg::<2>(env);
+    let workspace = &mut Qureg::try_new(2, env).unwrap();
 
     let hamil = &mut PauliHamil::try_new(2, 2).unwrap();
     init_pauli_hamil(hamil, &[0.5, 0.5], &[PAULI_X, PAULI_X, PAULI_X, PAULI_Z])
@@ -3276,7 +3276,7 @@ fn calc_expec_pauli_hamil_01() {
 #[test]
 fn two_qubit_unitary_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<3>(env);
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
     qureg.init_zero_state();
     qureg.pauli_x(0).unwrap();
 
@@ -3306,7 +3306,7 @@ fn two_qubit_unitary_01() {
 #[test]
 fn two_qubit_unitary_02() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<3>(env);
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
     qureg.init_zero_state();
     qureg.pauli_x(0).unwrap();
 
@@ -3337,7 +3337,7 @@ fn two_qubit_unitary_02() {
 #[test]
 fn controlled_two_qubit_unitary_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<3>(env);
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
     qureg.init_zero_state();
     qureg.pauli_x(0).unwrap();
 
@@ -3373,7 +3373,7 @@ fn controlled_two_qubit_unitary_01() {
 #[test]
 fn controlled_two_qubit_unitary_02() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<3>(env);
+    let qureg = &mut Qureg::try_new(3, env).unwrap();
     qureg.init_zero_state();
     qureg.pauli_x(0).unwrap();
 
@@ -3410,7 +3410,7 @@ fn controlled_two_qubit_unitary_02() {
 #[test]
 fn multi_controlled_two_qubit_unitary_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut Qureg::<'_, 4>::try_new(env).unwrap();
+    let qureg = &mut Qureg::try_new(4, env).unwrap();
     qureg.init_zero_state();
     qureg.pauli_x(0).unwrap();
     qureg.pauli_x(1).unwrap();
@@ -3468,7 +3468,7 @@ fn multi_controlled_two_qubit_unitary_01() {
 #[test]
 fn multi_controlled_two_qubit_unitary_02() {
     let env = &QuestEnv::new();
-    let qureg = &mut Qureg::<'_, 4>::try_new(env).unwrap();
+    let qureg = &mut Qureg::try_new(4, env).unwrap();
     qureg.init_zero_state();
     qureg.pauli_x(0).unwrap();
     qureg.pauli_x(1).unwrap();
@@ -3527,7 +3527,7 @@ fn multi_controlled_two_qubit_unitary_02() {
 #[test]
 fn multi_controlled_multi_qubit_unitary_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut Qureg::<'_, 4>::try_new(env).unwrap();
+    let qureg = &mut Qureg::try_new(4, env).unwrap();
     qureg.init_zero_state();
     qureg.pauli_x(0).unwrap();
     qureg.pauli_x(1).unwrap();
@@ -3564,9 +3564,9 @@ fn apply_pauli_sum_01() {
         PAULI_X,
     };
     let env = &QuestEnv::new();
-    let in_qureg = &mut create_qureg::<2>(env);
+    let in_qureg = &mut Qureg::try_new(2, env).unwrap();
     in_qureg.init_zero_state();
-    let out_qureg = &mut create_qureg::<2>(env);
+    let out_qureg = &mut Qureg::try_new(2, env).unwrap();
     let all_pauli_codes = &[PAULI_I, PAULI_X, PAULI_X, PAULI_I];
     let term_coeffs = &[SQRT_2.recip(), SQRT_2.recip()];
 
@@ -3580,9 +3580,9 @@ fn apply_pauli_sum_03() {
         PAULI_X,
     };
     let env = &QuestEnv::new();
-    let in_qureg = &mut create_qureg::<2>(env);
+    let in_qureg = &mut Qureg::try_new(2, env).unwrap();
     in_qureg.init_zero_state();
-    let out_qureg = &mut create_qureg::<2>(env);
+    let out_qureg = &mut Qureg::try_new(2, env).unwrap();
 
     // wrong number of codes
     let all_pauli_codes = &[PAULI_I, PAULI_X, PAULI_X];
@@ -3598,9 +3598,9 @@ fn apply_pauli_hamil_01() {
         PAULI_X,
     };
     let env = &QuestEnv::new();
-    let in_qureg = &mut create_qureg::<2>(env);
+    let in_qureg = &mut Qureg::try_new(2, env).unwrap();
     in_qureg.init_zero_state();
-    let out_qureg = &mut create_qureg::<2>(env);
+    let out_qureg = &mut Qureg::try_new(2, env).unwrap();
 
     let hamil = &mut PauliHamil::try_new(2, 2).unwrap();
     let coeffs = &[SQRT_2.recip(), SQRT_2.recip()];
@@ -3615,7 +3615,7 @@ fn apply_trotter_circuit_01() {
     use PauliOpType::PAULI_X;
 
     let env = &QuestEnv::new();
-    let qureg = &mut Qureg::<'_, 1>::try_new(env).unwrap();
+    let qureg = &mut Qureg::try_new(1, env).unwrap();
     qureg.init_zero_state();
 
     let hamil = &mut PauliHamil::try_new(1, 1).unwrap();
@@ -3635,13 +3635,13 @@ fn apply_trotter_circuit_01() {
 #[test]
 fn set_weighted_qureg_01() {
     let env = &QuestEnv::new();
-    let qureg1 = &mut Qureg::<'_, 1>::try_new(env).unwrap();
+    let qureg1 = &mut Qureg::try_new(1, env).unwrap();
     qureg1.init_zero_state();
-    let qureg2 = &mut Qureg::<'_, 1>::try_new(env).unwrap();
+    let qureg2 = &mut Qureg::try_new(1, env).unwrap();
     qureg2.init_zero_state();
     qureg2.pauli_x(0).unwrap();
 
-    let out = &mut Qureg::<'_, 1>::try_new(env).unwrap();
+    let out = &mut Qureg::try_new(1, env).unwrap();
     out.init_zero_state();
 
     let fac1 = Qcomplex::new(SQRT_2.recip(), 0.);
@@ -3654,14 +3654,14 @@ fn set_weighted_qureg_01() {
 #[test]
 fn set_weighted_qureg_04() {
     let env = &QuestEnv::new();
-    let qureg1 = &mut create_qureg::<2>(env);
+    let qureg1 = &mut Qureg::try_new(2, env).unwrap();
     qureg1.init_zero_state();
     // all quregs should either state vectors of density matrices
-    let qureg2 = &mut create_density_qureg::<2>(env);
+    let qureg2 = &mut Qureg::try_new_density(2, env).unwrap();
     qureg2.init_zero_state();
     qureg2.pauli_x(0).unwrap();
 
-    let out = &mut create_qureg::<2>(env);
+    let out = &mut Qureg::try_new(2, env).unwrap();
     out.init_zero_state();
 
     let fac1 = Qcomplex::new(SQRT_2.recip(), 0.);
@@ -3674,7 +3674,7 @@ fn set_weighted_qureg_04() {
 #[test]
 fn multi_controlled_multi_rotate_z_01() {
     let env = &QuestEnv::new();
-    let qureg = &mut Qureg::<'_, 4>::try_new(env).unwrap();
+    let qureg = &mut Qureg::try_new(4, env).unwrap();
 
     // Initialize `|1111>`
     qureg.init_zero_state();
@@ -3723,7 +3723,7 @@ fn multi_controlled_multi_rotate_pauli_01() {
     use PauliOpType::PAULI_Z;
 
     let env = &QuestEnv::new();
-    let qureg = &mut Qureg::<'_, 4>::try_new(env).unwrap();
+    let qureg = &mut Qureg::try_new(4, env).unwrap();
 
     // Initialize `|1111>`
     qureg.init_zero_state();
@@ -3772,7 +3772,7 @@ fn multi_controlled_multi_rotate_pauli_01() {
 #[test]
 fn check_array_length_init_state_from_amps() {
     let env = &QuestEnv::new();
-    let qureg = &mut create_qureg::<2>(env);
+    let qureg = &mut Qureg::try_new(2, env).unwrap();
 
     let reals = [0.; 4];
     let imags = [0.; 4];

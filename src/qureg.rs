@@ -17,23 +17,18 @@ use super::{
     Vector,
 };
 
-#[must_use]
-pub fn create_qureg<const N: u16>(env: &QuestEnv) -> Qureg<'_, N> {
-    Qureg::try_new(env).expect("cannot allocate new state-vector Qureg")
-}
-
-#[must_use]
-pub fn create_density_qureg<const N: u16>(env: &QuestEnv) -> Qureg<'_, N> {
-    Qureg::try_new_density(env).expect("cannot allocate new density Qureg")
-}
+// #[must_use]
+// pub fn create_density_qureg(env: &QuestEnv) -> Qureg<'_> {
+//     Qureg::try_new_density(env).expect("cannot allocate new density Qureg")
+// }
 
 #[derive(Debug)]
-pub struct Qureg<'a, const N: u16> {
+pub struct Qureg<'a> {
     pub(crate) env: &'a QuestEnv,
     pub(crate) reg: ffi::Qureg,
 }
 
-impl<'a, const N: u16> Qureg<'a, N> {
+impl<'a> Qureg<'a> {
     /// Creates a state-vector Qureg object.
     ///
     /// # Examples
@@ -52,8 +47,10 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// on failure.  This is an exception thrown by `QuEST`.
     ///
     /// [1]: https://quest-kit.github.io/QuEST/modules.html
-    pub fn try_new(env: &'a QuestEnv) -> Result<Self, QuestError> {
-        let num_qubits = i32::from(N);
+    pub fn try_new(
+        num_qubits: i32,
+        env: &'a QuestEnv,
+    ) -> Result<Self, QuestError> {
         Ok(Self {
             env,
             reg: catch_quest_exception(|| unsafe {
@@ -80,8 +77,10 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// on failure.  This is an exception thrown by `QuEST`.
     ///
     /// [1]: https://quest-kit.github.io/QuEST/modules.html
-    pub fn try_new_density(env: &'a QuestEnv) -> Result<Self, QuestError> {
-        let num_qubits = i32::from(N);
+    pub fn try_new_density(
+        num_qubits: i32,
+        env: &'a QuestEnv,
+    ) -> Result<Self, QuestError> {
         Ok(Self {
             env,
             reg: catch_quest_exception(|| unsafe {
@@ -162,8 +161,8 @@ impl<'a, const N: u16> Qureg<'a, N> {
     ///
     /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
     #[must_use]
-    pub const fn num_qubits(&self) -> u16 {
-        N
+    pub const fn num_qubits(&self) -> i32 {
+        self.reg.numQubitsRepresented
     }
 
     /// Return the total number of amplitudes in the register.
@@ -405,6 +404,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// # Errors
     ///
     /// - [`InvalidQuESTInputError`],
+    ///   - if `self` and `pure` have mismatching dimensions
     ///   - if `pure` is a density matrix
     ///
     /// # Examples
@@ -427,7 +427,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     #[allow(clippy::needless_pass_by_ref_mut)]
     pub fn init_pure_state(
         &mut self,
-        pure_: &Qureg<'_, N>,
+        pure_: &Qureg<'_>,
     ) -> Result<(), QuestError> {
         catch_quest_exception(|| unsafe {
             ffi::initPureState(self.reg, pure_.reg);
@@ -1062,6 +1062,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// - [`InvalidQuESTInputError`],
     ///   - if `self` is a state-vector while `copy_qureg` is a density matrix
     ///     (and vice versa)
+    ///   - if `self` and `copy_qureg` have different dimensions
     ///
     /// # Examples
     ///
@@ -1081,7 +1082,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     #[allow(clippy::needless_pass_by_ref_mut)]
     pub fn clone_qureg(
         &mut self,
-        copy_qureg: &Qureg<'_, N>,
+        copy_qureg: &Qureg<'_>,
     ) -> Result<(), QuestError> {
         catch_quest_exception(|| unsafe {
             ffi::cloneQureg(self.reg, copy_qureg.reg);
@@ -3491,7 +3492,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     pub fn mix_density_matrix(
         &mut self,
         prob: Qreal,
-        other_qureg: &Qureg<'_, N>,
+        other_qureg: &Qureg<'_>,
     ) -> Result<(), QuestError> {
         catch_quest_exception(|| unsafe {
             ffi::mixDensityMatrix(self.reg, prob, other_qureg.reg);
@@ -3602,7 +3603,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
     pub fn calc_fidelity(
         &self,
-        pure_state: &Qureg<'_, N>,
+        pure_state: &Qureg<'_>,
     ) -> Result<Qreal, QuestError> {
         catch_quest_exception(|| unsafe {
             ffi::calcFidelity(self.reg, pure_state.reg)
@@ -3966,7 +3967,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
         &self,
         target_qubits: &[i32],
         pauli_codes: &[PauliOpType],
-        workspace: &mut Qureg<'_, N>,
+        workspace: &mut Qureg<'_>,
     ) -> Result<Qreal, QuestError> {
         let num_targets = target_qubits.len() as i32;
         catch_quest_exception(|| unsafe {
@@ -4015,7 +4016,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
         &self,
         all_pauli_codes: &[PauliOpType],
         term_coeffs: &[Qreal],
-        workspace: &mut Qureg<'_, N>,
+        workspace: &mut Qureg<'_>,
     ) -> Result<Qreal, QuestError> {
         let num_sum_terms = term_coeffs.len() as i32;
         catch_quest_exception(|| unsafe {
@@ -4066,7 +4067,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     pub fn calc_expec_pauli_hamil(
         &self,
         hamil: &PauliHamil,
-        workspace: &mut Qureg<'_, N>,
+        workspace: &mut Qureg<'_>,
     ) -> Result<Qreal, QuestError> {
         catch_quest_exception(|| unsafe {
             ffi::calcExpecPauliHamil(self.reg, hamil.0, workspace.reg)
@@ -5918,7 +5919,7 @@ impl<'a, const N: u16> Qureg<'a, N> {
     }
 } // Qureg
 
-impl<'a, const N: u16> Drop for Qureg<'a, N> {
+impl<'a> Drop for Qureg<'a> {
     fn drop(&mut self) {
         catch_quest_exception(|| {
             unsafe { ffi::destroyQureg(self.reg, self.env.0) };
@@ -5967,10 +5968,10 @@ impl<'a, const N: u16> Drop for Qureg<'a, N> {
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
-pub fn apply_pauli_hamil<const N: u16>(
-    in_qureg: &mut Qureg<'_, N>,
+pub fn apply_pauli_hamil(
+    in_qureg: &mut Qureg<'_>,
     hamil: &PauliHamil,
-    out_qureg: &mut Qureg<'_, N>,
+    out_qureg: &mut Qureg<'_>,
 ) -> Result<(), QuestError> {
     catch_quest_exception(|| unsafe {
         ffi::applyPauliHamil(in_qureg.reg, hamil.0, out_qureg.reg);
@@ -6017,11 +6018,11 @@ pub fn apply_pauli_hamil<const N: u16>(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
-pub fn apply_pauli_sum<const N: u16>(
-    in_qureg: &mut Qureg<'_, N>,
+pub fn apply_pauli_sum(
+    in_qureg: &mut Qureg<'_>,
     all_pauli_codes: &[PauliOpType],
     term_coeffs: &[Qreal],
-    out_qureg: &mut Qureg<'_, N>,
+    out_qureg: &mut Qureg<'_>,
 ) -> Result<(), QuestError> {
     let num_sum_terms = term_coeffs.len() as i32;
     catch_quest_exception(|| unsafe {
@@ -6056,9 +6057,9 @@ pub fn apply_pauli_sum<const N: u16>(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
-pub fn calc_hilbert_schmidt_distance<const N: u16>(
-    a: &Qureg<'_, N>,
-    b: &Qureg<'_, N>,
+pub fn calc_hilbert_schmidt_distance(
+    a: &Qureg<'_>,
+    b: &Qureg<'_>,
 ) -> Result<Qreal, QuestError> {
     catch_quest_exception(|| unsafe {
         ffi::calcHilbertSchmidtDistance(a.reg, b.reg)
@@ -6087,9 +6088,9 @@ pub fn calc_hilbert_schmidt_distance<const N: u16>(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
-pub fn calc_inner_product<const N: u16>(
-    bra: &Qureg<'_, N>,
-    ket: &Qureg<'_, N>,
+pub fn calc_inner_product(
+    bra: &Qureg<'_>,
+    ket: &Qureg<'_>,
 ) -> Result<Qcomplex, QuestError> {
     catch_quest_exception(|| unsafe { ffi::calcInnerProduct(bra.reg, ket.reg) })
         .map(Into::into)
@@ -6116,9 +6117,9 @@ pub fn calc_inner_product<const N: u16>(
 /// See [QuEST API] for more information.
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
-pub fn calc_density_inner_product<const N: u16>(
-    rho1: &Qureg<'_, N>,
-    rho2: &Qureg<'_, N>,
+pub fn calc_density_inner_product(
+    rho1: &Qureg<'_>,
+    rho2: &Qureg<'_>,
 ) -> Result<Qreal, QuestError> {
     catch_quest_exception(|| unsafe {
         ffi::calcDensityInnerProduct(rho1.reg, rho2.reg)
@@ -6141,13 +6142,13 @@ pub fn calc_density_inner_product<const N: u16>(
 ///
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 #[allow(clippy::needless_pass_by_ref_mut)]
-pub fn set_weighted_qureg<const N: u16>(
+pub fn set_weighted_qureg(
     fac1: Qcomplex,
-    qureg1: &Qureg<'_, N>,
+    qureg1: &Qureg<'_>,
     fac2: Qcomplex,
-    qureg2: &Qureg<'_, N>,
+    qureg2: &Qureg<'_>,
     fac_out: Qcomplex,
-    out: &mut Qureg<'_, N>,
+    out: &mut Qureg<'_>,
 ) -> Result<(), QuestError> {
     catch_quest_exception(|| unsafe {
         ffi::setWeightedQureg(
