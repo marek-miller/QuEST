@@ -3750,7 +3750,7 @@ impl<'a> Qureg<'a> {
     }
 
     /// Performs a SWAP gate between `qubit1` and `qubit2`.
-
+    ///
     /// This effects
     ///
     /// ```text
@@ -3811,6 +3811,30 @@ impl<'a> Qureg<'a> {
 
     /// Performs a sqrt SWAP gate between `qubit1` and `qubit2`.
     ///
+    /// This effects
+    ///
+    /// ```text
+    /// [ 1     0        0     0 ]
+    /// [ 0  (1+i)/2  (1-i)/2  0 ]
+    /// [ 0  (1-i)/2  (1+i)/2  0 ]
+    /// [ 0     0        0     1 ]
+    /// ```
+    ///
+    /// on the designated qubits, though is performed internally by three CNOT
+    /// gates.
+    ///
+    /// # Parameters
+    ///
+    /// - `qubit1`: qubit to sqrt swap
+    /// - `qubit2`: other qubit to sqrt swap
+    ///
+    /// # Errors
+    ///
+    /// - [`InvalidQuESTInputError`],
+    ///   - if either `qubit1` or `qubit2` is outside [0,
+    ///     [`qureg.num_qubits()`]).
+    ///   - if `qubit1` and `qubit2` are equal
+    ///
     /// # Examples
     ///
     /// ```rust
@@ -3828,6 +3852,8 @@ impl<'a> Qureg<'a> {
     ///
     /// See [QuEST API] for more information.
     ///
+    /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+    /// [`num_qubits()`]: crate::Qureg::num_qubits()
     /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
     #[allow(clippy::needless_pass_by_ref_mut)]
     pub fn sqrt_swap_gate(
@@ -3841,6 +3867,37 @@ impl<'a> Qureg<'a> {
     }
 
     /// Apply a general single-qubit unitary with multiple control qubits.
+    ///
+    /// The operation is conditioned upon a specific bit sequence:
+    /// `control_state`.
+    ///
+    /// Any number of control qubits can be specified, along with their
+    /// classical state (`0` or `1`) to condition upon. Only amplitudes of
+    /// computational basis states  for which `control_qubits` have
+    /// corresponding bit values `control_state` are modified  by `u`.
+    ///  
+    /// This function is equivalent (albeit faster) to applying [`pauli_x()`] on
+    /// each of the control qubits which are conditioned on outcome `0`,
+    /// calling [`multi_controlled_unitary()`], then re-appplying
+    /// `pauli_x()` on the same qubits.
+    ///
+    ///  # Parameters
+    ///
+    /// - `control_qubits`: the indices of the control qubits
+    /// - `control_state`: the bit values (`0` or `1`) of each control qubit,
+    ///   upon which to condition
+    /// - `target_qubit`: qubit to operate the unitary upon
+    /// - `u`: single-qubit unitary matrix to apply
+    ///
+    /// # Errors
+    ///
+    /// - [`InvalidQuESTInputError`],
+    ///   - if any qubit index (`target_qubit` or one in `control_qubits`) is
+    ///     outside [0, [`num_qubits()`]),
+    ///   - if any qubit in `control_qubits` is repeated
+    ///   - if `control_qubits` contains `target_qubit`
+    ///   - if any element of `control_state` is not a bit (`0` or `1`)
+    ///   - if `u` is not unitary
     ///
     /// # Examples
     ///
@@ -3869,6 +3926,10 @@ impl<'a> Qureg<'a> {
     ///
     /// See [QuEST API] for more information.
     ///
+    /// [`pauli_x()`]: Qureg::pauli_x()
+    /// [`multi_controlled_unitary()`]: Qureg::multi_controlled_unitary()
+    /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+    /// [`num_qubits()`]: crate::Qureg::num_qubits()
     /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
     #[allow(clippy::needless_pass_by_ref_mut)]
     pub fn multi_state_controlled_unitary(
@@ -3893,6 +3954,37 @@ impl<'a> Qureg<'a> {
 
     /// Apply a multi-qubit Z rotation on selected qubits.
     ///
+    /// This is the unitary
+    ///
+    /// ```latex
+    ///    \exp \left( - i \, \frac{\theta}{2} \; \bigotimes_{j}^{\text{numQubits}} Z_j\right)
+    /// ```
+    ///
+    /// where the Pauli Z gates operate the qubits listed in `qubits`, and cause
+    /// rotations of `theta = angle`.
+    ///
+    /// All qubits not appearing in `qubits` are assumed to receive the
+    /// identity operator.
+    ///
+    /// This has the effect of premultiplying every amplitude with `exp(+/- i
+    /// \theta/2)` where the sign is determined by the parity of the target
+    /// qubits for that amplitude.
+    ///
+    ///  # Parameters
+    ///
+    /// - `qubits`: a list of the indices of the target qubits
+    /// - `angle`: the angle by which the multi-qubit state is rotated around
+    ///   the Z axis
+    ///
+    /// # Errors
+    ///
+    /// - [`InvalidQuESTInputError`],
+    ///   - if any qubit index in `qubits` is outside [0, [`num_qubits()`]),
+    ///   - if any qubit in `qubits` is repeated
+    ///   - if `control_qubits` contains `target_qubit`
+    ///   - if any element of `control_state` is not a bit (`0` or `1`)
+    ///   - if `u` is not unitary
+    ///
     /// # Examples
     ///
     /// ```rust
@@ -3914,6 +4006,8 @@ impl<'a> Qureg<'a> {
     ///
     /// See [QuEST API] for more information.
     ///
+    /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+    /// [`num_qubits()`]: crate::Qureg::num_qubits()
     /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
     #[allow(clippy::needless_pass_by_ref_mut)]
     pub fn multi_rotate_z(
