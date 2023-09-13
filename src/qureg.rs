@@ -3470,6 +3470,29 @@ impl<'a> Qureg<'a> {
     /// Mixes a density matrix to induce two-qubit homogeneous depolarising
     /// noise.
     ///
+    /// With probability `prob`, applies to `qubit1` and `qubit2` any operator
+    /// of the set:
+    ///
+    /// ```text
+    /// { IX, IY, IZ, XI, YI, ZI, XX, XY, XZ, YX, YY, YZ, ZX, ZY, ZZ }.
+    /// ```
+    ///
+    /// Note this is the set of all two-qubit Pauli gates excluding `II`.
+    ///
+    /// # Parameters
+    ///
+    /// - `qubit1`: qubit upon which to induce depolarizing noise
+    /// - `qubit2`: qubit upon which to induce depolarizing noise
+    /// - `prob`: the probability of the phase error occurring
+    ///
+    /// # Errors
+    ///
+    /// - [`InvalidQuESTInputError`],
+    ///   - if `qureg` is not a density matrix
+    ///   - if `qubit1` or `qubit2` are outside [0, [`num_qubits()`]).
+    ///   - if `qubit1 = qubit2`
+    ///   - if `prob` is not in `[0, 15/16]`
+    ///
     /// # Examples
     ///
     /// ```rust
@@ -3489,6 +3512,8 @@ impl<'a> Qureg<'a> {
     ///
     /// See [QuEST API] for more information.
     ///
+    /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+    /// [`num_qubits()`]: crate::Qureg::num_qubits()
     /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
     #[allow(clippy::needless_pass_by_ref_mut)]
     pub fn mix_two_qubit_depolarising(
@@ -3503,6 +3528,28 @@ impl<'a> Qureg<'a> {
     }
 
     /// Mixes a density matrix to induce general single-qubit Pauli noise.
+    ///
+    /// With probabilities `prob_x`, `prob_y` and `prob_z`, applies Pauli X, Y,
+    /// and Z respectively to `target_qubit`.
+    ///
+    /// This function operates by first converting the given Pauli
+    /// probabilities into a single-qubit Kraus map (four 2x2 operators).
+    ///
+    /// # Parameters
+    ///
+    /// - `target_qubit`: qubit to decohere
+    /// - `prob_x`: the probability of inducing an X error
+    /// - `prob_y`: the probability of inducing an Y error
+    /// - `prob_z`: the probability of inducing an Z error
+    ///
+    /// # Errors
+    ///
+    /// - [`InvalidQuESTInputError`],
+    ///   - if `qureg` is not a density matrix
+    ///   - if `target_qubit` is outside [0, [`num_qubits()`])
+    ///   - if any of `prob_x`, `prob_y`, `prob_z` are not in `[0, 1]`
+    ///   - if any of p in `{prob_x, prob_y or prob_z}` don't satisfy `p <= (1 -
+    ///     prob_x - prob_y - prob_z)`
     ///
     /// # Examples
     ///
@@ -3523,6 +3570,8 @@ impl<'a> Qureg<'a> {
     ///
     /// See [QuEST API] for more information.
     ///
+    /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+    /// [`num_qubits()`]: crate::Qureg::num_qubits()
     /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
     #[allow(clippy::needless_pass_by_ref_mut)]
     pub fn mix_pauli(
@@ -3537,9 +3586,22 @@ impl<'a> Qureg<'a> {
         })
     }
 
-    /// Modifies `combine_qureg` with `other_qureg`.
+    /// Modifies register with `other_qureg`.
     ///
-    /// The state becomes `(1-prob) combine_qureg +  prob other_qureg`.
+    /// The state becomes `(1-prob) * self +  prob * other_qureg`.  The
+    /// probability `prob` must be in `[0,1]`.
+    ///
+    /// # Parameters
+    ///
+    /// - `prob`: the probability of `other_qureg` in the modified register
+    /// - `other_qureg`: a density matrix to be mixed into
+    ///
+    /// # Errors
+    ///
+    /// - [`InvalidQuESTInputError`],
+    ///   - if either `self` or `other_qureg` are not density matrices
+    ///   - if the dimensions of `self` and `other_qureg` do not match
+    ///   - if `prob` is not in `[0, 1]`
     ///
     /// # Examples
     ///
@@ -3560,6 +3622,7 @@ impl<'a> Qureg<'a> {
     ///
     /// See [QuEST API] for more information.
     ///
+    /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
     /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
     #[allow(clippy::needless_pass_by_ref_mut)]
     pub fn mix_density_matrix(
