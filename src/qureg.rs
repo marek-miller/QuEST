@@ -6402,6 +6402,28 @@ pub fn apply_pauli_sum(
 
 /// Computes the Hilbert Schmidt distance between two density matrices.
 ///
+/// Defined as the Frobenius norm of the difference between them.
+///
+/// This is equivalent to the square-root of the sum of the absolute value
+/// squared of the element-differences of the matrices.
+///
+/// We caution this may differ by some definitions of the Hilbert Schmidt
+/// distance by a square-root.
+///
+/// This function correctly returns the result of the above formulations even
+/// when `a` and `b` are incorrectly normalised (i.e. are general matrices).
+///
+/// # Parameters
+///
+/// - `a`: a density matrix
+/// - `b`: an equally-sized density matrix
+///
+/// # Errors
+///  
+/// - [`InvalidQuESTInputError`]
+///   - if either `a` or `b` are not density matrices
+///   - if `a` and `b` have mismatching dimension
+///
 /// # Examples
 ///
 /// ```rust
@@ -6422,6 +6444,7 @@ pub fn apply_pauli_sum(
 ///
 /// See [QuEST API] for more information.
 ///
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn calc_hilbert_schmidt_distance(
     a: &Qureg<'_>,
@@ -6433,6 +6456,33 @@ pub fn calc_hilbert_schmidt_distance(
 }
 
 /// Computes the inner product of two equal-size state vectors.
+///
+/// Given by
+///
+/// ```latex
+///  \langle \text{bra} | \text{ket} \rangle = \sum_i {\text{bra}_i}^* \; \times \; \text{ket}_i
+/// ```
+///
+/// The same `Qureg` may be passed as both `bra` and `ket`,
+/// though we recommend users check state-vector normalisation with
+/// [`calc_total_prob()`] which employs Kahan summation for greater accuracy.
+///
+/// Neither state-vector is modified.
+///
+/// This function returns the correct inner product even if `bra` and `ket` are
+/// not correctly normalised states.
+///
+/// # Parameters
+///
+/// - `bra`: bra `Qureg` to be the "bra" (i.e. have its values conjugate
+///   transposed) in the inner product
+/// - `ket`: qureg to be the "ket" in the inner product
+///
+/// # Errors
+///  
+/// - [`InvalidQuESTInputError`]
+///   - if either `bra` and `ket` are not both state-vectors
+///   - if `bra` and `ket` do not have equal dimensions
 ///
 /// # Examples
 ///
@@ -6455,6 +6505,8 @@ pub fn calc_hilbert_schmidt_distance(
 ///
 /// See [QuEST API] for more information.
 ///
+/// [`calc_total_prob()`]: Qureg::calc_total_prob()
+/// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
 /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
 pub fn calc_inner_product(
     bra: &Qureg<'_>,
