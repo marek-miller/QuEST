@@ -76,6 +76,7 @@ impl ComplexMatrixN {
     ///
     /// assert_eq!(mtr.num_qubits(), 3);
     /// ```
+    #[must_use]
     pub fn num_qubits(&self) -> i32 {
         self.0.numQubits
     }

@@ -17,11 +17,6 @@ use super::{
     Vector,
 };
 
-// #[must_use]
-// pub fn create_density_qureg(env: &QuestEnv) -> Qureg<'_> {
-//     Qureg::try_new_density(env).expect("cannot allocate new density Qureg")
-// }
-
 #[derive(Debug)]
 pub struct Qureg<'a> {
     pub(crate) env: &'a QuestEnv,
@@ -40,14 +35,14 @@ impl<'a> Qureg<'a> {
     ///     Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
     /// ```
     ///
-    /// See [QuEST API][1] for more information.
+    /// See [QuEST API] for more information.
     ///
     /// # Errors
     ///
     /// Returns [`QuestError::InvalidQuESTInputError`](crate::QuestError::InvalidQuESTInputError)
     /// on failure.  This is an exception thrown by `QuEST`.
     ///
-    /// [1]: https://quest-kit.github.io/QuEST/modules.html
+    /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
     pub fn try_new(
         num_qubits: i32,
         env: &'a QuestEnv,
@@ -71,14 +66,14 @@ impl<'a> Qureg<'a> {
     ///     .expect("cannot allocate memory for Qureg");
     /// ```
     ///
-    /// See [QuEST API][1] for more information.
+    /// See [QuEST API] for more information.
     ///
     /// # Errors
     ///
     /// Returns [`QuestError::InvalidQuESTInputError`](crate::QuestError::InvalidQuESTInputError)
     /// on failure.  This is an exception thrown by `QuEST`.
     ///
-    /// [1]: https://quest-kit.github.io/QuEST/modules.html
+    /// [Quest API]: https://quest-kit.github.io/QuEST/modules.html
     pub fn try_new_density(
         num_qubits: i32,
         env: &'a QuestEnv,
