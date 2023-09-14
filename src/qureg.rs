@@ -4023,6 +4023,34 @@ impl<'a> Qureg<'a> {
 
     /// Apply a multi-qubit multi-Pauli rotation.
     ///
+    /// This is the unitary
+    ///
+    /// ```latex
+    ///    \exp \left( - i \, \frac{\theta}{2} \; \bigotimes_{j}^{\text{numTargets}} \hat{\sigma}_j\right)
+    /// ```
+    ///
+    ///  where  `theta = angle` and `$\hat{\sigma}_j \in \{X, Y, Z\}$` is a
+    /// Pauli operator [`PauliOpType`] operating upon the corresponding qubit
+    /// `target_qubits`.
+    ///
+    /// This function effects the Pauli gadget by first rotating the qubits
+    /// which are nominated to receive `X` or `Y` Paulis into alternate
+    /// basis, performing [`multi_rotate_z()`] on all target qubits, then
+    /// restoring the original basis.
+    ///
+    ///  # Parameters
+    ///
+    /// - `target_qubits`: a list of the indices of the target qubits
+    /// - `target_paulis`: a list of the Pauli operators `PauliOpType`
+    /// - `angle`: the angle by which the multi-qubit state is rotated
+    ///
+    /// # Errors
+    ///
+    /// - [`InvalidQuESTInputError`],
+    ///   - if any qubit index in `target_qubits` is outside [0,
+    ///     [`num_qubits()`]),
+    ///   - if any qubit in `target_qubits` is repeated
+    ///
     /// # Examples
     ///
     /// ```rust
@@ -4045,8 +4073,13 @@ impl<'a> Qureg<'a> {
     /// assert!((amp + 1.).abs() < 2. * EPSILON);
     /// ```
     ///
+    ///
     /// See [QuEST API] for more information.
     ///
+    /// [`PauliOpType`]: crate::PauliOpType
+    /// [`multi_rotate_z()`]: Qureg::multi_rotate_z()
+    /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+    /// [`num_qubits()`]: crate::Qureg::num_qubits()
     /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
     #[allow(clippy::needless_pass_by_ref_mut)]
     pub fn multi_rotate_pauli(
@@ -4068,6 +4101,29 @@ impl<'a> Qureg<'a> {
     }
 
     /// Apply a multi-controlled multi-target Z rotation.
+    ///
+    /// All qubits not appearing in `target_qubits` and `control_qubits` are
+    /// assumed to receive the identity operator.
+    ///
+    /// This has the effect of premultiplying all amplitudes (for which the
+    /// control qubits are `1`)  with `$\exp(\pm i \theta/2)$`, where the
+    /// sign is determined by the parity of  the target qubits for that
+    /// amplitude.
+    ///
+    ///  # Parameters
+    ///
+    /// - `control_qubits`: list of the indices of qubits to control upon
+    /// - `target_qubits`: a list of the indices of the target qubits
+    /// - `angle`: the angle by which the multi-qubit state is rotated
+    ///
+    /// # Errors
+    ///
+    /// - [`InvalidQuESTInputError`],
+    ///   - if any qubit index in `target_qubits` or `control_qubits` is outside
+    ///     [0, [`num_qubits()`]),
+    ///   - if `control_qubits` or `target_qubits` contain any repetitions
+    ///   - if any qubit in `control_qubits` is also in `target_qubits` (and
+    ///     vice versa)
     ///
     /// # Examples
     ///
@@ -4094,6 +4150,8 @@ impl<'a> Qureg<'a> {
     ///
     /// See [QuEST API] for more information.
     ///
+    /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+    /// [`num_qubits()`]: crate::Qureg::num_qubits()
     /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
     #[allow(clippy::needless_pass_by_ref_mut)]
     pub fn multi_controlled_multi_rotate_z(
@@ -4117,6 +4175,30 @@ impl<'a> Qureg<'a> {
     }
 
     /// Apply a multi-controlled multi-target multi-Pauli rotation.
+    ///
+    /// All qubits not appearing in `target_qubits` and `control_qubits` are
+    /// assumed to receive the identity operator.
+    ///
+    /// This function effects the controlled Pauli gadget by first (controlled)
+    /// rotating the qubits which are targeted with either `X` or `Y` into
+    /// alternate basis, performing [`multi_controlled_multi_rotate_z()`] on all
+    /// target qubits, then restoring the original basis.
+    ///
+    /// # Parameters
+    ///
+    /// - `control_qubits`: list of the indices of qubits to control upon
+    /// - `target_qubits`: a list of the indices of the target qubits
+    /// - `target_paulis`: a list of the Pauli operators [`PauliOpType`]
+    /// - `angle`: the angle by which the multi-qubit state is rotated
+    ///
+    /// # Errors
+    ///
+    /// - [`InvalidQuESTInputError`],
+    ///   - if any qubit index in `target_qubits` or `control_qubits` is outside
+    ///     [0, [`num_qubits()`]),
+    ///   - if `control_qubits` or `target_qubits` contain any repetitions
+    ///   - if any qubit in `control_qubits` is also in `target_qubits` (and
+    ///     vice versa)
     ///
     /// # Examples
     ///
@@ -4151,6 +4233,10 @@ impl<'a> Qureg<'a> {
     ///
     /// See [QuEST API] for more information.
     ///
+    /// [`PauliOpType`]: crate::PauliOpType
+    /// [`multi_controlled_multi_rotate_z()`]: Qureg::multi_controlled_multi_rotate_z()
+    /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+    /// [`num_qubits()`]: crate::Qureg::num_qubits()
     /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
     #[allow(clippy::needless_pass_by_ref_mut)]
     pub fn multi_controlled_multi_rotate_pauli(
