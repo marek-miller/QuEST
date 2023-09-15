@@ -4258,6 +4258,79 @@ impl<'a> Qureg<'a> {
 
     /// Computes the expected value of a product of Pauli operators.
     ///
+    /// Letting `$\sigma = \otimes_j \hat{\sigma}_j$` be the operators
+    /// indicated by `pauli_codes` and acting on qubits `target_qubits`,
+    /// this function computes `$ \langle \psi | \sigma | \psi \rangle $`
+    /// if `$qureg = \psi$` is a state-vector, and computes `$ \text{Tr}(\sigma
+    /// \rho) $`  if `$qureg = \rho $` is a density matrix.
+    ///  
+    /// The slice `pauli_codes` specifies which Pauli operators to enact on the
+    /// corresponding qubits in `target_qubits`. The target qubits must be
+    /// unique, and at most `self.num_qubits()` may be specified.
+    ///
+    /// For example, on a 7-qubit state-vector,  
+    ///
+    /// ```rust
+    /// # use quest_bind::*;
+    /// # use PauliOpType::{
+    /// #     PAULI_X,
+    /// #     PAULI_Z,
+    /// #     PAULI_Y,
+    /// #     PAULI_I,
+    /// # };
+    /// # let env = QuestEnv::new();
+    /// # let qureg = {
+    /// #     let mut qureg = Qureg::try_new(2, &env).expect(
+    /// #         "cannot allocate memory for Qureg",
+    /// #     );
+    /// #     qureg.init_plus_state();
+    /// #     qureg
+    /// # };
+    /// # let mut workspace = Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
+    /// qureg.calc_expec_pauli_prod(&[4,5,6], &[PAULI_X, PAULI_I, PAULI_Z], &mut workspace);
+    /// ```
+    ///
+    /// will compute `$ \langle \psi | I I I I X I Z | \psi \rangle $` (where in
+    /// this notation, the left-most operator applies to the
+    /// least-significant qubit, i.e. that with index `0`).
+    ///
+    /// `workspace` must be a register with the same type (state-vector vs
+    /// density matrix) and dimensions (number of represented qubits) as `self`,
+    /// and is used as working space. When this function returns, `self` will
+    /// be unchanged and `workspace` will be set to `$ \sigma
+    /// | \psi \rangle $` (if `self` is a state-vector)  or $ \sigma
+    /// \rho $` (if `self` is a density matrix).
+    ///
+    /// NOTE that this last quantity is NOT the result of applying  the paulis
+    /// as unitaries, `$ \sigma^\dagger \rho \sigma $`, but is instead the
+    /// result of their direct multiplication with the density matrix. It
+    /// is therefore itself not a valid density matrix.
+    ///
+    /// This function works by cloning the `self` state into `workspace`,
+    /// applying the specified  Pauli operators to `workspace` then
+    /// computing its inner product with `self` (for state-vectors)
+    /// or its trace (for density matrices). It therefore should scale linearly
+    /// in time with the number of specified non-identity Pauli operators,
+    /// which is bounded by the number of represented qubits.
+    ///
+    /// # Parameters
+    ///
+    /// - `target_qubits`: a list of the indices of the target qubits
+    /// - `pauli_codes`: a list of the Pauli codes to apply to the corresponding
+    ///   qubits in `target_qubits`
+    /// - `workspace`: a working-space qureg with the same dimensions as `self`,
+    ///   which is modified to be the result of multiplying the state with the
+    ///   pauli operators
+    ///
+    /// # Errors
+    ///
+    /// - [`InvalidQuESTInputError`],
+    ///   - if `target_qubits.len() > self.num_qubits()`
+    ///   - if any qubit index in `target_qubits` is outside [0,
+    ///     [`num_qubits()`]),
+    ///   - if `target_qubits` contain any repetitions
+    ///   - if `workspace` is not of the same dimension as `self`
+    ///
     /// # Examples
     ///
     /// ```rust
@@ -4266,8 +4339,10 @@ impl<'a> Qureg<'a> {
     ///
     /// let env = QuestEnv::new();
     /// let qureg = {
-    ///     let mut qureg =
-    ///         Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
+    ///     let mut qureg = Qureg::try_new(2, &env).expect(
+    ///         "cannot allocate memory for
+    /// Qureg",
+    ///     );
     ///     qureg.init_plus_state();
     ///     qureg
     /// };
@@ -4284,6 +4359,8 @@ impl<'a> Qureg<'a> {
     ///
     /// See [QuEST API] for more information.
     ///
+    /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+    /// [`num_qubits()`]: crate::Qureg::num_qubits()
     /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
     #[allow(clippy::needless_pass_by_ref_mut)]
     pub fn calc_expec_pauli_prod(
@@ -4306,8 +4383,88 @@ impl<'a> Qureg<'a> {
 
     /// Computes the expected value of a sum of products of Pauli operators.
     ///
-    /// # Examples
+    /// Let
     ///
+    /// ```latex
+    /// H = \sum_i c_i \otimes_j^{N} \hat{\sigma}_{i,j}
+    /// ```
+    ///
+    /// be the operators indicated by `all_pauli_codes` (where `$ c_i \in $`
+    /// `term_coeffs`  and `N = self.num_qubits()`).
+    ///
+    /// This function computes `$ \langle \psi | H | \psi \rangle $` if `self =
+    /// \psi $` is a state-vector, and computes `$ \text{Tr}(H \rho)
+    /// =\text{Trace}(\rho H) $`  if `self = \rho $` is a density matrix.
+    ///
+    /// `all_pauli_codes` is an array which specifies which Pauli operators to
+    /// apply. For each sum term, a Pauli operator must be specified for
+    /// EVERY qubit in `self`; each set of `term_coeffs.len()` operators will be
+    /// grouped into a product.  `term_coeffs` is an arrray containing the term
+    /// coefficients.
+    ///
+    /// For example, on a 3-qubit state-vector,  
+    ///
+    /// ```rust
+    /// # use quest_bind::*;
+    /// # use PauliOpType::{
+    /// #     PAULI_X,
+    /// #     PAULI_Z,
+    /// #     PAULI_Y,
+    /// #     PAULI_I,
+    /// # };
+    /// # let env = QuestEnv::new();
+    /// # let qureg = {
+    /// #     let mut qureg = Qureg::try_new(2, &env).expect(
+    /// #         "cannot allocate memory for Qureg",
+    /// #     );
+    /// #     qureg.init_plus_state();
+    /// #     qureg
+    /// # };
+    /// # let mut workspace =
+    /// #     Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
+    /// let paulis = [PAULI_X, PAULI_I, PAULI_I,  PAULI_X, PAULI_Y, PAULI_Z];
+    /// let coeffs = [1.5, -3.6];
+    /// qureg.calc_expec_pauli_sum(&paulis, &coeffs, &mut workspace);
+    /// ```
+    ///
+    /// will compute `$ \langle \psi | (1.5 X I I - 3.6 X Y Z) | \psi \rangle$`
+    /// (where in this notation, the left-most operator  applies to the
+    /// least-significant qubit, i.e. that with index `0`).  
+    /// `workspace` must be a register with the same type (state-vector vs
+    /// density matrix) and dimensions (number of represented qubits) as
+    /// `self`, and is used as working space. When this function returns,
+    /// `self`  will be unchanged and `workspace` will be set to `self`
+    /// pre-multiplied with the final Pauli product.
+    ///
+    /// NOTE that if `self` is a density matrix, `workspace` will become `$
+    /// \hat{\sigma} \rho $` which is itself not a density matrix (it is
+    /// distinct from `$ \hat{\sigma} \rho \hat{\sigma}^\dagger $`).
+    ///
+    /// This function works by cloning the `self` state into `workspace`,
+    /// applying each of the specified  Pauli products to `workspace` (one
+    /// Pauli operation at a time), then computing its inner product with `self`
+    /// (for state-vectors) or its trace (for density matrices) multiplied
+    /// with the corresponding coefficient, and summing these contributions.
+    /// It therefore should scale linearly in time with the total number of
+    /// non-identity specified Pauli operators.
+    ///
+    /// # Parameters
+    ///
+    /// - `all_pauli_codes`: a list of the Pauli codes of all Paulis involved in
+    ///   the products of terms. A Pauli must be specified for each qubit  in
+    ///   the register, in every term of the sum.
+    /// - `term_coeffs`: The coefficients of each term in the sum of Pauli
+    ///   products
+    /// - `workspace`: a working-space qureg with the same dimensions as `self`,
+    ///   which is modified to be the result of multiplying the state with the
+    ///   pauli operators
+    ///
+    /// # Errors
+    ///
+    /// - [`InvalidQuESTInputError`],
+    ///   - if `workspace` is not of the same dimension as `self`
+    ///
+    /// # Examples
     /// ```rust
     /// # use quest_bind::*;
     /// use PauliOpType::{
@@ -4317,8 +4474,10 @@ impl<'a> Qureg<'a> {
     ///
     /// let env = QuestEnv::new();
     /// let qureg = {
-    ///     let mut qureg =
-    ///         Qureg::try_new(2, &env).expect("cannot allocate memory for Qureg");
+    ///     let mut qureg = Qureg::try_new(2, &env).expect(
+    ///         "cannot allocate memory for
+    /// Qureg",
+    ///     );
     ///     qureg.init_plus_state();
     ///     qureg
     /// };
@@ -4335,6 +4494,8 @@ impl<'a> Qureg<'a> {
     ///
     /// See [QuEST API] for more information.
     ///
+    /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+    /// [`num_qubits()`]: crate::Qureg::num_qubits()
     /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
     #[allow(clippy::needless_pass_by_ref_mut)]
     pub fn calc_expec_pauli_sum(
