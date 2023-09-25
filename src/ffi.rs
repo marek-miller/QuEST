@@ -142,6 +142,15 @@ pub struct DiagonalOp {
 }
 
 #[repr(C)]
+#[derive(Debug, Copy, Clone)]
+pub struct SubDiagonalOp {
+    pub numQubits: c_int,
+    pub numElems:  c_longlong,
+    pub real:      *mut qreal,
+    pub imag:      *mut qreal,
+}
+
+#[repr(C)]
 #[derive(Debug, Clone, Copy)]
 pub struct Qureg {
     pub isDensityMatrix:      c_int,
@@ -1743,6 +1752,77 @@ mod tests {
                 stringify!(DiagonalOp),
                 "::",
                 stringify!(deviceOperator)
+            )
+        );
+    }
+
+    #[allow(clippy::too_many_lines)]
+    #[test]
+    fn bindgen_test_layout_SubDiagonalOp() {
+        assert_eq!(
+            ::std::mem::size_of::<SubDiagonalOp>(),
+            32usize,
+            concat!("Size of: ", stringify!(SubDiagonalOp))
+        );
+        assert_eq!(
+            ::std::mem::align_of::<SubDiagonalOp>(),
+            8usize,
+            concat!("Alignment of ", stringify!(DiagonalOp))
+        );
+        assert_eq!(
+            unsafe {
+                std::ptr::addr_of!(
+                    (*(::std::ptr::null::<SubDiagonalOp>())).numQubits
+                ) as usize
+            },
+            0usize,
+            concat!(
+                "Offset of field: ",
+                stringify!(SubDiagonalOp),
+                "::",
+                stringify!(numQubits)
+            )
+        );
+        assert_eq!(
+            unsafe {
+                std::ptr::addr_of!(
+                    (*(::std::ptr::null::<SubDiagonalOp>())).numElems
+                ) as usize
+            },
+            8usize,
+            concat!(
+                "Offset of field: ",
+                stringify!(SubDiagonalOp),
+                "::",
+                stringify!(numElems)
+            )
+        );
+        assert_eq!(
+            unsafe {
+                std::ptr::addr_of!(
+                    (*(::std::ptr::null::<SubDiagonalOp>())).real
+                ) as usize
+            },
+            16usize,
+            concat!(
+                "Offset of field: ",
+                stringify!(SubDiagonalOp),
+                "::",
+                stringify!(real)
+            )
+        );
+        assert_eq!(
+            unsafe {
+                std::ptr::addr_of!(
+                    (*(::std::ptr::null::<SubDiagonalOp>())).imag
+                ) as usize
+            },
+            24usize,
+            concat!(
+                "Offset of field: ",
+                stringify!(SubDiagonalOp),
+                "::",
+                stringify!(imag)
             )
         );
     }
