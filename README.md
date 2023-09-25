@@ -3,7 +3,7 @@
 [![Test](https://github.com/marek-miller/quest_bind/actions/workflows/test.yml/badge.svg)](https://github.com/marek-miller/quest_bind/actions/workflows/test.yml)
 [![Docs](https://github.com/marek-miller/quest_bind/actions/workflows/docs.yml/badge.svg)](https://github.com/marek-miller/quest_bind/actions/workflows/docs.yml)
 
-A wrapper around [QuEST](https://github.com/QuEST-Kit/QuEST/) v3.5.0.
+A wrapper around [QuEST](https://github.com/QuEST-Kit/QuEST/) v3.6.0.
 
 Quantum Exact Simulation Toolkit (QuEST) is a no-fluff, bent-on-speed quantum
 circuit simulator [[1]](https://doi.org/10.1038/s41598-019-47174-9). It is
