@@ -4516,10 +4516,57 @@ impl<'a> Qureg<'a> {
         })
     }
 
-    /// Computes the expected value of `qureg` under Hermitian operator `hamil`.
+    /// Computes the expected value under Hermitian operator.
+    ///
+    /// Represent `hamil` as `$ H = \sum_i c_i \otimes_j^{N}
+    /// \hat{\sigma}_{i,j} $`  and `N = hamil.num_qubits()`.  This function
+    /// computes:
+    ///
+    /// ```latex
+    ///  \langle \psi | H | \psi \rangle
+    /// ```
+    ///
+    ///  if `self =  \psi` is a state-vector, and computes
+    ///
+    /// ```latex
+    /// \text{Trace}(H \rho) =\text{Trace}(\rho H)
+    /// ```
+    ///
+    /// if `self = \rho`  is a density matrix.
     ///
     /// This function is merely an encapsulation of `calc_expec_pauli_sum()` -
     /// refer to the doc there for an elaboration.
+    ///
+    /// `workspace` must be a register with the same type (state-vector vs
+    /// density matrix) and dimensions (number of represented qubits) as
+    /// `self` and `hamil`, and is used as working space.  When this
+    /// function returns, `self`  will be unchanged and `workspace` will be
+    /// set to `self` pre-multiplied with the final Pauli product in
+    /// `hamil`.
+    ///
+    /// Note that if `self` is a density matrix, `workspace` will
+    /// become `$ \hat{\sigma} \rho $`  which is itself not a density
+    /// matrix (it is distinct from `$\hat{\sigma} \rho \hat{\sigma}^\dagger$`).
+    ///
+    /// This function works by cloning the `self` state into `workspace`,
+    /// applying each of the specified  Pauli products in `hamil` to
+    /// `workspace` (one Pauli operation at a time), then computing its inner
+    /// product with `self` (for state-vectors) or its trace (for density
+    /// matrices) multiplied with the corresponding coefficient, and summing
+    /// these contributions.  It therefore should scale linearly in time
+    /// with the total number of non-identity specified Pauli operators.
+    ///
+    /// # Parameters
+    ///
+    /// - `hamil`: a [`PauliHamil`]
+    /// - `workspace`: a working-space `Qureg` with the same dimensions as
+    ///   `self`, which is modified to be the result of multiplying the state
+    ///   with the final specified Pauli product
+    ///
+    /// # Errors
+    ///
+    /// - [`InvalidQuESTInputError`],
+    ///   - if `workspace` is not of the same dimension as `self` and `hamil`
     ///
     /// # Examples
     ///
@@ -4550,6 +4597,9 @@ impl<'a> Qureg<'a> {
     ///
     /// See [QuEST API] for more information.
     ///
+    /// [`PauliHamil`]: crate::PauliHamil
+    /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+    /// [`num_qubits()`]: crate::Qureg::num_qubits()
     /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
     #[allow(clippy::needless_pass_by_ref_mut)]
     pub fn calc_expec_pauli_hamil(
@@ -4563,6 +4613,39 @@ impl<'a> Qureg<'a> {
     }
 
     ///  Apply a general two-qubit unitary (including a global phase factor).
+    ///
+    /// `target_qubit1` is treated as the least significant qubit in `u`,
+    /// such that a row in `u` is dotted with the vector
+    ///
+    /// ```latex
+    ///  |\text{targetQubit2} \;\; \text{targetQubit1}\rangle : \{|00\rangle, |01\rangle, |10\rangle, |11\rangle \}
+    /// ```
+    ///
+    /// The passed `ComplexMatrix4` must be unitary, otherwise an error is
+    /// thrown.  Use [`Qureg::apply_matrix4()`] to left-multiply a non-unitary
+    /// `ComplexMatrix4`.
+    ///
+    /// Note that in distributed mode, this routine requires that each node
+    /// contains at least 4 amplitudes.  This means an q-qubit register
+    /// (state vector or density matrix) can be distributed by at most
+    /// `2^(q/4)` nodes.
+    ///
+    /// # Parameters
+    ///
+    /// - `target_qubit1`: first qubit to operate on, treated as least
+    ///   significant in `u`
+    /// - `target_qubit2`: first qubit to operate on, treated as most
+    ///   significant in `u`
+    /// - `u`: unitary matrix to apply
+    ///
+    /// # Errors
+    ///
+    /// - [`InvalidQuESTInputError`],
+    ///   - if `target_qubit1` or `target_qubit2` are outside `[0,
+    ///     self.num_qubits())`
+    ///   - if `target_qubit1` equals `target_qubit2`
+    ///   - if matrix `u` is not unitary
+    ///   - if each node cannot fit 4 amplitudes in distributed mode
     ///
     /// # Examples
     ///
@@ -4600,6 +4683,9 @@ impl<'a> Qureg<'a> {
     ///
     /// See [`QuEST` Aqureg.PI] for more information.
     ///
+    /// [`Qureg::apply_matrix4()`]: crate::Qureg::apply_matrix4()
+    /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+    /// [`num_qubits()`]: crate::Qureg::num_qubits()
     /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
     #[allow(clippy::needless_pass_by_ref_mut)]
     pub fn two_qubit_unitary(
