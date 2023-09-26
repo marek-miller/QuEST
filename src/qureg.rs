@@ -4701,6 +4701,41 @@ impl<'a> Qureg<'a> {
 
     /// Apply a general controlled two-qubit unitary.
     ///
+    /// The given unitary is applied to the target amplitudes where the control
+    /// qubit has value 1.
+    ///
+    /// `target_qubit1` is treated as the least significant qubit in `u`,
+    /// such that a row in `u` is dotted with the vector
+    ///
+    /// The passed `ComplexMatrix4` must be unitary, otherwise an error is
+    /// thrown.
+    ///
+    /// Note that in distributed mode, this routine requires that each node
+    /// contains at least 4 amplitudes.  This means an q-qubit register
+    /// (state vector or density matrix) can be distributed by at most
+    /// `2^(q/4)` nodes.
+    ///
+    /// # Parameters
+    ///
+    /// - `contol_qubit`:  the control qubit which must be in state 1 to effect
+    ///   the given unitary
+    /// - `target_qubit1`: first qubit to operate on, treated as least
+    ///   significant in `u`
+    /// - `target_qubit2`: first qubit to operate on, treated as most
+    ///   significant in `u`
+    /// - `u`: unitary matrix to apply
+    ///
+    /// # Errors
+    ///
+    /// - [`InvalidQuESTInputError`],
+    ///   - if `control_qubit`,  `target_qubit1` or `target_qubit2` are outside
+    ///     `[0, self.num_qubits())`
+    ///   - if any of `control_qubit`, `target_qubit1` and `target_qubit2` are
+    ///     equal
+    ///   - if matrix `u` is not unitary
+    ///   - if each node cannot fit 4 amplitudes in distributed mode
+    ///
+    ///
     /// # Examples
     ///
     /// ```rust
@@ -4743,6 +4778,9 @@ impl<'a> Qureg<'a> {
     ///
     /// See [QuEST API] for more information.
     ///
+    /// [`Qureg::apply_matrix4()`]: crate::Qureg::apply_matrix4()
+    /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+    /// [`num_qubits()`]: crate::Qureg::num_qubits()
     /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
     #[allow(clippy::needless_pass_by_ref_mut)]
     pub fn controlled_two_qubit_unitary(
@@ -4764,6 +4802,46 @@ impl<'a> Qureg<'a> {
     }
 
     /// Apply a general multi-qubit unitary with any number of target qubits.
+    ///
+    /// Any number of control qubits can be specified, and if all have value 1,
+    /// the given unitary is applied to the target qubit.
+    ///
+    /// `target_qubit1` is treated as the least significant qubit in `u`,
+    /// such that a row in `u` is dotted with the vector
+    ///
+    /// ```latex
+    ///  |\text{targetQubit2} \;\; \text{targetQubit1}\rangle : \{|00\rangle, |01\rangle, |10\rangle, |11\rangle \}
+    /// ```
+    ///
+    /// The passed `ComplexMatrix4` must be unitary, otherwise an error is
+    /// thrown.  Use [`Qureg::apply_matrix4()`] to left-multiply a non-unitary
+    /// `ComplexMatrix4`.
+    ///
+    /// Note that in distributed mode, this routine requires that each node
+    /// contains at least 4 amplitudes.  This means an q-qubit register
+    /// (state vector or density matrix) can be distributed by at most
+    ///
+    /// # Parameters
+    ///
+    /// - `contol_qubits`:  the control qubits which all must be in state 1 to
+    ///   effect the given unitary
+    /// - `target_qubit1`: first qubit to operate on, treated as least
+    ///   significant in `u`
+    /// - `target_qubit2`: first qubit to operate on, treated as most
+    ///   significant in `u`
+    /// - `u`: unitary matrix to apply
+    ///
+    /// # Errors
+    ///
+    /// - [`InvalidQuESTInputError`],
+    ///   - if `target_qubit1` or `target_qubit2` are outside `[0,
+    ///     self.num_qubits())`
+    ///   - if `target_qubit1` equals `target_qubit2`
+    ///   - if any qubit in `control_qubits` is outside `[0, self.num_qubits())`
+    ///   - if `control_qubits` are not unique
+    ///   - if either `target_qubit1` or `target_qubit2` are in `control_qubit``
+    ///   - if matrix `u` is not unitary
+    ///   - if each node cannot fit 4 amplitudes in distributed mode
     ///
     /// # Examples
     ///
