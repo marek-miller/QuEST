@@ -2,8 +2,11 @@
 
 ## v0.3.8 (??/??/????)
 
+Update QuEST to v3.6.0.
+
 - New features/improvements:
 
+  - New type: `SubDiagonalOp`.
   - New function: `init_complex_matrix_from_slice()`
 
 ## v0.3.7 (08/09/2023)
@@ -41,8 +44,8 @@
 - Rewrite exception handling using `panic` mechanism. No more global API locks!
   Our wrapper is now fully concurrent and much faster.
 - Remove spurious checks that existed due to imperfect error catching.
-- Fix bug: `calc_prob_of_all_outcomes()` didn't check properly for the length of
-  the passed slice.
+- Fix bug: `calc_prob_of_all_outcomes()` didn't check properly for the length
+  of the passed slice.
 
 - Add method: `Qureg::get_num_amps_total()`
 
