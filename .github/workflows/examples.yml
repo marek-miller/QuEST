@@ -31,7 +31,7 @@ jobs:
           matrix.toolchain }}
       - name: Update Git Submodules
         run: |
-          git submodule update --init --remote --recursive
+          git submodule update --init
       - name: Run example ${{ matrix.example }}
         run: |
           cargo run --example ${{ matrix.example }} --features=${{ matrix.precision }}
