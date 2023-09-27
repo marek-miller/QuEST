@@ -50,6 +50,7 @@ pub use operators::{
     sync_diagonal_op,
     DiagonalOp,
     PauliHamil,
+    SubDiagonalOp,
 };
 pub use questenv::QuestEnv;
 pub use qureg::{

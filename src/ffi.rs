@@ -275,6 +275,10 @@ extern "C" {
         op: DiagonalOp,
     ) -> Complex;
 
+    pub fn createSubDiagonalOp(numQubits: c_int) -> SubDiagonalOp;
+
+    pub fn destroySubDiagonalOp(op: SubDiagonalOp);
+
     pub fn reportState(qureg: Qureg);
 
     pub fn reportStateToScreen(

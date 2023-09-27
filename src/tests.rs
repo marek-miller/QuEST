@@ -204,6 +204,13 @@ fn calc_expec_diagonal_op_() {
 }
 
 #[test]
+fn create_subdiagonal_op_01() {
+    let _ = SubDiagonalOp::try_new(1).unwrap();
+    let _ = SubDiagonalOp::try_new(0).unwrap_err();
+    let _ = SubDiagonalOp::try_new(-1).unwrap_err();
+}
+
+#[test]
 fn create_pauli_hamil_01() {
     let _ = PauliHamil::try_new(1, 1).unwrap();
     let _ = PauliHamil::try_new(2, 3).unwrap();
