@@ -5069,6 +5069,7 @@ impl<'a> Qureg<'a> {
     /// let amp = qureg.get_real_amp(7).unwrap();
     /// assert!((amp - 1.).abs() < EPSILON);
     /// ```
+    ///
     /// See [QuEST API] for more information.
     ///
     /// [`Qureg::apply_matrix_n()`]: crate::Qureg::apply_matrix_n()
@@ -5096,6 +5097,47 @@ impl<'a> Qureg<'a> {
 
     /// Apply a general multi-controlled multi-qubit unitary (including a global
     /// phase factor).
+    ///
+    /// Any number of control and target qubits can be specified.
+    ///
+    /// The target qubits in `targs` are treated as ordered least significant
+    /// to most significant in `u`.
+    ///
+    /// The passed `ComplexMatrixN` must be unitary and be a compatible size
+    /// with the specified number of target qubits, otherwise an error is
+    /// thrown.
+    ///
+    /// Note that in multithreaded mode, each thread will clone
+    /// `2^(targs.len())` amplitudes, and store these in the runtime stack.
+    /// Using `t` threads, the total memory overhead of this function is
+    /// `t*2^(targs.len())`. For many targets (e.g. 16 qubits), this may
+    /// cause a stack-overflow / seg-fault (e.g. on a 1 MiB stack).
+    ///  
+    /// Note too that in distributed mode, this routine requires that each node
+    /// contains at least `2^(targs.len())` amplitudes in the register. This
+    /// means an q-qubit register (state vector or density matrix)
+    /// can be distributed by at most `2^q / 2^(targs.len())` nodes.
+    ///
+    /// # Parameters
+    ///
+    /// - `ctrls`: a list  of control qubits
+    /// - `targs`: a list of the target qubits, ordered least significant to
+    ///   most in `u`
+    /// - `u`: unitary matrix to apply
+    ///
+    /// # Errors
+    ///
+    /// - [`InvalidQuESTInputError`],
+    ///   - if any qubit in `ctrls` or `targs` is outside of `[0,
+    ///     self.num_qubits())`
+    ///   - if `ctrls` or `targs` contain any repetitions
+    ///   - if any qubit in `ctrls` is also in `targs` (and vice versa)
+    ///   - if `targs.len() < 1`
+    ///   - if `ctrls.len() < 1` (use [`multi_qubit_unitary()`] for no controls)
+    ///   - if matrix `u` is not unitary
+    ///   - if `u` is not of a compatible size with `targs.len()`
+    ///   - if a node cannot fit the required number of target amplitudes in
+    ///     distributed mode
     ///
     /// # Examples
     ///
@@ -5134,6 +5176,10 @@ impl<'a> Qureg<'a> {
     ///
     /// See [QuEST API] for more information.
     ///
+    /// [`Qureg::apply_matrix_n()`]: crate::Qureg::apply_matrix_n()
+    /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+    /// [`num_qubits()`]: crate::Qureg::num_qubits()
+    /// [`multi_qubit_unitary()`]: crate::Qureg::multi_qubit_unitary()
     /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
     #[allow(clippy::needless_pass_by_ref_mut)]
     pub fn multi_controlled_multi_qubit_unitary(
