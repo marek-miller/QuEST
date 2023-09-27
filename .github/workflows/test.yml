@@ -28,7 +28,7 @@ jobs:
           matrix.toolchain }}
       - name: Update Git Submodules
         run: |
-          git submodule update --init --remote --recursive
+          git submodule update --init
       - name: Build with build.rs
         run: |
           cargo build --verbose --features=${{ matrix.precision }}

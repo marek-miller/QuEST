@@ -115,6 +115,76 @@ impl<'a> Drop for DiagonalOp<'a> {
     }
 }
 
+///  Represents a diagonal complex operator of a smaller dimension than the full
+///  Hilbert state.
+#[derive(Debug)]
+pub struct SubDiagonalOp {
+    pub(crate) op: ffi::SubDiagonalOp,
+}
+
+impl SubDiagonalOp {
+    /// Creates a `SubDiagonalOp` representing a diagonal operator which can act
+    /// upon a subset of the qubits in a [`Qureg`]. This is similar to a
+    /// [`DiagonalOp`] acting upon specific qubits.
+    ///
+    /// The resulting operator (initially all zero) need not be unitary nor
+    /// Hermitian, and can be applied to any `Qureg` of a compatible number
+    /// of qubits.
+    ///
+    /// This function allocates space for `2^(num_qubits)` complex
+    /// amplitudes, which are initially zero. This is the same cost as a
+    /// local state-vector of equal number of qubits.
+    ///
+    /// Unlike `DiagonalOp`, this object is **not** distributed;
+    /// instead, all nodes (during distributed simulation)
+    /// store the full set of diagonal elements, similar to a
+    /// [`ComplexMatrixN`].
+    ///
+    /// # Parameters
+    ///
+    /// - `num_qubits`: number of qubits which inform the Hilbert space
+    ///   dimension of the returned `SubDiagonalOp`
+    ///
+    /// # Errors
+    ///
+    /// Returns [`InvalidQuESTInputError`],
+    ///
+    /// - if `num_qubits <= 0`
+    /// - if `num_qubits` is so large that the number of elements cannot fit in
+    ///   a long long int type
+    ///
+    /// # Examples
+    ///
+    /// ```rust
+    /// # use quest_bind::SubDiagonalOp;
+    /// let _ = SubDiagonalOp::try_new(2).unwrap();
+    /// ```
+    ///
+    /// See [QuEST API] for more information.
+    ///
+    /// [`Qureg`]: crate::Qureg
+    /// [`DiagonalOp`]: crate::DiagonalOp
+    /// [`ComplexMatrixN`]: crate::ComplexMatrixN
+    /// [`InvalidQuESTInputError`]: crate::QuestError::InvalidQuESTInputError
+    /// [QuEST API]: https://quest-kit.github.io/QuEST/modules.html
+    pub fn try_new(num_qubits: i32) -> Result<Self, QuestError> {
+        Ok(Self {
+            op: catch_quest_exception(|| unsafe {
+                ffi::createSubDiagonalOp(num_qubits)
+            })?,
+        })
+    }
+}
+
+impl Drop for SubDiagonalOp {
+    fn drop(&mut self) {
+        catch_quest_exception(|| unsafe {
+            ffi::destroySubDiagonalOp(self.op);
+        })
+        .expect("dropping SubDiagonalOp should always succeed");
+    }
+}
+
 /// Initialize [`PauliHamil`](crate::PauliHamil) instance with the given term
 /// coefficients
 ///
